@@ -27,3 +27,4 @@ tsconfig.tsbuildinfo
 
 # codex local metadata
 .codex
+.vercel
