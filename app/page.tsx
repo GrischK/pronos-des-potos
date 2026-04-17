@@ -25,13 +25,21 @@ const scoreRules = [
 
 export default function Home() {
   return (
-    <main className="page-shell">
+    <main className="landing-page">
       <section className="hero-section">
+        <Link className="landing-brand" href="/">
+          <span className="brand-mark">P</span>
+          <span>
+            <span className="brand-name">Pronos des potos</span>
+            <span className="brand-tagline">Tournois entre amis</span>
+          </span>
+        </Link>
+
         <div className="hero-layout">
           <PageHeader
-            eyebrow="Pronos des potos"
-            title="Les pronos propres, compétition par compétition."
-            description="Crée une compétition, invite les potos, verrouille les matchs, saisis les résultats et laisse le classement faire le reste."
+            eyebrow="Euro, Coupe du monde, chambrage"
+            title="Tes potes, leurs pronos, un vrai classement."
+            description="Crée ou rejoins une compétition, pronostique les matchs avant le coup d'envoi et laisse les scores décider qui a vraiment le flair."
           />
 
           <aside className="score-panel" aria-label="Règles de score">
@@ -52,11 +60,11 @@ export default function Home() {
         </div>
 
         <div className="actions">
-          <Link className="btn btn-primary" href="/competitions">
-            Voir les compétitions
+          <Link className="btn btn-secondary" href="/signup">
+            Créer un compte
           </Link>
-          <Link className="btn btn-secondary" href="/admin">
-            Administration
+          <Link className="btn btn-primary" href="/login">
+            Se connecter
           </Link>
         </div>
       </section>

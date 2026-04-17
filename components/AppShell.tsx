@@ -3,6 +3,7 @@ import Link from "next/link";
 const navItems = [
   { href: "/competitions", label: "Compétitions" },
   { href: "/admin", label: "Admin" },
+  { href: "/login", label: "Connexion" },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
