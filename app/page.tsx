@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const foundations = [
   {
     title: "Une compétition, un classement",
@@ -26,12 +28,12 @@ export default function Home() {
           les résultats et laisse le classement faire le reste.
         </p>
         <div className="actions">
-          <a className="button" href="/competitions">
+          <Link className="button" href="/competitions">
             Voir les compétitions
-          </a>
-          <a className="button secondary" href="/admin">
+          </Link>
+          <Link className="button secondary" href="/admin">
             Administration
-          </a>
+          </Link>
         </div>
       </section>
 

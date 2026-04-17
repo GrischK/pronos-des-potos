@@ -1,12 +1,12 @@
 import { unstable_cache } from "next/cache";
 
-import { prisma } from "@/src/db/prisma";
-
 export const getCompetitionsOverview = unstable_cache(
   async () => {
     if (!process.env.DATABASE_URL) {
       return [];
     }
+
+    const { prisma } = await import("@/src/db/prisma");
 
     return prisma.competition.findMany({
       orderBy: [{ startsAt: "desc" }, { createdAt: "desc" }],
@@ -44,8 +44,10 @@ export async function getCompetitionBySlug(slug: string) {
   }
 
   return unstable_cache(
-    async () =>
-      prisma.competition.findUnique({
+    async () => {
+      const { prisma } = await import("@/src/db/prisma");
+
+      return prisma.competition.findUnique({
         where: { slug },
         select: {
           id: true,
@@ -55,7 +57,8 @@ export async function getCompetitionBySlug(slug: string) {
           startsAt: true,
           endsAt: true,
         },
-      }),
+      });
+    },
     ["competition", slug],
     {
       tags: [`competition:${slug}`],
