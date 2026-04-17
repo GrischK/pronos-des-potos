@@ -1,29 +1,42 @@
 import Link from "next/link";
 
+import { EmptyState } from "@/components/EmptyState";
+import { PageHeader } from "@/components/PageHeader";
 import { getCompetitionsOverview } from "@/src/server/competitions";
+
+export const dynamic = "force-dynamic";
 
 export default async function CompetitionsPage() {
   const competitions = await getCompetitionsOverview();
 
   return (
-    <main className="page">
-      <p className="eyebrow">Compétitions</p>
-      <h1>Choisis le tournoi.</h1>
+    <main className="page-shell">
+      <PageHeader
+        eyebrow="Compétitions"
+        title="Choisis le tournoi."
+        description="Chaque Euro, Coupe du monde ou tournoi garde ses matchs, ses pronos et son vainqueur."
+      />
 
-      <section className="section">
+      <section className="page-section">
         {competitions.length === 0 ? (
-          <div className="card">
-            <h2>Aucune compétition pour l'instant</h2>
-            <p>La première compétition sera créée depuis l'administration.</p>
-          </div>
+          <EmptyState
+            title="Aucune compétition pour l'instant"
+            text="La première compétition sera créée depuis l'administration."
+            action={
+              <Link className="btn btn-primary" href="/admin">
+                Préparer une compétition
+              </Link>
+            }
+          />
         ) : (
-          <div className="grid">
+          <div className="content-grid">
             {competitions.map((competition) => (
               <Link
-                className="card"
+                className="card competition-card"
                 href={`/competitions/${competition.slug}`}
                 key={competition.id}
               >
+                <p className="badge badge-live">Ouverte</p>
                 <h2>{competition.name}</h2>
                 <p>
                   {competition.matchCount} matchs, {competition.playerCount}{" "}

@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { PageHeader } from "@/components/PageHeader";
+
 const foundations = [
   {
     title: "Une compétition, un classement",
@@ -17,30 +19,28 @@ const foundations = [
 
 export default function Home() {
   return (
-    <main className="page">
-      <section className="hero">
-        <div>
-          <p className="eyebrow">Pronos des potos</p>
-          <h1>Les pronos propres, compétition par compétition.</h1>
-        </div>
-        <p>
-          Crée une compétition, invite les potos, verrouille les matchs, saisis
-          les résultats et laisse le classement faire le reste.
-        </p>
+    <main className="page-shell">
+      <section className="hero-section">
+        <PageHeader
+          eyebrow="Pronos des potos"
+          title="Les pronos propres, compétition par compétition."
+          description="Crée une compétition, invite les potos, verrouille les matchs, saisis les résultats et laisse le classement faire le reste."
+        />
+
         <div className="actions">
-          <Link className="button" href="/competitions">
+          <Link className="btn btn-primary" href="/competitions">
             Voir les compétitions
           </Link>
-          <Link className="button secondary" href="/admin">
+          <Link className="btn btn-secondary" href="/admin">
             Administration
           </Link>
         </div>
       </section>
 
-      <section className="section">
-        <div className="grid">
+      <section className="page-section">
+        <div className="content-grid">
           {foundations.map((item) => (
-            <article className="card" key={item.title}>
+            <article className="card feature-card" key={item.title}>
               <h2>{item.title}</h2>
               <p>{item.text}</p>
             </article>

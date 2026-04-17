@@ -1,17 +1,20 @@
+import { EmptyState } from "@/components/EmptyState";
+import { PageHeader } from "@/components/PageHeader";
+
 export default function AdminPage() {
   return (
-    <main className="page">
-      <p className="eyebrow">Administration</p>
-      <h1>Créer et piloter les compétitions.</h1>
+    <main className="page-shell">
+      <PageHeader
+        eyebrow="Administration"
+        title="Créer et piloter les compétitions."
+        description="Prépare les tournois, importe les matchs, verrouille les pronos et valide les résultats."
+      />
 
-      <section className="section">
-        <div className="card">
-          <h2>Prochaine étape</h2>
-          <p>
-            Brancher l'auth, puis créer les écrans pour ajouter une compétition,
-            ses équipes et ses matchs.
-          </p>
-        </div>
+      <section className="page-section">
+        <EmptyState
+          title="Prochaine étape"
+          text="Brancher l'auth, puis créer les écrans pour ajouter une compétition, ses équipes et ses matchs."
+        />
       </section>
     </main>
   );

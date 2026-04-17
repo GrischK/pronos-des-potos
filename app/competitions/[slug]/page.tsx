@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { PageHeader } from "@/components/PageHeader";
 import { getCompetitionBySlug } from "@/src/server/competitions";
 
 type CompetitionPageProps = {
@@ -18,25 +19,31 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
   }
 
   return (
-    <main className="page">
-      <p className="eyebrow">{competition.kind}</p>
-      <h1>{competition.name}</h1>
+    <main className="page-shell">
+      <PageHeader
+        eyebrow={competition.kind}
+        title={competition.name}
+        description="Retrouve les pronos, les scores et le classement de cette compétition."
+      />
 
-      <section className="section">
-        <div className="grid">
-          <Link className="card" href={`/competitions/${competition.slug}/pronos`}>
+      <section className="page-section">
+        <div className="content-grid">
+          <Link
+            className="card action-card"
+            href={`/competitions/${competition.slug}/pronos`}
+          >
             <h2>Mes pronos</h2>
             <p>Saisir ou modifier les scores avant verrouillage.</p>
           </Link>
           <Link
-            className="card"
+            className="card action-card"
             href={`/competitions/${competition.slug}/classement`}
           >
             <h2>Classement</h2>
             <p>Voir les points et le vainqueur de la compétition.</p>
           </Link>
           <Link
-            className="card"
+            className="card action-card"
             href={`/competitions/${competition.slug}/tous-les-pronos`}
           >
             <h2>Tous les pronos</h2>
