@@ -186,6 +186,12 @@
       color 160ms ease;
   }
 
+  .nav-button {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+
   .nav-link:hover {
     background: color-mix(in srgb, var(--pitch) 14%, white);
     color: var(--foreground);

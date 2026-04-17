@@ -1,9 +1,10 @@
 import Link from "next/link";
 
+import { LogoutButton } from "@/components/LogoutButton";
+
 const navItems = [
   { href: "/competitions", label: "Compétitions" },
   { href: "/admin", label: "Admin" },
-  { href: "/login", label: "Connexion" },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -24,6 +25,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               {item.label}
             </Link>
           ))}
+          <LogoutButton />
         </nav>
       </header>
 

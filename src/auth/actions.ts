@@ -52,6 +52,16 @@ export async function signupAction(
       return { error: "Un compte existe déjà avec cet email." };
     }
 
+    if (process.env.NODE_ENV !== "production") {
+      console.error(error);
+      return {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Inscription impossible pour le moment.",
+      };
+    }
+
     return { error: "Inscription impossible pour le moment." };
   }
 
