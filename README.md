@@ -1,15 +1,34 @@
-# pronos-des-potos
+# Pronos des potos V2
 
-This is app, built for my friends, offers the opportunity to make predictions for different football competitions.
+Application de pronostics multi-competition, pensee pour etre deployee simplement sur Vercel.
 
-The idea is to make prediction for all matches before each tournament stage ('mes pronos' page).
+## Stack
 
-When you have made your predictions, you can have a resume with all users predictions ('tous les pronos' page).
+- Next.js App Router
+- Prisma
+- Postgres, cible Neon via l'integration Vercel
+- Cache Next.js avec invalidation par tags
 
-On ranking page ('classement' page) you can see user sorted by total points.
+## Regles de score
 
-0 point if you did wrong result prediction 💩
-1 point if good result but not the right score 😏
-3 points if good result, right score but at least one user did the same prediction 👌
-4 points if you are the only one with good result and right score 💪
-An admin page allows to manage prediction status to lock them when the stage begins.
+- 0 point si le resultat est faux
+- 1 point si le resultat est bon mais pas le score exact
+- 3 points si le score exact est bon et partage avec au moins un autre joueur
+- 4 points si le score exact est bon et unique
+
+## Developpement
+
+```bash
+npm install
+cp .env.example .env
+npm run db:migrate
+npm run dev
+```
+
+## Scripts utiles
+
+```bash
+npm run typecheck
+npm run test
+npm run build
+```

@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum CompetitionKind {
+  WORLD_CUP
+  EURO
+  CHAMPIONS_LEAGUE
+  OTHER
+}
+
+enum CompetitionStatus {
+  DRAFT
+  OPEN
+  LIVE
+  FINISHED
+  ARCHIVED
+}
+
+enum MatchStatus {
+  SCHEDULED
+  LOCKED
+  LIVE
+  FINISHED
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  image     String?
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  competitions CompetitionPlayer[]
+  predictions  Prediction[]
+}
+
+model Competition {
+  id        String            @id @default(cuid())
+  name      String
+  slug      String            @unique
+  kind      CompetitionKind
+  status    CompetitionStatus @default(DRAFT)
+  startsAt  DateTime?
+  endsAt    DateTime?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  players CompetitionPlayer[]
+  teams   Team[]
+  matches Match[]
+
+  @@index([status])
+  @@index([startsAt])
+}
+
+model CompetitionPlayer {
+  id            String   @id @default(cuid())
+  userId        String
+  competitionId String
+  joinedAt      DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  competition Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, competitionId])
+  @@index([competitionId])
+}
+
+model Team {
+  id            String   @id @default(cuid())
+  competitionId String
+  name          String
+  shortName     String?
+  code          String?
+  flagUrl       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  competition Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  homeMatches Match[]     @relation("HomeTeam")
+  awayMatches Match[]     @relation("AwayTeam")
+
+  @@unique([competitionId, name])
+  @@index([competitionId])
+}
+
+model Match {
+  id            String      @id @default(cuid())
+  competitionId String
+  homeTeamId    String
+  awayTeamId    String
+  kickoffAt     DateTime
+  stage         String
+  status        MatchStatus @default(SCHEDULED)
+  homeScore     Int?
+  awayScore     Int?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  competition Competition  @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  homeTeam    Team         @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeam    Team         @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  predictions Prediction[]
+
+  @@index([competitionId, kickoffAt])
+  @@index([status])
+}
+
+model Prediction {
+  id        String   @id @default(cuid())
+  userId    String
+  matchId   String
+  homeScore Int
+  awayScore Int
+  points    Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, matchId])
+  @@index([matchId])
+  @@index([userId])
+}
