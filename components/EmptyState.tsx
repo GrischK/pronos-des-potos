@@ -3,7 +3,7 @@ type EmptyStateProps = {
   text: string;
   action?: React.ReactNode;
 };
-²
+
 export function EmptyState({ title, text, action }: EmptyStateProps) {
   return (
     <div className="empty-state">
