@@ -52,6 +52,8 @@ export async function savePredictionAction(
       id: true,
       kickoffAt: true,
       status: true,
+      homeTeamId: true,
+      awayTeamId: true,
       competitionId: true,
       competition: {
         select: {
@@ -76,6 +78,10 @@ export async function savePredictionAction(
 
   if (match.status !== "SCHEDULED") {
     return { error: "Ce match n'est plus ouvert aux pronos." };
+  }
+
+  if (!match.homeTeamId || !match.awayTeamId) {
+    return { error: "Les équipes ne sont pas encore connues pour ce match." };
   }
 
   if (match.kickoffAt.getTime() <= Date.now()) {

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { PageHeader } from "@/components/PageHeader";
-import { PredictionMatchForm } from "@/components/predictions/PredictionMatchForm";
+import { PredictionSchedule } from "@/components/predictions/PredictionSchedule";
 import { getPredictionPageData } from "@/src/server/predictions";
 
 export const dynamic = "force-dynamic";
@@ -48,15 +48,7 @@ export default async function PronosticsPage({ params }: PronosticsPageProps) {
           </p>
         ) : null}
 
-        <div className="prediction-list">
-          {competition.matches.map((match) => (
-            <PredictionMatchForm
-              key={match.id}
-              match={match}
-              slug={competition.slug}
-            />
-          ))}
-        </div>
+        <PredictionSchedule matches={competition.matches} slug={competition.slug} />
       </section>
     </main>
   );

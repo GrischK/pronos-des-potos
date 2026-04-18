@@ -73,8 +73,24 @@ type CompetitionMatch = {
   status: string;
   homeScore: number | null;
   awayScore: number | null;
-  homeTeam: TeamInfo;
-  awayTeam: TeamInfo;
+  homePlaceholder: string | null;
+  awayPlaceholder: string | null;
+  homeTeam: TeamInfo | null;
+  awayTeam: TeamInfo | null;
+};
+
+export type CompetitionScheduleMatch = {
+  id: string;
+  externalMatchId: string | null;
+  kickoffAt: string;
+  stage: string;
+  status: string;
+  homeScore: number | null;
+  awayScore: number | null;
+  homePlaceholder: string | null;
+  awayPlaceholder: string | null;
+  homeTeam: TeamInfo | null;
+  awayTeam: TeamInfo | null;
 };
 
 export type CompetitionGroup = {
@@ -90,17 +106,12 @@ export type CompetitionGroup = {
     goalDifference: number;
     points: number;
   }[];
-  matches: {
-    id: string;
-    externalMatchId: string | null;
-    kickoffAt: string;
-    stage: string;
-    status: string;
-    homeScore: number | null;
-    awayScore: number | null;
-    homeTeam: TeamInfo;
-    awayTeam: TeamInfo;
-  }[];
+  matches: CompetitionScheduleMatch[];
+};
+
+export type CompetitionPhase = {
+  name: string;
+  matches: CompetitionScheduleMatch[];
 };
 
 function getTeamKey(name: string) {
@@ -113,14 +124,21 @@ function buildWorldCup2026Groups(matches: CompetitionMatch[]): CompetitionGroup[
   const teamsByName = new Map<string, TeamInfo>();
 
   for (const match of matches) {
-    teamsByName.set(getTeamKey(match.homeTeam.name), match.homeTeam);
-    teamsByName.set(getTeamKey(match.awayTeam.name), match.awayTeam);
+    if (match.homeTeam) {
+      teamsByName.set(getTeamKey(match.homeTeam.name), match.homeTeam);
+    }
+
+    if (match.awayTeam) {
+      teamsByName.set(getTeamKey(match.awayTeam.name), match.awayTeam);
+    }
   }
 
   return WORLD_CUP_2026_GROUPS.map((group) => {
     const teamNames = new Set(group.teams.map(getTeamKey));
     const groupMatches = matches.filter(
       (match) =>
+        match.homeTeam &&
+        match.awayTeam &&
         teamNames.has(getTeamKey(match.homeTeam.name)) &&
         teamNames.has(getTeamKey(match.awayTeam.name)),
     );
@@ -150,7 +168,9 @@ function buildWorldCup2026Groups(matches: CompetitionMatch[]): CompetitionGroup[
       if (
         match.status !== "FINISHED" ||
         match.homeScore === null ||
-        match.awayScore === null
+        match.awayScore === null ||
+        !match.homeTeam ||
+        !match.awayTeam
       ) {
         continue;
       }
@@ -206,6 +226,36 @@ function buildWorldCup2026Groups(matches: CompetitionMatch[]): CompetitionGroup[
       })),
     };
   });
+}
+
+const PHASE_LABELS: Record<string, string> = {
+  LAST_32: "16es de finale",
+  LAST_16: "8es de finale",
+  QUARTER_FINALS: "Quarts de finale",
+  SEMI_FINALS: "Demi-finales",
+  THIRD_PLACE: "Match pour la 3e place",
+  FINAL: "Finale",
+};
+
+const PHASE_ORDER = [
+  "LAST_32",
+  "LAST_16",
+  "QUARTER_FINALS",
+  "SEMI_FINALS",
+  "THIRD_PLACE",
+  "FINAL",
+];
+
+function buildWorldCup2026Phases(matches: CompetitionMatch[]): CompetitionPhase[] {
+  return PHASE_ORDER.map((stage) => ({
+    name: PHASE_LABELS[stage],
+    matches: matches
+      .filter((match) => match.stage === stage)
+      .map((match) => ({
+        ...match,
+        kickoffAt: match.kickoffAt.toISOString(),
+      })),
+  })).filter((phase) => phase.matches.length > 0);
 }
 
 function isWorldCup2026Competition(competition: {
@@ -283,9 +333,11 @@ export async function getCompetitionBySlug(slug: string) {
           kickoffAt: true,
           stage: true,
           status: true,
-          homeScore: true,
-          awayScore: true,
-          homeTeam: {
+              homeScore: true,
+              awayScore: true,
+              homePlaceholder: true,
+              awayPlaceholder: true,
+              homeTeam: {
             select: {
               name: true,
               shortName: true,
@@ -311,10 +363,13 @@ export async function getCompetitionBySlug(slug: string) {
 
     return {
       ...competition,
-      matchCount: competition.matches.length,
-      groups: isWorldCup2026Competition(competition)
-        ? buildWorldCup2026Groups(competition.matches)
-        : [],
-    };
-  });
+          matchCount: competition.matches.length,
+          groups: isWorldCup2026Competition(competition)
+            ? buildWorldCup2026Groups(competition.matches)
+            : [],
+          phases: isWorldCup2026Competition(competition)
+            ? buildWorldCup2026Phases(competition.matches)
+            : [],
+        };
+      });
 }

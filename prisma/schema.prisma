@@ -120,8 +120,10 @@ model Match {
   competitionId String
   apiFootballFixtureId Int?
   externalMatchId String?
-  homeTeamId    String
-  awayTeamId    String
+  homeTeamId    String?
+  awayTeamId    String?
+  homePlaceholder String?
+  awayPlaceholder String?
   kickoffAt     DateTime
   stage         String
   status        MatchStatus @default(SCHEDULED)
@@ -131,8 +133,8 @@ model Match {
   updatedAt     DateTime    @updatedAt
 
   competition Competition  @relation(fields: [competitionId], references: [id], onDelete: Cascade)
-  homeTeam    Team         @relation("HomeTeam", fields: [homeTeamId], references: [id])
-  awayTeam    Team         @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  homeTeam    Team?        @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeam    Team?        @relation("AwayTeam", fields: [awayTeamId], references: [id])
   predictions Prediction[]
 
   @@index([competitionId, kickoffAt])

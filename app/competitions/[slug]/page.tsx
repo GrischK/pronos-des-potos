@@ -70,7 +70,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
         {competition.groups.length === 0 ? (
           <p>Aucun match importé pour cette compétition.</p>
         ) : (
-          <CompetitionGroups groups={competition.groups} />
+          <CompetitionGroups groups={competition.groups} phases={competition.phases} />
         )}
       </section>
     </main>

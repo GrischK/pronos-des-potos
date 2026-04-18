@@ -12,8 +12,10 @@ type ImportedTeam = {
 
 export type ImportedMatch = {
   externalId: string;
-  homeTeam: ImportedTeam;
-  awayTeam: ImportedTeam;
+  homeTeam: ImportedTeam | null;
+  awayTeam: ImportedTeam | null;
+  homePlaceholder: string;
+  awayPlaceholder: string;
   kickoffAt: Date;
   stage: string;
   status: MatchStatus;
@@ -130,14 +132,12 @@ async function importFromFootballData(
     const homeTeam = footballDataTeam(match.homeTeam);
     const awayTeam = footballDataTeam(match.awayTeam);
 
-    if (!homeTeam || !awayTeam) {
-      return [];
-    }
-
     return [{
       externalId: String(match.id),
       homeTeam,
       awayTeam,
+      homePlaceholder: homeTeam?.name ?? "À déterminer",
+      awayPlaceholder: awayTeam?.name ?? "À déterminer",
       kickoffAt: new Date(match.utcDate),
       stage: match.stage || (match.matchday ? `Journée ${match.matchday}` : "Phase à confirmer"),
       status: mapFootballDataStatus(match.status),
@@ -147,7 +147,9 @@ async function importFromFootballData(
   });
 
   return {
-    teams: compactTeams(matches.flatMap((match) => [match.homeTeam, match.awayTeam])),
+    teams: compactTeams(
+      matches.flatMap((match) => [match.homeTeam, match.awayTeam]).filter((team) => team !== null),
+    ),
     matches,
   };
 }

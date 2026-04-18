@@ -37,7 +37,7 @@ function slugify(value: string) {
 
 async function upsertImportedTeam(
   competitionId: string,
-  team: ImportedMatch["homeTeam"],
+  team: NonNullable<ImportedMatch["homeTeam"]>,
 ) {
   return prisma.team.upsert({
     where: {
@@ -103,8 +103,12 @@ async function importCompetitionData(
   const kickoffDates: Date[] = [];
 
   for (const match of matches) {
-    const homeTeam = await upsertImportedTeam(competitionId, match.homeTeam);
-    const awayTeam = await upsertImportedTeam(competitionId, match.awayTeam);
+    const homeTeam = match.homeTeam
+      ? await upsertImportedTeam(competitionId, match.homeTeam)
+      : null;
+    const awayTeam = match.awayTeam
+      ? await upsertImportedTeam(competitionId, match.awayTeam)
+      : null;
 
     kickoffDates.push(match.kickoffAt);
 
@@ -118,8 +122,10 @@ async function importCompetitionData(
       create: {
         competitionId,
         externalMatchId: match.externalId,
-        homeTeamId: homeTeam.id,
-        awayTeamId: awayTeam.id,
+        homeTeamId: homeTeam?.id,
+        awayTeamId: awayTeam?.id,
+        homePlaceholder: match.homePlaceholder,
+        awayPlaceholder: match.awayPlaceholder,
         kickoffAt: match.kickoffAt,
         stage: match.stage,
         status: match.status,
@@ -127,8 +133,10 @@ async function importCompetitionData(
         awayScore: match.awayScore,
       },
       update: {
-        homeTeamId: homeTeam.id,
-        awayTeamId: awayTeam.id,
+        homeTeamId: homeTeam?.id,
+        awayTeamId: awayTeam?.id,
+        homePlaceholder: match.homePlaceholder,
+        awayPlaceholder: match.awayPlaceholder,
         kickoffAt: match.kickoffAt,
         stage: match.stage,
         status: match.status,

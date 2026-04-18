@@ -10,6 +10,8 @@ export type PredictionMatch = {
   status: string;
   homeScore: number | null;
   awayScore: number | null;
+  homePlaceholder: string | null;
+  awayPlaceholder: string | null;
   canPredict: boolean;
   prediction: {
     homeScore: number;
@@ -18,11 +20,11 @@ export type PredictionMatch = {
   homeTeam: {
     name: string;
     flagUrl: string | null;
-  };
+  } | null;
   awayTeam: {
     name: string;
     flagUrl: string | null;
-  };
+  } | null;
 };
 
 export async function getPredictionPageData(slug: string) {
@@ -51,6 +53,8 @@ export async function getPredictionPageData(slug: string) {
           status: true,
           homeScore: true,
           awayScore: true,
+          homePlaceholder: true,
+          awayPlaceholder: true,
           homeTeam: {
             select: {
               name: true,
@@ -98,9 +102,13 @@ export async function getPredictionPageData(slug: string) {
       status: match.status,
       homeScore: match.homeScore,
       awayScore: match.awayScore,
+      homePlaceholder: match.homePlaceholder,
+      awayPlaceholder: match.awayPlaceholder,
       canPredict:
         competition.status === "OPEN" &&
         match.status === "SCHEDULED" &&
+        match.homeTeam !== null &&
+        match.awayTeam !== null &&
         match.kickoffAt.getTime() > now,
       prediction: match.predictions[0] ?? null,
       homeTeam: match.homeTeam,

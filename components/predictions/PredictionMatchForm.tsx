@@ -36,6 +36,10 @@ function getLockReason(match: PredictionMatch) {
     return null;
   }
 
+  if (!match.homeTeam || !match.awayTeam) {
+    return "Équipes à déterminer";
+  }
+
   if (match.status !== "SCHEDULED") {
     return "Match verrouillé";
   }
@@ -45,6 +49,19 @@ function getLockReason(match: PredictionMatch) {
   }
 
   return "Compétition fermée";
+}
+
+function getTeamName(match: PredictionMatch, side: "home" | "away") {
+  const team = side === "home" ? match.homeTeam : match.awayTeam;
+  const placeholder = side === "home" ? match.homePlaceholder : match.awayPlaceholder;
+
+  return team?.name ?? placeholder ?? "À déterminer";
+}
+
+function getTeamFlag(match: PredictionMatch, side: "home" | "away") {
+  const team = side === "home" ? match.homeTeam : match.awayTeam;
+
+  return team?.flagUrl ?? null;
 }
 
 export function PredictionMatchForm({ match, slug }: PredictionMatchFormProps) {
@@ -67,20 +84,20 @@ export function PredictionMatchForm({ match, slug }: PredictionMatchFormProps) {
 
       <div className="prediction-grid">
         <span className="match-team">
-          {match.homeTeam.flagUrl ? (
+          {getTeamFlag(match, "home") ? (
             <img
               alt=""
               className="team-flag"
               loading="lazy"
-              src={match.homeTeam.flagUrl}
+              src={getTeamFlag(match, "home") ?? undefined}
             />
           ) : null}
-          <span>{match.homeTeam.name}</span>
+          <span>{getTeamName(match, "home")}</span>
         </span>
 
         <div className="prediction-inputs">
           <input
-            aria-label={`Score ${match.homeTeam.name}`}
+            aria-label={`Score ${getTeamName(match, "home")}`}
             defaultValue={match.prediction?.homeScore ?? ""}
             disabled={!match.canPredict || pending}
             inputMode="numeric"
@@ -92,7 +109,7 @@ export function PredictionMatchForm({ match, slug }: PredictionMatchFormProps) {
           />
           <span>·</span>
           <input
-            aria-label={`Score ${match.awayTeam.name}`}
+            aria-label={`Score ${getTeamName(match, "away")}`}
             defaultValue={match.prediction?.awayScore ?? ""}
             disabled={!match.canPredict || pending}
             inputMode="numeric"
@@ -105,13 +122,13 @@ export function PredictionMatchForm({ match, slug }: PredictionMatchFormProps) {
         </div>
 
         <span className="match-team match-team-away">
-          <span>{match.awayTeam.name}</span>
-          {match.awayTeam.flagUrl ? (
+          <span>{getTeamName(match, "away")}</span>
+          {getTeamFlag(match, "away") ? (
             <img
               alt=""
               className="team-flag"
               loading="lazy"
-              src={match.awayTeam.flagUrl}
+              src={getTeamFlag(match, "away") ?? undefined}
             />
           ) : null}
         </span>
