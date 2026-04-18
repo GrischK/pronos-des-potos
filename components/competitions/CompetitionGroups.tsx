@@ -13,6 +13,14 @@ type CompetitionGroupsProps = {
   phases: CompetitionPhase[];
 };
 
+const TWO_LEGGED_STAGES = new Set([
+  "PLAYOFFS",
+  "LAST_32",
+  "LAST_16",
+  "QUARTER_FINALS",
+  "SEMI_FINALS",
+]);
+
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   dateStyle: "medium",
   timeStyle: "short",
@@ -51,6 +59,68 @@ function getTeamFlag(match: CompetitionScheduleMatch, side: "home" | "away") {
   const team = side === "home" ? match.homeTeam : match.awayTeam;
 
   return team?.flagUrl ?? null;
+}
+
+function sortMatchesByKickoff(matches: CompetitionScheduleMatch[]) {
+  return [...matches].sort(
+    (a, b) => new Date(a.kickoffAt).getTime() - new Date(b.kickoffAt).getTime(),
+  );
+}
+
+function getPhaseMatchSections(phase: CompetitionPhase) {
+  const matches = sortMatchesByKickoff(phase.matches);
+
+  if (
+    phase.stage === "LEAGUE_STAGE" &&
+    matches.some((match) => match.matchday !== null)
+  ) {
+    const matchesByMatchday = new Map<number, CompetitionScheduleMatch[]>();
+
+    for (const match of matches) {
+      const matchday = match.matchday ?? 0;
+      matchesByMatchday.set(matchday, [
+        ...(matchesByMatchday.get(matchday) ?? []),
+        match,
+      ]);
+    }
+
+    return Array.from(matchesByMatchday.entries())
+      .sort(([a], [b]) => a - b)
+      .map(([matchday, sectionMatches]) => ({
+        id: `matchday-${matchday}`,
+        title: matchday > 0 ? `Journée ${matchday}` : "Journée à confirmer",
+        matches: sectionMatches,
+      }));
+  }
+
+  if (
+    TWO_LEGGED_STAGES.has(phase.stage) &&
+    matches.length > 1 &&
+    matches.length % 2 === 0
+  ) {
+    const splitIndex = matches.length / 2;
+
+    return [
+      {
+        id: "first-leg",
+        title: "Matchs aller",
+        matches: matches.slice(0, splitIndex),
+      },
+      {
+        id: "second-leg",
+        title: "Matchs retour",
+        matches: matches.slice(splitIndex),
+      },
+    ];
+  }
+
+  return [
+    {
+      id: "matches",
+      title: "Matchs",
+      matches,
+    },
+  ];
 }
 
 function MatchList({ matches }: { matches: CompetitionScheduleMatch[] }) {
@@ -108,12 +178,16 @@ function MatchList({ matches }: { matches: CompetitionScheduleMatch[] }) {
 export function CompetitionGroups({ groups, phases }: CompetitionGroupsProps) {
   const stages = useMemo(
     () => [
-      {
-        id: "GROUPS",
-        label: "Groupes",
-        title: "Phase de groupes",
-        kind: "groups" as const,
-      },
+      ...(groups.length > 0
+        ? [
+            {
+              id: "GROUPS",
+              label: "Groupes",
+              title: "Phase de groupes",
+              kind: "groups" as const,
+            },
+          ]
+        : []),
       ...phases.map((phase) => ({
         id: phase.name,
         label: phase.name,
@@ -122,7 +196,7 @@ export function CompetitionGroups({ groups, phases }: CompetitionGroupsProps) {
         phase,
       })),
     ],
-    [phases],
+    [groups.length, phases],
   );
   const [activeStageIndex, setActiveStageIndex] = useState(0);
   const [activeGroupName, setActiveGroupName] = useState(groups[0]?.name ?? "");
@@ -243,7 +317,15 @@ export function CompetitionGroups({ groups, phases }: CompetitionGroupsProps) {
             </div>
             <p>{activeStage.phase.matches.length} matchs importés.</p>
           </div>
-          <MatchList matches={activeStage.phase.matches} />
+          {getPhaseMatchSections(activeStage.phase).map((section) => (
+            <div className="match-subsection" key={section.id}>
+              <div className="match-subsection-header">
+                <h3>{section.title}</h3>
+                <span>{section.matches.length} matchs</span>
+              </div>
+              <MatchList matches={section.matches} />
+            </div>
+          ))}
         </div>
       ) : null}
     </div>

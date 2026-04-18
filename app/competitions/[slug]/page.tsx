@@ -67,7 +67,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
           </p>
         </div>
 
-        {competition.groups.length === 0 ? (
+        {competition.groups.length === 0 && competition.phases.length === 0 ? (
           <p>Aucun match importé pour cette compétition.</p>
         ) : (
           <CompetitionGroups groups={competition.groups} phases={competition.phases} />

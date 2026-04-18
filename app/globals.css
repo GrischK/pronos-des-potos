@@ -468,6 +468,26 @@
     @apply grid gap-3;
   }
 
+  .match-subsection {
+    @apply grid gap-3;
+  }
+
+  .match-subsection + .match-subsection {
+    @apply mt-6;
+  }
+
+  .match-subsection-header {
+    @apply flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2;
+  }
+
+  .match-subsection-header h3 {
+    @apply text-base font-black text-foreground;
+  }
+
+  .match-subsection-header span {
+    @apply text-sm font-bold text-muted;
+  }
+
   .schedule-browser {
     @apply grid gap-5;
   }
@@ -616,12 +636,20 @@
     grid-template-columns: 52px auto 52px;
   }
 
+  .prediction-score-block {
+    @apply grid justify-items-center gap-2;
+  }
+
   .prediction-inputs input {
     @apply h-11 rounded-lg border border-line bg-white px-2 text-center font-black text-foreground outline-none;
   }
 
   .prediction-inputs input:disabled {
     @apply bg-surface-alt text-muted;
+  }
+
+  .prediction-result {
+    @apply rounded-lg bg-surface-alt px-2.5 py-1 text-xs font-black text-muted;
   }
 
   .prediction-actions {
@@ -635,6 +663,10 @@
 
     .prediction-inputs {
       @apply w-fit;
+    }
+
+    .prediction-score-block {
+      @apply justify-items-start;
     }
 
     .match-team-away {

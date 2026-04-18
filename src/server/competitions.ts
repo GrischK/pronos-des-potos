@@ -70,6 +70,7 @@ type CompetitionMatch = {
   externalMatchId: string | null;
   kickoffAt: Date;
   stage: string;
+  matchday: number | null;
   status: string;
   homeScore: number | null;
   awayScore: number | null;
@@ -84,6 +85,7 @@ export type CompetitionScheduleMatch = {
   externalMatchId: string | null;
   kickoffAt: string;
   stage: string;
+  matchday: number | null;
   status: string;
   homeScore: number | null;
   awayScore: number | null;
@@ -111,6 +113,7 @@ export type CompetitionGroup = {
 
 export type CompetitionPhase = {
   name: string;
+  stage: string;
   matches: CompetitionScheduleMatch[];
 };
 
@@ -229,6 +232,9 @@ function buildWorldCup2026Groups(matches: CompetitionMatch[]): CompetitionGroup[
 }
 
 const PHASE_LABELS: Record<string, string> = {
+  GROUP_STAGE: "Phase de groupes",
+  LEAGUE_STAGE: "Phase de ligue",
+  PLAYOFFS: "Barrages",
   LAST_32: "16es de finale",
   LAST_16: "8es de finale",
   QUARTER_FINALS: "Quarts de finale",
@@ -238,6 +244,9 @@ const PHASE_LABELS: Record<string, string> = {
 };
 
 const PHASE_ORDER = [
+  "GROUP_STAGE",
+  "LEAGUE_STAGE",
+  "PLAYOFFS",
   "LAST_32",
   "LAST_16",
   "QUARTER_FINALS",
@@ -246,16 +255,40 @@ const PHASE_ORDER = [
   "FINAL",
 ];
 
-function buildWorldCup2026Phases(matches: CompetitionMatch[]): CompetitionPhase[] {
-  return PHASE_ORDER.map((stage) => ({
-    name: PHASE_LABELS[stage],
-    matches: matches
-      .filter((match) => match.stage === stage)
-      .map((match) => ({
-        ...match,
-        kickoffAt: match.kickoffAt.toISOString(),
-      })),
-  })).filter((phase) => phase.matches.length > 0);
+function serializeMatch(match: CompetitionMatch): CompetitionScheduleMatch {
+  return {
+    ...match,
+    kickoffAt: match.kickoffAt.toISOString(),
+  };
+}
+
+function getStageLabel(stage: string) {
+  return PHASE_LABELS[stage] ?? stage.replace(/_/g, " ");
+}
+
+function buildCompetitionPhases(
+  matches: CompetitionMatch[],
+  excludedStages: string[] = [],
+): CompetitionPhase[] {
+  const knownStages = new Set(PHASE_ORDER);
+  const excludedStageSet = new Set(excludedStages);
+  const extraStages = Array.from(
+    new Set(
+      matches
+        .map((match) => match.stage)
+        .filter((stage) => !knownStages.has(stage) && !excludedStageSet.has(stage)),
+    ),
+  ).sort();
+
+  return [...PHASE_ORDER, ...extraStages]
+    .map((stage) => ({
+      name: getStageLabel(stage),
+      stage,
+      matches: matches
+        .filter((match) => match.stage === stage && !excludedStageSet.has(stage))
+        .map(serializeMatch),
+    }))
+    .filter((phase) => phase.matches.length > 0);
 }
 
 function isWorldCup2026Competition(competition: {
@@ -332,12 +365,13 @@ export async function getCompetitionBySlug(slug: string) {
           externalMatchId: true,
           kickoffAt: true,
           stage: true,
+          matchday: true,
           status: true,
-              homeScore: true,
-              awayScore: true,
-              homePlaceholder: true,
-              awayPlaceholder: true,
-              homeTeam: {
+          homeScore: true,
+          awayScore: true,
+          homePlaceholder: true,
+          awayPlaceholder: true,
+          homeTeam: {
             select: {
               name: true,
               shortName: true,
@@ -363,13 +397,14 @@ export async function getCompetitionBySlug(slug: string) {
 
     return {
       ...competition,
-          matchCount: competition.matches.length,
-          groups: isWorldCup2026Competition(competition)
-            ? buildWorldCup2026Groups(competition.matches)
-            : [],
-          phases: isWorldCup2026Competition(competition)
-            ? buildWorldCup2026Phases(competition.matches)
-            : [],
-        };
-      });
+      matchCount: competition.matches.length,
+      groups: isWorldCup2026Competition(competition)
+        ? buildWorldCup2026Groups(competition.matches)
+        : [],
+      phases: buildCompetitionPhases(
+        competition.matches,
+        isWorldCup2026Competition(competition) ? ["GROUP_STAGE"] : [],
+      ),
+    };
+  });
 }

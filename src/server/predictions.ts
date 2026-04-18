@@ -7,6 +7,7 @@ export type PredictionMatch = {
   id: string;
   kickoffAt: string;
   stage: string;
+  matchday: number | null;
   status: string;
   homeScore: number | null;
   awayScore: number | null;
@@ -50,6 +51,7 @@ export async function getPredictionPageData(slug: string) {
           id: true,
           kickoffAt: true,
           stage: true,
+          matchday: true,
           status: true,
           homeScore: true,
           awayScore: true,
@@ -99,6 +101,7 @@ export async function getPredictionPageData(slug: string) {
       id: match.id,
       kickoffAt: match.kickoffAt.toISOString(),
       stage: match.stage,
+      matchday: match.matchday,
       status: match.status,
       homeScore: match.homeScore,
       awayScore: match.awayScore,
