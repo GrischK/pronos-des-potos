@@ -27,6 +27,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ))}
           <LogoutButton />
         </nav>
+
+        <details className="mobile-nav">
+          <summary className="burger-button" aria-label="Ouvrir le menu">
+            <span aria-hidden="true" />
+            <span aria-hidden="true" />
+            <span aria-hidden="true" />
+          </summary>
+
+          <nav className="mobile-nav-panel" aria-label="Navigation principale mobile">
+            {navItems.map((item) => (
+              <Link className="nav-link" href={item.href} key={item.href}>
+                {item.label}
+              </Link>
+            ))}
+            <LogoutButton />
+          </nav>
+        </details>
       </header>
 
       {children}
