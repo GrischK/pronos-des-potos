@@ -376,6 +376,15 @@
     color: var(--coral);
   }
 
+  .btn-warning {
+    @apply border-line bg-surface text-foreground;
+  }
+
+  .btn-warning:hover {
+    border-color: color-mix(in srgb, var(--card) 58%, var(--line));
+    color: color-mix(in srgb, var(--card) 52%, black);
+  }
+
   .btn-danger {
     @apply border-line bg-white text-muted;
   }

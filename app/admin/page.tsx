@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/PageHeader";
 import {
   deleteCompetitionAction,
   syncCompetitionAction,
+  toggleCompetitionOpenAction,
 } from "@/src/server/admin-actions";
 import { getAdminCompetitions } from "@/src/server/admin";
 
@@ -62,6 +63,26 @@ export default async function AdminPage() {
                       </span>
                     ) : null}
                     <div className="admin-item-actions">
+                      <form action={toggleCompetitionOpenAction}>
+                        <input
+                          name="competitionId"
+                          type="hidden"
+                          value={competition.id}
+                        />
+                        <button
+                          className={
+                            competition.status === "OPEN"
+                              ? "btn btn-warning"
+                              : "btn btn-primary"
+                          }
+                          type="submit"
+                        >
+                          {competition.status === "OPEN"
+                            ? "Fermer les pronos"
+                            : "Ouvrir les pronos"}
+                        </button>
+                      </form>
+
                       <form action={syncCompetitionAction}>
                         <input
                           name="competitionId"

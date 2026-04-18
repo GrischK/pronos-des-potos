@@ -276,6 +276,43 @@ export async function syncCompetitionAction(formData: FormData) {
   updateTag(`competition:${competition.slug}`);
 }
 
+export async function toggleCompetitionOpenAction(formData: FormData) {
+  const admin = await getCurrentAdmin();
+
+  if (!admin) {
+    throw new Error("Accès réservé aux admins.");
+  }
+
+  const competitionId = z.string().min(1).parse(formData.get("competitionId"));
+  const competition = await prisma.competition.findUnique({
+    where: {
+      id: competitionId,
+    },
+    select: {
+      id: true,
+      slug: true,
+      status: true,
+    },
+  });
+
+  if (!competition) {
+    throw new Error("Compétition introuvable.");
+  }
+
+  await prisma.competition.update({
+    where: {
+      id: competition.id,
+    },
+    data: {
+      status: competition.status === "OPEN" ? "DRAFT" : "OPEN",
+    },
+  });
+
+  updateTag("competitions");
+  updateTag("admin-competitions");
+  updateTag(`competition:${competition.slug}`);
+}
+
 export async function deleteCompetitionAction(formData: FormData) {
   const admin = await getCurrentAdmin();
 

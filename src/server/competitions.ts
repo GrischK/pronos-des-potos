@@ -223,43 +223,38 @@ function isWorldCup2026Competition(competition: {
   );
 }
 
-export const getCompetitionsOverview = unstable_cache(
-  async () => {
-    if (!process.env.DATABASE_URL) {
-      return [];
-    }
+export async function getCompetitionsOverview() {
+  if (!process.env.DATABASE_URL) {
+    return [];
+  }
 
-    const { prisma } = await import("@/src/db/prisma");
+  const { prisma } = await import("@/src/db/prisma");
 
-    return prisma.competition.findMany({
-      orderBy: [{ startsAt: "desc" }, { createdAt: "desc" }],
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        _count: {
-          select: {
-            matches: true,
-            players: true,
-          },
+  return prisma.competition.findMany({
+    orderBy: [{ startsAt: "desc" }, { createdAt: "desc" }],
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      status: true,
+      _count: {
+        select: {
+          matches: true,
+          players: true,
         },
       },
-    }).then((competitions) =>
-      competitions.map((competition) => ({
-        id: competition.id,
-        name: competition.name,
-        slug: competition.slug,
-        matchCount: competition._count.matches,
-        playerCount: competition._count.players,
-      })),
-    );
-  },
-  ["competitions-overview"],
-  {
-    tags: ["competitions"],
-    revalidate: 300,
-  },
-);
+    },
+  }).then((competitions) =>
+    competitions.map((competition) => ({
+      id: competition.id,
+      name: competition.name,
+      slug: competition.slug,
+      status: competition.status,
+      matchCount: competition._count.matches,
+      playerCount: competition._count.players,
+    })),
+  );
+}
 
 export async function getCompetitionBySlug(slug: string) {
   if (!process.env.DATABASE_URL) {
