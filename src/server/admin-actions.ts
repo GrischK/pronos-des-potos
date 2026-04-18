@@ -1,6 +1,7 @@
 "use server";
 
 import { updateTag } from "next/cache";
+import { Prisma } from "@prisma/client";
 import type { ExternalDataProvider } from "@prisma/client";
 import { z } from "zod";
 
@@ -217,6 +218,19 @@ export async function createCompetitionAction(
         parsed.data.externalSeason,
       );
 
+      if (result.teamCount === 0 && result.fixtureCount === 0) {
+        await prisma.competition.delete({
+          where: {
+            id: competition.id,
+          },
+        });
+
+        return {
+          error:
+            "Import vide depuis football-data.org. Vérifie le code compétition et la saison (ex: Champions League 2025/26 => code CL, saison 2025).",
+        };
+      }
+
       importSummary = ` ${result.teamCount} équipes et ${result.fixtureCount} matchs importés.`;
     }
 
@@ -227,6 +241,10 @@ export async function createCompetitionAction(
       success: `${competition.name} créée.${importSummary}`,
     };
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return { error: "Slug déjà utilisé. Choisis un slug unique." };
+    }
+
     if (error instanceof Error) {
       return { error: error.message };
     }
