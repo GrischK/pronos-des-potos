@@ -6,6 +6,22 @@ import { getCompetitionsOverview } from "@/src/server/competitions";
 
 export const dynamic = "force-dynamic";
 
+const statusLabels = {
+  DRAFT: "Fermée",
+  OPEN: "Ouverte",
+  LIVE: "En cours",
+  FINISHED: "Terminée",
+  ARCHIVED: "Archivée",
+} as const;
+
+const statusBadgeClasses = {
+  DRAFT: "badge badge-warning",
+  OPEN: "badge badge-live",
+  LIVE: "badge badge-live",
+  FINISHED: "badge badge-warning",
+  ARCHIVED: "badge badge-warning",
+} as const;
+
 export default async function CompetitionsPage() {
   const competitions = await getCompetitionsOverview();
 
@@ -36,7 +52,9 @@ export default async function CompetitionsPage() {
                 href={`/competitions/${competition.slug}`}
                 key={competition.id}
               >
-                <p className="badge badge-live">Ouverte</p>
+                <p className={statusBadgeClasses[competition.status]}>
+                  {statusLabels[competition.status]}
+                </p>
                 <h2>{competition.name}</h2>
                 <p>
                   {competition.matchCount} matchs, {competition.playerCount}{" "}

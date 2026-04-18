@@ -26,6 +26,10 @@ enum CompetitionStatus {
   ARCHIVED
 }
 
+enum ExternalDataProvider {
+  FOOTBALL_DATA
+}
+
 enum MatchStatus {
   SCHEDULED
   LOCKED
@@ -54,6 +58,13 @@ model Competition {
   slug      String            @unique
   kind      CompetitionKind
   status    CompetitionStatus @default(DRAFT)
+  apiFootballLeagueId Int?
+  apiFootballSeason   Int?
+  apiFootballLastSyncAt DateTime?
+  externalProvider ExternalDataProvider?
+  externalCompetitionId String?
+  externalSeason String?
+  externalLastSyncAt DateTime?
   startsAt  DateTime?
   endsAt    DateTime?
   createdAt DateTime          @default(now())
@@ -65,6 +76,8 @@ model Competition {
 
   @@index([status])
   @@index([startsAt])
+  @@index([apiFootballLeagueId, apiFootballSeason])
+  @@index([externalProvider, externalCompetitionId, externalSeason])
 }
 
 model CompetitionPlayer {
@@ -83,6 +96,8 @@ model CompetitionPlayer {
 model Team {
   id            String   @id @default(cuid())
   competitionId String
+  apiFootballTeamId Int?
+  externalTeamId String?
   name          String
   shortName     String?
   code          String?
@@ -95,14 +110,20 @@ model Team {
   awayMatches Match[]     @relation("AwayTeam")
 
   @@unique([competitionId, name])
+  @@unique([competitionId, apiFootballTeamId])
+  @@unique([competitionId, externalTeamId])
   @@index([competitionId])
 }
 
 model Match {
   id            String      @id @default(cuid())
   competitionId String
-  homeTeamId    String
-  awayTeamId    String
+  apiFootballFixtureId Int?
+  externalMatchId String?
+  homeTeamId    String?
+  awayTeamId    String?
+  homePlaceholder String?
+  awayPlaceholder String?
   kickoffAt     DateTime
   stage         String
   status        MatchStatus @default(SCHEDULED)
@@ -112,12 +133,14 @@ model Match {
   updatedAt     DateTime    @updatedAt
 
   competition Competition  @relation(fields: [competitionId], references: [id], onDelete: Cascade)
-  homeTeam    Team         @relation("HomeTeam", fields: [homeTeamId], references: [id])
-  awayTeam    Team         @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  homeTeam    Team?        @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeam    Team?        @relation("AwayTeam", fields: [awayTeamId], references: [id])
   predictions Prediction[]
 
   @@index([competitionId, kickoffAt])
   @@index([status])
+  @@unique([competitionId, apiFootballFixtureId])
+  @@unique([competitionId, externalMatchId])
 }
 
 model Prediction {
