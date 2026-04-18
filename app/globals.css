@@ -565,6 +565,54 @@
     @apply w-fit rounded-lg bg-surface-alt px-2.5 py-1 text-xs font-black text-muted;
   }
 
+  .readonly-notice {
+    @apply mb-4 rounded-lg border border-line bg-surface-alt p-4 font-bold text-muted;
+  }
+
+  .prediction-list {
+    @apply grid gap-3;
+  }
+
+  .prediction-row {
+    @apply grid gap-3 rounded-lg border border-line bg-surface p-4;
+  }
+
+  .prediction-grid {
+    @apply grid items-center gap-3;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .prediction-inputs {
+    @apply grid items-center gap-2 font-black;
+    grid-template-columns: 52px auto 52px;
+  }
+
+  .prediction-inputs input {
+    @apply h-11 rounded-lg border border-line bg-white px-2 text-center font-black text-foreground outline-none;
+  }
+
+  .prediction-inputs input:disabled {
+    @apply bg-surface-alt text-muted;
+  }
+
+  .prediction-actions {
+    @apply flex flex-wrap items-center gap-3;
+  }
+
+  @media (max-width: 760px) {
+    .prediction-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .prediction-inputs {
+      @apply w-fit;
+    }
+
+    .match-team-away {
+      @apply justify-start text-left;
+    }
+  }
+
   @media (max-width: 760px) {
     .group-browser {
       grid-template-columns: 1fr;
