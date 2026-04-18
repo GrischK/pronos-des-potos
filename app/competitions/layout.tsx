@@ -1,18 +1,18 @@
 import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/AppShell";
-import { getSessionUserId } from "@/src/auth/session";
+import { getCurrentUser } from "@/src/auth/current-user";
 
 export default async function CompetitionsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const userId = await getSessionUserId();
+  const user = await getCurrentUser();
 
-  if (!userId) {
+  if (!user) {
     redirect("/login");
   }
 
-  return <AppShell>{children}</AppShell>;
+  return <AppShell showAdminNav={user.role === "ADMIN"}>{children}</AppShell>;
 }

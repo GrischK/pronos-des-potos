@@ -292,6 +292,56 @@
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   }
 
+  .admin-layout {
+    @apply grid gap-4;
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  }
+
+  .admin-panel {
+    @apply min-h-0;
+  }
+
+  .admin-form {
+    @apply mt-6 grid gap-4;
+  }
+
+  .form-grid {
+    @apply grid gap-3.5;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .check-field {
+    @apply flex items-center gap-2.5 rounded-lg border border-line bg-surface-alt p-3 font-bold text-foreground;
+  }
+
+  .check-field input {
+    @apply h-4 w-4 accent-pitch;
+  }
+
+  .admin-list {
+    @apply mt-5 grid gap-3;
+  }
+
+  .admin-list-item {
+    @apply grid gap-1 rounded-lg border border-line bg-surface-alt p-3 transition-colors;
+  }
+
+  .admin-list-item:hover {
+    @apply border-pitch bg-surface;
+  }
+
+  .admin-list-item strong {
+    @apply font-black;
+  }
+
+  .admin-list-item span {
+    @apply text-sm leading-[1.45] text-muted;
+  }
+
+  .admin-item-actions {
+    @apply mt-2 flex flex-wrap gap-2;
+  }
+
   .actions {
     @apply flex flex-wrap gap-3;
   }
@@ -324,6 +374,15 @@
   .btn-secondary:hover {
     border-color: color-mix(in srgb, var(--coral) 46%, var(--line));
     color: var(--coral);
+  }
+
+  .btn-danger {
+    @apply border-line bg-white text-muted;
+  }
+
+  .btn-danger:hover {
+    border-color: color-mix(in srgb, #dc2626 54%, var(--line));
+    color: #b91c1c;
   }
 
   .card,
@@ -394,6 +453,117 @@
 
   .action-card:nth-child(3) {
     border-left: 5px solid var(--navy);
+  }
+
+  .match-list {
+    @apply grid gap-3;
+  }
+
+  .group-browser {
+    @apply grid gap-4;
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+
+  .group-nav {
+    @apply sticky top-24 flex max-h-[calc(100vh-140px)] flex-col gap-2 self-start overflow-auto;
+  }
+
+  .group-nav-button {
+    @apply min-h-11 rounded-lg border border-line bg-surface-alt px-3 text-sm font-black text-muted transition-colors;
+  }
+
+  .group-nav-button[aria-pressed="true"] {
+    @apply border-pitch bg-foreground text-white;
+  }
+
+  .group-panel {
+    @apply grid min-w-0 gap-5;
+  }
+
+  .standings-table-wrap {
+    @apply overflow-x-auto rounded-lg border border-line bg-surface;
+  }
+
+  .standings-table {
+    @apply w-full border-collapse text-left text-sm;
+  }
+
+  .standings-table th {
+    @apply border-b border-line bg-surface-alt px-3 py-2 text-xs font-black uppercase tracking-normal text-muted;
+  }
+
+  .standings-table td {
+    @apply border-b border-line px-3 py-2 font-bold;
+  }
+
+  .standings-table tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  .standings-table th:not(:first-child),
+  .standings-table td:not(:first-child) {
+    @apply text-center;
+  }
+
+  .standings-team {
+    @apply flex min-w-[170px] items-center gap-2 font-black;
+  }
+
+  .standings-team span {
+    @apply min-w-0 truncate;
+  }
+
+  .match-row {
+    @apply grid gap-3 rounded-lg border border-line bg-surface p-4;
+  }
+
+  .match-meta {
+    @apply flex flex-wrap gap-2 text-sm font-bold text-muted;
+  }
+
+  .match-meta span:not(:last-child)::after {
+    content: "·";
+    @apply ml-2;
+    color: var(--line-strong);
+  }
+
+  .match-teams {
+    @apply grid items-center gap-3;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .match-team {
+    @apply flex min-w-0 items-center gap-2 font-black;
+  }
+
+  .match-team span {
+    @apply min-w-0 truncate;
+  }
+
+  .match-team-away {
+    @apply justify-end text-right;
+  }
+
+  .team-flag {
+    @apply h-7 w-7 shrink-0 rounded-full border border-line bg-white object-contain p-0.5;
+  }
+
+  .match-score {
+    @apply rounded-lg bg-foreground px-3 py-1 text-sm font-black text-white;
+  }
+
+  .match-status {
+    @apply w-fit rounded-lg bg-surface-alt px-2.5 py-1 text-xs font-black text-muted;
+  }
+
+  @media (max-width: 760px) {
+    .group-browser {
+      grid-template-columns: 1fr;
+    }
+
+    .group-nav {
+      @apply static grid max-h-none grid-cols-6 overflow-visible;
+    }
   }
 
   .badge {
@@ -514,14 +684,16 @@
     @apply text-[0.88rem] font-[850] text-foreground;
   }
 
-  .field input {
+  .field input,
+  .field select {
     @apply min-h-[46px] w-full rounded-lg border border-line bg-white px-3 text-foreground outline-none;
     transition:
       border-color 160ms ease,
       box-shadow 160ms ease;
   }
 
-  .field input:focus {
+  .field input:focus,
+  .field select:focus {
     @apply border-pitch;
     box-shadow: 0 0 0 4px color-mix(in srgb, var(--pitch) 14%, transparent);
   }
@@ -531,6 +703,12 @@
     border: 1px solid color-mix(in srgb, var(--coral) 32%, white);
     background: color-mix(in srgb, var(--coral) 10%, white);
     color: color-mix(in srgb, var(--coral) 78%, black);
+  }
+
+  .form-success {
+    @apply m-0 rounded-lg px-3 py-2.5 font-extrabold text-pitch-strong;
+    border: 1px solid color-mix(in srgb, var(--pitch) 28%, white);
+    background: color-mix(in srgb, var(--pitch) 10%, white);
   }
 
   .auth-submit {
@@ -613,5 +791,9 @@
 
   .auth-hero h1 {
     @apply text-[2.8rem];
+  }
+
+  .admin-layout {
+    grid-template-columns: 1fr;
   }
 }

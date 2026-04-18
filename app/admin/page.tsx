@@ -1,20 +1,95 @@
-import { EmptyState } from "@/components/EmptyState";
-import { PageHeader } from "@/components/PageHeader";
+import Link from "next/link";
 
-export default function AdminPage() {
+import { CompetitionForm } from "@/components/admin/CompetitionForm";
+import { PageHeader } from "@/components/PageHeader";
+import {
+  deleteCompetitionAction,
+  syncCompetitionAction,
+} from "@/src/server/admin-actions";
+import { getAdminCompetitions } from "@/src/server/admin";
+
+export const dynamic = "force-dynamic";
+
+export default async function AdminPage() {
+  const competitions = await getAdminCompetitions();
+
   return (
     <main className="page-shell">
       <PageHeader
         eyebrow="Administration"
-        title="Créer et piloter les compétitions."
-        description="Prépare les tournois, importe les matchs, verrouille les pronos et valide les résultats."
+        title="Créer une compétition."
+        description="Renseigne le code compétition football-data.org et la saison, puis importe les équipes et les matchs."
       />
 
       <section className="page-section">
-        <EmptyState
-          title="Prochaine étape"
-          text="Brancher l'auth, puis créer les écrans pour ajouter une compétition, ses équipes et ses matchs."
-        />
+        <div className="admin-layout">
+          <section className="card admin-panel">
+            <p className="badge badge-live">football-data.org</p>
+            <h2>Nouvelle compétition</h2>
+            <p>
+              football-data.org est la source principale pour le calendrier,
+              les équipes, les scores et les livescores pendant la compétition.
+            </p>
+
+            <CompetitionForm />
+          </section>
+
+          <section className="card admin-panel">
+            <p className="badge badge-warning">Compétitions</p>
+            <h2>Déjà configurées</h2>
+
+            {competitions.length === 0 ? (
+              <p>Aucune compétition créée pour le moment.</p>
+            ) : (
+              <div className="admin-list">
+                {competitions.map((competition) => (
+                  <div className="admin-list-item" key={competition.id}>
+                    <Link href={`/competitions/${competition.slug}`}>
+                      <strong>{competition.name}</strong>
+                    </Link>
+                    <span>
+                      {competition.kind} · {competition.status} ·{" "}
+                      {competition._count.teams} équipes ·{" "}
+                      {competition._count.matches} matchs
+                    </span>
+                    {competition.externalProvider &&
+                    competition.externalCompetitionId &&
+                    competition.externalSeason ? (
+                      <span>
+                        {competition.externalProvider} #
+                        {competition.externalCompetitionId}, saison{" "}
+                        {competition.externalSeason}
+                      </span>
+                    ) : null}
+                    <div className="admin-item-actions">
+                      <form action={syncCompetitionAction}>
+                        <input
+                          name="competitionId"
+                          type="hidden"
+                          value={competition.id}
+                        />
+                        <button className="btn btn-secondary" type="submit">
+                          Synchroniser
+                        </button>
+                      </form>
+
+                      <form action={deleteCompetitionAction}>
+                        <input
+                          name="competitionId"
+                          type="hidden"
+                          value={competition.id}
+                        />
+                        <button className="btn btn-danger" type="submit">
+                          Effacer
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
       </section>
     </main>
   );
