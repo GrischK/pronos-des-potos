@@ -10,6 +10,14 @@ type PredictionScheduleProps = {
   slug: string;
 };
 
+type PredictionPhaseSection = {
+  id: string;
+  label: string;
+  title: string;
+  kind: "phase";
+  matches: PredictionMatch[];
+};
+
 const groups = [
   { name: "Groupe A", teams: ["Mexico", "South Africa", "South Korea", "Czech Republic"] },
   { name: "Groupe B", teams: ["Canada", "Qatar", "Switzerland", "Bosnia-Herzegovina"] },
@@ -33,6 +41,9 @@ const aliases: Record<string, string> = {
 };
 
 const phaseLabels: Record<string, string> = {
+  GROUP_STAGE: "Phase de groupes",
+  LEAGUE_STAGE: "Phase de ligue",
+  PLAYOFFS: "Barrages",
   LAST_32: "16es de finale",
   LAST_16: "8es de finale",
   QUARTER_FINALS: "Quarts de finale",
@@ -42,6 +53,9 @@ const phaseLabels: Record<string, string> = {
 };
 
 const phaseOrder = [
+  "GROUP_STAGE",
+  "LEAGUE_STAGE",
+  "PLAYOFFS",
   "LAST_32",
   "LAST_16",
   "QUARTER_FINALS",
@@ -50,50 +64,144 @@ const phaseOrder = [
   "FINAL",
 ];
 
+const twoLeggedStages = new Set([
+  "PLAYOFFS",
+  "LAST_32",
+  "LAST_16",
+  "QUARTER_FINALS",
+  "SEMI_FINALS",
+]);
+
 function teamKey(name: string) {
   return (aliases[name] ?? name).toLowerCase().replace(/[^a-z0-9]+/g, "");
 }
 
-export function PredictionSchedule({ matches, slug }: PredictionScheduleProps) {
-  const stages = useMemo(() => {
-    const phaseSections = phaseOrder.map((stage) => ({
-      id: stage,
-      label: phaseLabels[stage],
-      title: phaseLabels[stage],
-      kind: "phase" as const,
-      matches: matches.filter((match) => match.stage === stage),
-    })).filter((section) => section.matches.length > 0);
+function getStageLabel(stage: string) {
+  return phaseLabels[stage] ?? stage.replace(/_/g, " ");
+}
+
+function sortMatchesByKickoff(matches: PredictionMatch[]) {
+  return [...matches].sort(
+    (a, b) => new Date(a.kickoffAt).getTime() - new Date(b.kickoffAt).getTime(),
+  );
+}
+
+function getPhaseMatchSections(section: PredictionPhaseSection) {
+  const matches = sortMatchesByKickoff(section.matches);
+
+  if (
+    section.id === "LEAGUE_STAGE" &&
+    matches.some((match) => match.matchday !== null)
+  ) {
+    const matchesByMatchday = new Map<number, PredictionMatch[]>();
+
+    for (const match of matches) {
+      const matchday = match.matchday ?? 0;
+      matchesByMatchday.set(matchday, [
+        ...(matchesByMatchday.get(matchday) ?? []),
+        match,
+      ]);
+    }
+
+    return Array.from(matchesByMatchday.entries())
+      .sort(([a], [b]) => a - b)
+      .map(([matchday, sectionMatches]) => ({
+        id: `matchday-${matchday}`,
+        title: matchday > 0 ? `Journée ${matchday}` : "Journée à confirmer",
+        matches: sectionMatches,
+      }));
+  }
+
+  if (
+    twoLeggedStages.has(section.id) &&
+    matches.length > 1 &&
+    matches.length % 2 === 0
+  ) {
+    const splitIndex = matches.length / 2;
 
     return [
       {
-        id: "GROUPS",
-        label: "Groupes",
-        title: "Phase de groupes",
-        kind: "groups" as const,
+        id: "first-leg",
+        title: "Matchs aller",
+        matches: matches.slice(0, splitIndex),
       },
-      ...phaseSections,
+      {
+        id: "second-leg",
+        title: "Matchs retour",
+        matches: matches.slice(splitIndex),
+      },
     ];
-  }, [matches]);
+  }
+
+  return [
+    {
+      id: "matches",
+      title: "Matchs",
+      matches,
+    },
+  ];
+}
+
+export function PredictionSchedule({ matches, slug }: PredictionScheduleProps) {
   const groupSections = useMemo(
     () =>
-      groups.map((group) => {
-      const teamKeys = new Set(group.teams.map(teamKey));
+      groups
+        .map((group) => {
+          const teamKeys = new Set(group.teams.map(teamKey));
 
-      return {
-        id: group.name,
-        label: group.name.replace("Groupe ", ""),
-        title: group.name,
-        matches: matches.filter(
-          (match) =>
-            match.homeTeam &&
-            match.awayTeam &&
-            teamKeys.has(teamKey(match.homeTeam.name)) &&
-            teamKeys.has(teamKey(match.awayTeam.name)),
-        ),
-      };
-    }),
+          return {
+            id: group.name,
+            label: group.name.replace("Groupe ", ""),
+            title: group.name,
+            matches: matches.filter(
+              (match) =>
+                match.homeTeam &&
+                match.awayTeam &&
+                teamKeys.has(teamKey(match.homeTeam.name)) &&
+                teamKeys.has(teamKey(match.awayTeam.name)),
+            ),
+          };
+        })
+        .filter((section) => section.matches.length > 0),
     [matches],
   );
+  const stages = useMemo(() => {
+    const knownStages = new Set(phaseOrder);
+    const excludedStages = new Set(groupSections.length > 0 ? ["GROUP_STAGE"] : []);
+    const extraStages = Array.from(
+      new Set(
+        matches
+          .map((match) => match.stage)
+          .filter(
+            (stage) => !knownStages.has(stage) && !excludedStages.has(stage),
+          ),
+      ),
+    ).sort();
+    const phaseSections = [...phaseOrder, ...extraStages]
+      .filter((stage) => !excludedStages.has(stage))
+      .map((stage) => ({
+        id: stage,
+        label: getStageLabel(stage),
+        title: getStageLabel(stage),
+        kind: "phase" as const,
+        matches: matches.filter((match) => match.stage === stage),
+      }))
+      .filter((section) => section.matches.length > 0);
+
+    return [
+      ...(groupSections.length > 0
+        ? [
+            {
+              id: "GROUPS",
+              label: "Groupes",
+              title: "Phase de groupes",
+              kind: "groups" as const,
+            },
+          ]
+        : []),
+      ...phaseSections,
+    ];
+  }, [groupSections.length, matches]);
   const [activeStageIndex, setActiveStageIndex] = useState(0);
   const [activeGroupId, setActiveGroupId] = useState(groupSections[0]?.id ?? "");
   const activeStage = stages[activeStageIndex] ?? stages[0];
@@ -177,11 +285,19 @@ export function PredictionSchedule({ matches, slug }: PredictionScheduleProps) {
             <p>{activeStage.matches.length} matchs.</p>
           </div>
 
-          <div className="prediction-list">
-            {activeStage.matches.map((match) => (
-              <PredictionMatchForm key={match.id} match={match} slug={slug} />
-            ))}
-          </div>
+          {getPhaseMatchSections(activeStage).map((section) => (
+            <div className="match-subsection" key={section.id}>
+              <div className="match-subsection-header">
+                <h3>{section.title}</h3>
+                <span>{section.matches.length} matchs</span>
+              </div>
+              <div className="prediction-list">
+                {section.matches.map((match) => (
+                  <PredictionMatchForm key={match.id} match={match} slug={slug} />
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       ) : null}
     </div>

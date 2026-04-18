@@ -18,6 +18,7 @@ export type ImportedMatch = {
   awayPlaceholder: string;
   kickoffAt: Date;
   stage: string;
+  matchday: number | null;
   status: MatchStatus;
   homeScore: number | null;
   awayScore: number | null;
@@ -91,9 +92,7 @@ async function footballDataGet<T>(path: string, params: Record<string, string>) 
     headers: {
       "X-Auth-Token": apiKey,
     },
-    next: {
-      revalidate: 3600,
-    },
+    cache: "no-store",
   });
 
   if (!response.ok) {
@@ -140,6 +139,7 @@ async function importFromFootballData(
       awayPlaceholder: awayTeam?.name ?? "À déterminer",
       kickoffAt: new Date(match.utcDate),
       stage: match.stage || (match.matchday ? `Journée ${match.matchday}` : "Phase à confirmer"),
+      matchday: match.matchday ?? null,
       status: mapFootballDataStatus(match.status),
       homeScore: match.score.fullTime.home,
       awayScore: match.score.fullTime.away,

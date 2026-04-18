@@ -126,6 +126,7 @@ model Match {
   awayPlaceholder String?
   kickoffAt     DateTime
   stage         String
+  matchday      Int?
   status        MatchStatus @default(SCHEDULED)
   homeScore     Int?
   awayScore     Int?

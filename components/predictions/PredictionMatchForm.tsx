@@ -64,12 +64,21 @@ function getTeamFlag(match: PredictionMatch, side: "home" | "away") {
   return team?.flagUrl ?? null;
 }
 
+function getResultLabel(status: string) {
+  if (status === "LIVE") {
+    return "Score live";
+  }
+
+  return "Score final";
+}
+
 export function PredictionMatchForm({ match, slug }: PredictionMatchFormProps) {
   const [state, formAction, pending] = useActionState(
     savePredictionAction,
     initialState,
   );
   const lockReason = getLockReason(match);
+  const hasResult = match.homeScore !== null && match.awayScore !== null;
 
   return (
     <form action={formAction} className="prediction-row">
@@ -95,30 +104,39 @@ export function PredictionMatchForm({ match, slug }: PredictionMatchFormProps) {
           <span>{getTeamName(match, "home")}</span>
         </span>
 
-        <div className="prediction-inputs">
-          <input
-            aria-label={`Score ${getTeamName(match, "home")}`}
-            defaultValue={match.prediction?.homeScore ?? ""}
-            disabled={!match.canPredict || pending}
-            inputMode="numeric"
-            max="99"
-            min="0"
-            name="homeScore"
-            required
-            type="number"
-          />
-          <span>·</span>
-          <input
-            aria-label={`Score ${getTeamName(match, "away")}`}
-            defaultValue={match.prediction?.awayScore ?? ""}
-            disabled={!match.canPredict || pending}
-            inputMode="numeric"
-            max="99"
-            min="0"
-            name="awayScore"
-            required
-            type="number"
-          />
+        <div className="prediction-score-block">
+          <div className="prediction-inputs">
+            <input
+              aria-label={`Score ${getTeamName(match, "home")}`}
+              defaultValue={match.prediction?.homeScore ?? ""}
+              disabled={!match.canPredict || pending}
+              inputMode="numeric"
+              max="99"
+              min="0"
+              name="homeScore"
+              required
+              type="number"
+            />
+            <span>·</span>
+            <input
+              aria-label={`Score ${getTeamName(match, "away")}`}
+              defaultValue={match.prediction?.awayScore ?? ""}
+              disabled={!match.canPredict || pending}
+              inputMode="numeric"
+              max="99"
+              min="0"
+              name="awayScore"
+              required
+              type="number"
+            />
+          </div>
+
+          {hasResult ? (
+            <p className="prediction-result">
+              {getResultLabel(match.status)} : {match.homeScore} ·{" "}
+              {match.awayScore}
+            </p>
+          ) : null}
         </div>
 
         <span className="match-team match-team-away">
