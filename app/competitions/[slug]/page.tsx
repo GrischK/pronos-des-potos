@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { AutoRefresh } from "@/components/AutoRefresh";
 import { CompetitionGroups } from "@/components/competitions/CompetitionGroups";
 import { PageHeader } from "@/components/PageHeader";
 import { getCompetitionBySlug } from "@/src/server/competitions";
@@ -23,6 +24,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
 
   return (
     <main className="page-shell">
+      <AutoRefresh intervalMs={60000} />
       <PageHeader
         eyebrow={competition.kind}
         title={competition.name}

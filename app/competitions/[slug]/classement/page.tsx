@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { AutoRefresh } from "@/components/AutoRefresh";
 import { PageHeader } from "@/components/PageHeader";
 import { getLeaderboardData } from "@/src/server/leaderboard";
 
@@ -24,6 +25,7 @@ export default async function ClassementPage({ params }: ClassementPageProps) {
 
   return (
     <main className="page-shell">
+      <AutoRefresh intervalMs={30000} />
       <PageHeader
         eyebrow={competition.kind}
         title={`Classement - ${competition.name}`}

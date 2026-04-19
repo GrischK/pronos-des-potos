@@ -116,6 +116,25 @@ function footballDataTeam(team: FootballDataTeam): ImportedTeam | null {
   };
 }
 
+function footballDataMatch(match: FootballDataMatch): ImportedMatch {
+  const homeTeam = footballDataTeam(match.homeTeam);
+  const awayTeam = footballDataTeam(match.awayTeam);
+
+  return {
+    externalId: String(match.id),
+    homeTeam,
+    awayTeam,
+    homePlaceholder: homeTeam?.name ?? "À déterminer",
+    awayPlaceholder: awayTeam?.name ?? "À déterminer",
+    kickoffAt: new Date(match.utcDate),
+    stage: match.stage || (match.matchday ? `Journée ${match.matchday}` : "Phase à confirmer"),
+    matchday: match.matchday ?? null,
+    status: mapFootballDataStatus(match.status),
+    homeScore: match.score.fullTime.home,
+    awayScore: match.score.fullTime.away,
+  };
+}
+
 async function importFromFootballData(
   competitionCode: string,
   season: string,
@@ -127,24 +146,7 @@ async function importFromFootballData(
     },
   );
 
-  const matches = payload.matches.flatMap((match) => {
-    const homeTeam = footballDataTeam(match.homeTeam);
-    const awayTeam = footballDataTeam(match.awayTeam);
-
-    return [{
-      externalId: String(match.id),
-      homeTeam,
-      awayTeam,
-      homePlaceholder: homeTeam?.name ?? "À déterminer",
-      awayPlaceholder: awayTeam?.name ?? "À déterminer",
-      kickoffAt: new Date(match.utcDate),
-      stage: match.stage || (match.matchday ? `Journée ${match.matchday}` : "Phase à confirmer"),
-      matchday: match.matchday ?? null,
-      status: mapFootballDataStatus(match.status),
-      homeScore: match.score.fullTime.home,
-      awayScore: match.score.fullTime.away,
-    }];
-  });
+  const matches = payload.matches.map(footballDataMatch);
 
   return {
     teams: compactTeams(
@@ -164,4 +166,17 @@ export function importExternalCompetitionData(
   }
 
   return importFromFootballData(competitionId, season);
+}
+
+export async function importExternalMatchData(
+  provider: ExternalDataProvider,
+  externalMatchId: string,
+) {
+  if (provider !== "FOOTBALL_DATA") {
+    throw new Error("football-data.org est la seule source de données supportée.");
+  }
+
+  return footballDataMatch(
+    await footballDataGet<FootballDataMatch>(`matches/${externalMatchId}`, {}),
+  );
 }

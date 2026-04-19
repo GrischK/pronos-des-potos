@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { AutoRefresh } from "@/components/AutoRefresh";
 import { PageHeader } from "@/components/PageHeader";
 import { PredictionSchedule } from "@/components/predictions/PredictionSchedule";
 import { getPredictionPageData } from "@/src/server/predictions";
@@ -23,6 +24,7 @@ export default async function PronosticsPage({ params }: PronosticsPageProps) {
 
   return (
     <main className="page-shell">
+      <AutoRefresh intervalMs={30000} />
       <PageHeader
         eyebrow={competition.kind}
         title={`Mes pronos - ${competition.name}`}
