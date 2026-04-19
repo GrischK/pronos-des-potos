@@ -19,7 +19,7 @@ export function AppShell({ children, showAdminNav = false }: AppShellProps) {
   return (
     <div className="app-shell">
       <header className="site-header">
-        <Link className="brand" href="/">
+        <Link className="brand" href="/competitions">
           <span className="brand-mark">P</span>
           <span>
             <span className="brand-name">Pronos des potos</span>
