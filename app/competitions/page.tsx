@@ -5,7 +5,6 @@ import { PageHeader } from "@/components/PageHeader";
 import {
   getCompetitionsOverview,
   getNextPredictionOpportunity,
-  type NextPredictionOpportunity,
 } from "@/src/server/competitions";
 
 export const dynamic = "force-dynamic";
@@ -32,10 +31,18 @@ const kickoffFormatter = new Intl.DateTimeFormat("fr-FR", {
   timeZone: "Europe/Paris",
 });
 
-function getTeamName(
-  match: NextPredictionOpportunity,
-  side: "home" | "away",
-) {
+type MatchPreview = {
+  homeTeam: {
+    name: string;
+  } | null;
+  awayTeam: {
+    name: string;
+  } | null;
+  homePlaceholder: string | null;
+  awayPlaceholder: string | null;
+};
+
+function getTeamName(match: MatchPreview, side: "home" | "away") {
   const team = side === "home" ? match.homeTeam : match.awayTeam;
   const placeholder =
     side === "home" ? match.homePlaceholder : match.awayPlaceholder;
@@ -118,10 +125,50 @@ export default async function CompetitionsPage() {
                   {statusLabels[competition.status]}
                 </p>
                 <h2>{competition.name}</h2>
-                <p>
-                  {competition.matchCount} matchs, {competition.playerCount}{" "}
-                  participants
-                </p>
+                <div className="competition-card-summary">
+                  <span>
+                    <strong>{competition.matchCount}</strong>
+                    Matchs
+                  </span>
+                  <span>
+                    <strong>{competition.playerCount}</strong>
+                    Participants
+                  </span>
+                </div>
+
+                <div className="competition-card-next">
+                  <span>Prochain match</span>
+                  <strong>
+                    {competition.nextMatch
+                      ? `${getTeamName(competition.nextMatch, "home")} - ${getTeamName(
+                          competition.nextMatch,
+                          "away",
+                        )}`
+                      : "Aucun match à venir"}
+                  </strong>
+                  {competition.nextMatch ? (
+                    <small>{formatKickoffAt(competition.nextMatch.kickoffAt)}</small>
+                  ) : null}
+                </div>
+
+                <div className="competition-card-stats">
+                  <span>
+                    <strong>{competition.remainingMatchCount}</strong>
+                    Restants
+                  </span>
+                  <span>
+                    <strong>{competition.missingPredictionCount}</strong>
+                    À poser
+                  </span>
+                  <span>
+                    <strong>
+                      {competition.leader
+                        ? `${competition.leader.points} pts`
+                        : "-"}
+                    </strong>
+                    {competition.leader?.name ?? "Leader"}
+                  </span>
+                </div>
               </Link>
             ))}
           </div>

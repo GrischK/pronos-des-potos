@@ -457,6 +457,50 @@
     @apply grid content-between gap-[18px];
   }
 
+  .competition-card-summary {
+    @apply grid gap-2;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .competition-card-summary span {
+    @apply grid gap-1 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-normal text-muted;
+    background: color-mix(in srgb, var(--mint) 14%, white);
+  }
+
+  .competition-card-summary strong {
+    @apply text-2xl font-black leading-none text-pitch-strong;
+  }
+
+  .competition-card-next {
+    @apply grid gap-1 rounded-lg border border-line bg-surface-alt p-3;
+  }
+
+  .competition-card-next span {
+    @apply text-xs font-black uppercase tracking-normal text-foreground;
+  }
+
+  .competition-card-next strong {
+    @apply min-w-0 truncate text-base font-black leading-tight text-foreground;
+  }
+
+  .competition-card-next small {
+    @apply text-sm font-bold text-muted;
+  }
+
+  .competition-card-stats {
+    @apply grid gap-2;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .competition-card-stats span {
+    @apply grid min-w-0 gap-1 rounded-lg bg-white px-3 py-2 text-xs font-bold leading-tight text-muted;
+    border: 1px solid color-mix(in srgb, var(--pitch) 10%, var(--line));
+  }
+
+  .competition-card-stats strong {
+    @apply min-w-0 truncate text-base font-black leading-none text-foreground;
+  }
+
   .next-prediction-panel {
     @apply grid items-center gap-4 rounded-lg border border-line bg-surface p-5;
     background:
