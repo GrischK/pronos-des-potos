@@ -464,6 +464,35 @@
     border-left: 5px solid var(--navy);
   }
 
+  .competition-highlights {
+    @apply grid gap-4;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .highlight-panel {
+    @apply grid min-w-0 gap-4 rounded-lg border border-line bg-surface p-4;
+  }
+
+  .highlight-match-list {
+    @apply grid gap-3;
+  }
+
+  .highlight-match-card {
+    @apply grid gap-3 rounded-lg border border-line bg-white p-4;
+  }
+
+  .highlight-prono-line {
+    @apply flex items-center justify-between gap-3 rounded-lg bg-surface-alt px-3 py-2;
+  }
+
+  .highlight-prono-line span {
+    @apply text-sm font-bold text-muted;
+  }
+
+  .highlight-prono-line strong {
+    @apply rounded-lg bg-foreground px-2.5 py-1 text-sm font-black text-white;
+  }
+
   .match-list {
     @apply grid gap-3;
   }
@@ -769,6 +798,10 @@
 
   @media (max-width: 760px) {
     .leaderboard-summary {
+      grid-template-columns: 1fr;
+    }
+
+    .competition-highlights {
       grid-template-columns: 1fr;
     }
 

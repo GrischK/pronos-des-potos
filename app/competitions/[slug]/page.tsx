@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { CompetitionGroups } from "@/components/competitions/CompetitionGroups";
+import { CompetitionHighlights } from "@/components/competitions/CompetitionHighlights";
 import { PageHeader } from "@/components/PageHeader";
+import { getCompetitionHighlights } from "@/src/server/competition-highlights";
 import { getCompetitionBySlug } from "@/src/server/competitions";
 
 export const dynamic = "force-dynamic";
@@ -16,9 +18,12 @@ type CompetitionPageProps = {
 
 export default async function CompetitionPage({ params }: CompetitionPageProps) {
   const { slug } = await params;
-  const competition = await getCompetitionBySlug(slug);
+  const [competition, highlights] = await Promise.all([
+    getCompetitionBySlug(slug),
+    getCompetitionHighlights(slug),
+  ]);
 
-  if (!competition) {
+  if (!competition || !highlights) {
     notFound();
   }
 
@@ -55,6 +60,10 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
             <p>Comparer les choix des potos une fois les matchs verrouillés.</p>
           </Link>
         </div>
+      </section>
+
+      <section className="page-section">
+        <CompetitionHighlights highlights={highlights} />
       </section>
 
       <section className="page-section">
