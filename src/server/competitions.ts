@@ -325,6 +325,7 @@ export async function getCompetitionsOverview() {
       name: true,
       slug: true,
       status: true,
+      emblemUrl: true,
       matches: {
         where: {
           OR: [
@@ -481,6 +482,7 @@ export async function getCompetitionsOverview() {
         name: competition.name,
         slug: competition.slug,
         status: competition.status,
+        emblemUrl: competition.emblemUrl,
         matchCount: competition._count.matches,
         playerCount: competition._count.players,
         nextMatch: nextMatch
@@ -610,6 +612,7 @@ export async function getCompetitionBySlug(slug: string) {
       name: true,
       slug: true,
       kind: true,
+      emblemUrl: true,
       externalProvider: true,
       externalCompetitionId: true,
       externalSeason: true,

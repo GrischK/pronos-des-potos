@@ -25,6 +25,9 @@ export type ImportedMatch = {
 };
 
 export type ImportedCompetitionData = {
+  competition: {
+    emblemUrl: string | null;
+  };
   teams: ImportedTeam[];
   matches: ImportedMatch[];
 };
@@ -51,6 +54,10 @@ type FootballDataMatch = {
       away: number | null;
     };
   };
+};
+
+type FootballDataCompetition = {
+  emblem?: string | null;
 };
 
 function compactTeams(teams: ImportedTeam[]) {
@@ -139,16 +146,25 @@ async function importFromFootballData(
   competitionCode: string,
   season: string,
 ): Promise<ImportedCompetitionData> {
-  const payload = await footballDataGet<{ matches: FootballDataMatch[] }>(
-    `competitions/${competitionCode}/matches`,
-    {
-      season,
-    },
-  );
+  const [competition, payload] = await Promise.all([
+    footballDataGet<FootballDataCompetition>(
+      `competitions/${competitionCode}`,
+      {},
+    ),
+    footballDataGet<{ matches: FootballDataMatch[] }>(
+      `competitions/${competitionCode}/matches`,
+      {
+        season,
+      },
+    ),
+  ]);
 
   const matches = payload.matches.map(footballDataMatch);
 
   return {
+    competition: {
+      emblemUrl: competition.emblem ?? null,
+    },
     teams: compactTeams(
       matches.flatMap((match) => [match.homeTeam, match.awayTeam]).filter((team) => team !== null),
     ),

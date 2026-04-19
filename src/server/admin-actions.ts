@@ -75,7 +75,7 @@ async function importCompetitionData(
   externalCompetitionId: string,
   externalSeason: string,
 ) {
-  const { teams, matches } = await importExternalCompetitionData(
+  const { competition, teams, matches } = await importExternalCompetitionData(
     provider,
     externalCompetitionId,
     externalSeason,
@@ -157,6 +157,7 @@ async function importCompetitionData(
   await prisma.competition.update({
     where: { id: competitionId },
     data: {
+      emblemUrl: competition.emblemUrl,
       externalLastSyncAt: new Date(),
       startsAt:
         kickoffDates.length > 0

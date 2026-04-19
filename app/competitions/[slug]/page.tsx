@@ -32,6 +32,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
       <AutoRefresh intervalMs={60000} />
       <PageHeader
         eyebrow={competition.kind}
+        emblemUrl={competition.emblemUrl}
         title={competition.name}
         description="Retrouve les pronos, les scores et le classement de cette compétition."
       />

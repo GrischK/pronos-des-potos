@@ -124,7 +124,17 @@ export default async function CompetitionsPage() {
                 <p className={statusBadgeClasses[competition.status]}>
                   {statusLabels[competition.status]}
                 </p>
-                <h2>{competition.name}</h2>
+                <div className="competition-card-title">
+                  {competition.emblemUrl ? (
+                    <img
+                      alt=""
+                      className="competition-emblem"
+                      loading="lazy"
+                      src={competition.emblemUrl}
+                    />
+                  ) : null}
+                  <h2>{competition.name}</h2>
+                </div>
                 <div className="competition-card-summary">
                   <span>
                     <strong>{competition.matchCount}</strong>
