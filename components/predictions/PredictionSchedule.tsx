@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { ReactNode } from "react";
 
 import { PredictionMatchForm } from "@/components/predictions/PredictionMatchForm";
 import type { PredictionMatch } from "@/src/server/predictions";
@@ -10,19 +11,39 @@ type PredictionScheduleProps = {
   slug: string;
 };
 
-type PredictionPhaseSection = {
+export type ScheduleMatch = {
+  id: string;
+  kickoffAt: string;
+  stage: string;
+  matchday: number | null;
+  homeTeam: {
+    name: string;
+  } | null;
+  awayTeam: {
+    name: string;
+  } | null;
+};
+
+type PredictionScheduleBrowserProps<TMatch extends ScheduleMatch> = {
+  groupHeading: string;
+  matches: TMatch[];
+  phaseHeading: string;
+  renderMatch: (match: TMatch) => ReactNode;
+};
+
+type PredictionPhaseSection<TMatch extends ScheduleMatch> = {
   id: string;
   label: string;
   title: string;
   kind: "phase";
-  matches: PredictionMatch[];
+  matches: TMatch[];
 };
 
-type ChronologicalSection = {
+type ChronologicalSection<TMatch extends ScheduleMatch> = {
   id: string;
   label: string;
   title: string;
-  matches: PredictionMatch[];
+  matches: TMatch[];
 };
 
 type ScheduleView = "structure" | "chronology";
@@ -103,20 +124,22 @@ function getStageLabel(stage: string) {
   return phaseLabels[stage] ?? stage.replace(/_/g, " ");
 }
 
-function sortMatchesByKickoff(matches: PredictionMatch[]) {
+function sortMatchesByKickoff<TMatch extends ScheduleMatch>(matches: TMatch[]) {
   return [...matches].sort(
     (a, b) => new Date(a.kickoffAt).getTime() - new Date(b.kickoffAt).getTime(),
   );
 }
 
-function getPhaseMatchSections(section: PredictionPhaseSection) {
+function getPhaseMatchSections<TMatch extends ScheduleMatch>(
+  section: PredictionPhaseSection<TMatch>,
+) {
   const matches = sortMatchesByKickoff(section.matches);
 
   if (
     section.id === "LEAGUE_STAGE" &&
     matches.some((match) => match.matchday !== null)
   ) {
-    const matchesByMatchday = new Map<number, PredictionMatch[]>();
+    const matchesByMatchday = new Map<number, TMatch[]>();
 
     for (const match of matches) {
       const matchday = match.matchday ?? 0;
@@ -185,8 +208,8 @@ function getDayLabel(value: string) {
   return dayLabelFormatter.format(date);
 }
 
-function getChronologicalSections(matches: PredictionMatch[]) {
-  const sections = new Map<string, ChronologicalSection>();
+function getChronologicalSections<TMatch extends ScheduleMatch>(matches: TMatch[]) {
+  const sections = new Map<string, ChronologicalSection<TMatch>>();
 
   for (const match of sortMatchesByKickoff(matches)) {
     const usesMatchday = match.stage === "LEAGUE_STAGE" && match.matchday !== null;
@@ -211,7 +234,12 @@ function getChronologicalSections(matches: PredictionMatch[]) {
   return Array.from(sections.values());
 }
 
-export function PredictionSchedule({ matches, slug }: PredictionScheduleProps) {
+export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
+  groupHeading,
+  matches,
+  phaseHeading,
+  renderMatch,
+}: PredictionScheduleBrowserProps<TMatch>) {
   const groupSections = useMemo(
     () =>
       groups
@@ -341,7 +369,7 @@ export function PredictionSchedule({ matches, slug }: PredictionScheduleProps) {
 
             <div className="prediction-list">
               {activeDay.matches.map((match) => (
-                <PredictionMatchForm key={match.id} match={match} slug={slug} />
+                renderMatch(match)
               ))}
             </div>
           </div>
@@ -395,14 +423,14 @@ export function PredictionSchedule({ matches, slug }: PredictionScheduleProps) {
             <div className="section-heading">
               <div>
                 <p className="badge badge-live">{activeGroup.title}</p>
-                <h2>Mes scores</h2>
+                <h2>{groupHeading}</h2>
               </div>
               <p>{activeGroup.matches.length} matchs.</p>
             </div>
 
             <div className="prediction-list">
               {activeGroup.matches.map((match) => (
-                <PredictionMatchForm key={match.id} match={match} slug={slug} />
+                renderMatch(match)
               ))}
             </div>
           </div>
@@ -414,7 +442,7 @@ export function PredictionSchedule({ matches, slug }: PredictionScheduleProps) {
           <div className="section-heading">
             <div>
               <p className="badge badge-live">{activeStage.title}</p>
-              <h2>Mes scores</h2>
+              <h2>{phaseHeading}</h2>
             </div>
             <p>{activeStage.matches.length} matchs.</p>
           </div>
@@ -427,7 +455,7 @@ export function PredictionSchedule({ matches, slug }: PredictionScheduleProps) {
               </div>
               <div className="prediction-list">
                 {section.matches.map((match) => (
-                  <PredictionMatchForm key={match.id} match={match} slug={slug} />
+                  renderMatch(match)
                 ))}
               </div>
             </div>
@@ -435,5 +463,18 @@ export function PredictionSchedule({ matches, slug }: PredictionScheduleProps) {
         </div>
       ) : null}
     </div>
+  );
+}
+
+export function PredictionSchedule({ matches, slug }: PredictionScheduleProps) {
+  return (
+    <PredictionScheduleBrowser
+      groupHeading="Mes scores"
+      matches={matches}
+      phaseHeading="Mes scores"
+      renderMatch={(match) => (
+        <PredictionMatchForm key={match.id} match={match} slug={slug} />
+      )}
+    />
   );
 }
