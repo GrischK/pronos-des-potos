@@ -19,78 +19,53 @@ export type LeaderboardData = {
   name: string;
   slug: string;
   kind: string;
-  finishedMatchCount: number;
   participantCount: number;
+  official: LeaderboardSnapshot;
+  live: LeaderboardSnapshot;
+};
+
+export type LeaderboardSnapshot = {
   rows: LeaderboardRow[];
+  matchCount: number;
+  liveMatchCount: number;
 };
 
 function getUserDisplayName(user: { name: string | null; email: string }) {
   return user.name?.trim() || user.email;
 }
 
-export async function getLeaderboardData(
-  slug: string,
-): Promise<LeaderboardData | null> {
-  const competition = await prisma.competition.findUnique({
-    where: {
-      slug,
-    },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      kind: true,
-      players: {
-        select: {
-          user: {
-            select: {
-              id: true,
-              email: true,
-              name: true,
-            },
-          },
-        },
-      },
-      matches: {
-        where: {
-          status: "FINISHED",
-          homeScore: {
-            not: null,
-          },
-          awayScore: {
-            not: null,
-          },
-        },
-        select: {
-          id: true,
-          homeScore: true,
-          awayScore: true,
-          predictions: {
-            select: {
-              userId: true,
-              homeScore: true,
-              awayScore: true,
-              user: {
-                select: {
-                  id: true,
-                  email: true,
-                  name: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
+type LeaderboardMatch = {
+  id: string;
+  status: string;
+  homeScore: number | null;
+  awayScore: number | null;
+  predictions: {
+    userId: string;
+    homeScore: number;
+    awayScore: number;
+    user: {
+      id: string;
+      email: string;
+      name: string | null;
+    };
+  }[];
+};
 
-  if (!competition) {
-    return null;
-  }
+type CompetitionPlayer = {
+  user: {
+    id: string;
+    email: string;
+    name: string | null;
+  };
+};
 
+function buildLeaderboardSnapshot(
+  players: CompetitionPlayer[],
+  matches: LeaderboardMatch[],
+): LeaderboardSnapshot {
   const rowsByUser = new Map<string, LeaderboardRow>();
 
-  for (const player of competition.players) {
+  for (const player of players) {
     rowsByUser.set(player.user.id, {
       userId: player.user.id,
       name: getUserDisplayName(player.user),
@@ -103,7 +78,7 @@ export async function getLeaderboardData(
     });
   }
 
-  for (const match of competition.matches) {
+  for (const match of matches) {
     if (match.homeScore === null || match.awayScore === null) {
       continue;
     }
@@ -167,12 +142,89 @@ export async function getLeaderboardData(
   );
 
   return {
+    rows,
+    matchCount: matches.length,
+    liveMatchCount: matches.filter((match) => match.status === "LIVE").length,
+  };
+}
+
+export async function getLeaderboardData(
+  slug: string,
+): Promise<LeaderboardData | null> {
+  const competition = await prisma.competition.findUnique({
+    where: {
+      slug,
+    },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      kind: true,
+      players: {
+        select: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            },
+          },
+        },
+      },
+      matches: {
+        where: {
+          status: {
+            in: ["FINISHED", "LIVE"],
+          },
+          homeScore: {
+            not: null,
+          },
+          awayScore: {
+            not: null,
+          },
+        },
+        select: {
+          id: true,
+          status: true,
+          homeScore: true,
+          awayScore: true,
+          predictions: {
+            select: {
+              userId: true,
+              homeScore: true,
+              awayScore: true,
+              user: {
+                select: {
+                  id: true,
+                  email: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!competition) {
+    return null;
+  }
+
+  const officialMatches = competition.matches.filter(
+    (match) => match.status === "FINISHED",
+  );
+  const liveMatches = competition.matches.filter(
+    (match) => match.status === "FINISHED" || match.status === "LIVE",
+  );
+
+  return {
     id: competition.id,
     name: competition.name,
     slug: competition.slug,
     kind: competition.kind,
-    finishedMatchCount: competition.matches.length,
-    participantCount: rows.length,
-    rows,
+    participantCount: competition.players.length,
+    official: buildLeaderboardSnapshot(competition.players, officialMatches),
+    live: buildLeaderboardSnapshot(competition.players, liveMatches),
   };
 }
