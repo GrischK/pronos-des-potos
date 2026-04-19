@@ -1,5 +1,7 @@
 import { unstable_cache } from "next/cache";
 
+import { getCurrentUser } from "@/src/auth/current-user";
+
 const WORLD_CUP_2026_GROUPS = [
   {
     name: "Groupe A",
@@ -337,6 +339,96 @@ export async function getCompetitionsOverview() {
       playerCount: competition._count.players,
     })),
   );
+}
+
+export type NextPredictionOpportunity = {
+  id: string;
+  kickoffAt: string;
+  competition: {
+    name: string;
+    slug: string;
+  };
+  homeTeam: {
+    name: string;
+  } | null;
+  awayTeam: {
+    name: string;
+  } | null;
+  homePlaceholder: string | null;
+  awayPlaceholder: string | null;
+};
+
+export async function getNextPredictionOpportunity(): Promise<NextPredictionOpportunity | null> {
+  if (!process.env.DATABASE_URL) {
+    return null;
+  }
+
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return null;
+  }
+
+  const { prisma } = await import("@/src/db/prisma");
+  const match = await prisma.match.findFirst({
+    where: {
+      status: "SCHEDULED",
+      kickoffAt: {
+        gt: new Date(),
+      },
+      homeTeamId: {
+        not: null,
+      },
+      awayTeamId: {
+        not: null,
+      },
+      competition: {
+        status: "OPEN",
+      },
+      predictions: {
+        none: {
+          userId: user.id,
+        },
+      },
+    },
+    orderBy: [{ kickoffAt: "asc" }, { createdAt: "asc" }],
+    select: {
+      id: true,
+      kickoffAt: true,
+      homePlaceholder: true,
+      awayPlaceholder: true,
+      competition: {
+        select: {
+          name: true,
+          slug: true,
+        },
+      },
+      homeTeam: {
+        select: {
+          name: true,
+        },
+      },
+      awayTeam: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  if (!match) {
+    return null;
+  }
+
+  return {
+    id: match.id,
+    kickoffAt: match.kickoffAt.toISOString(),
+    competition: match.competition,
+    homeTeam: match.homeTeam,
+    awayTeam: match.awayTeam,
+    homePlaceholder: match.homePlaceholder,
+    awayPlaceholder: match.awayPlaceholder,
+  };
 }
 
 export async function getCompetitionBySlug(slug: string) {

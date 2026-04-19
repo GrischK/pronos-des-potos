@@ -457,6 +457,31 @@
     @apply grid content-between gap-[18px];
   }
 
+  .next-prediction-panel {
+    @apply grid items-center gap-4 rounded-lg border border-line bg-surface p-5;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--mint) 18%, white), white 50%),
+      var(--surface);
+    box-shadow: 0 16px 38px color-mix(in srgb, var(--foreground) 8%, transparent);
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .next-prediction-panel h2 {
+    @apply mt-3 mb-0 text-3xl font-black leading-tight tracking-normal;
+  }
+
+  .next-prediction-panel p:not(.badge) {
+    @apply mt-2 mb-0 font-bold text-muted;
+  }
+
+  .next-prediction-action {
+    @apply grid justify-items-end gap-3 text-right;
+  }
+
+  .next-prediction-action strong {
+    @apply rounded-lg bg-foreground px-3 py-2 text-sm font-black text-surface;
+  }
+
   .action-card:nth-child(1) {
     border-left: 5px solid var(--pitch);
   }
@@ -857,6 +882,14 @@
 
     .admin-rename-form {
       grid-template-columns: 1fr;
+    }
+
+    .next-prediction-panel {
+      grid-template-columns: 1fr;
+    }
+
+    .next-prediction-action {
+      @apply justify-items-start text-left;
     }
 
     .competition-highlights {
