@@ -4,6 +4,7 @@ import { CompetitionForm } from "@/components/admin/CompetitionForm";
 import { PageHeader } from "@/components/PageHeader";
 import {
   deleteCompetitionAction,
+  renameCompetitionAction,
   syncCompetitionAction,
   toggleCompetitionOpenAction,
 } from "@/src/server/admin-actions";
@@ -62,6 +63,28 @@ export default async function AdminPage() {
                         {competition.externalSeason}
                       </span>
                     ) : null}
+                    <form
+                      action={renameCompetitionAction}
+                      className="admin-rename-form"
+                    >
+                      <input
+                        name="competitionId"
+                        type="hidden"
+                        value={competition.id}
+                      />
+                      <label className="field">
+                        <span>Renommer le tournoi</span>
+                        <input
+                          defaultValue={competition.name}
+                          minLength={3}
+                          name="name"
+                          required
+                        />
+                      </label>
+                      <button className="btn btn-secondary" type="submit">
+                        Renommer
+                      </button>
+                    </form>
                     <div className="admin-item-actions">
                       <form action={toggleCompetitionOpenAction}>
                         <input

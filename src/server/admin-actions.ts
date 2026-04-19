@@ -27,6 +27,11 @@ const competitionSchema = z.object({
   importNow: z.enum(["on"]).optional(),
 });
 
+const renameCompetitionSchema = z.object({
+  competitionId: z.string().min(1),
+  name: z.string().trim().min(3, "Nom de compétition trop court."),
+});
+
 function slugify(value: string) {
   return value
     .normalize("NFD")
@@ -333,6 +338,31 @@ export async function toggleCompetitionOpenAction(formData: FormData) {
     },
     data: {
       status: competition.status === "OPEN" ? "DRAFT" : "OPEN",
+    },
+  });
+
+  updateTag("competitions");
+  updateTag("admin-competitions");
+  updateTag(`competition:${competition.slug}`);
+}
+
+export async function renameCompetitionAction(formData: FormData) {
+  const admin = await getCurrentAdmin();
+
+  if (!admin) {
+    throw new Error("Accès réservé aux admins.");
+  }
+
+  const parsed = renameCompetitionSchema.parse(Object.fromEntries(formData));
+  const competition = await prisma.competition.update({
+    where: {
+      id: parsed.competitionId,
+    },
+    data: {
+      name: parsed.name,
+    },
+    select: {
+      slug: true,
     },
   });
 

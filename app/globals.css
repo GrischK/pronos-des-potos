@@ -338,6 +338,11 @@
     @apply text-sm leading-[1.45] text-muted;
   }
 
+  .admin-rename-form {
+    @apply mt-3 grid items-end gap-2 rounded-lg border border-line bg-surface p-3;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
   .admin-item-actions {
     @apply mt-2 flex flex-wrap gap-2;
   }
@@ -847,6 +852,10 @@
     }
 
     .leaderboard-rules {
+      grid-template-columns: 1fr;
+    }
+
+    .admin-rename-form {
       grid-template-columns: 1fr;
     }
 
