@@ -739,6 +739,10 @@
     @apply rounded-lg bg-surface-alt px-2.5 py-1 text-xs font-black text-muted;
   }
 
+  .prediction-empty {
+    @apply max-w-[220px] rounded-lg bg-surface-alt px-3 py-2 text-center text-xs font-black text-muted;
+  }
+
   .prediction-actions {
     @apply flex flex-wrap items-center gap-3;
   }
