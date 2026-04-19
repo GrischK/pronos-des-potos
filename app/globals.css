@@ -492,6 +492,18 @@
     @apply grid gap-5;
   }
 
+  .schedule-view-switch {
+    @apply flex w-fit flex-wrap gap-2 rounded-lg border border-line bg-surface p-1;
+  }
+
+  .schedule-view-switch button {
+    @apply min-h-10 rounded-lg px-3 text-sm font-black text-muted transition-colors;
+  }
+
+  .schedule-view-switch button[aria-pressed="true"] {
+    @apply bg-foreground text-white;
+  }
+
   .phase-pager {
     @apply grid items-center gap-3 rounded-lg border border-line bg-surface p-4;
     grid-template-columns: 44px minmax(0, 1fr) 44px;
@@ -536,6 +548,35 @@
 
   .group-panel {
     @apply grid min-w-0 gap-5;
+  }
+
+  .day-browser {
+    @apply grid gap-4;
+  }
+
+  .day-nav {
+    @apply flex gap-2 overflow-x-auto pb-1;
+  }
+
+  .day-nav-button {
+    @apply flex min-h-10 shrink-0 items-center gap-2 rounded-lg border border-line bg-surface-alt px-3 py-2 text-left transition-colors;
+  }
+
+  .day-nav-button span {
+    @apply text-sm font-black text-foreground;
+  }
+
+  .day-nav-button small {
+    @apply text-xs font-bold text-muted;
+  }
+
+  .day-nav-button[aria-pressed="true"] {
+    @apply border-pitch bg-foreground;
+  }
+
+  .day-nav-button[aria-pressed="true"] span,
+  .day-nav-button[aria-pressed="true"] small {
+    @apply text-white;
   }
 
   .standings-table-wrap {
@@ -681,6 +722,10 @@
 
     .group-nav {
       @apply static grid max-h-none grid-cols-6 overflow-visible;
+    }
+
+    .day-nav {
+      @apply -mx-1 px-1;
     }
   }
 

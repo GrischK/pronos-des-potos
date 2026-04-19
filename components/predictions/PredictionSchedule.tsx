@@ -18,6 +18,15 @@ type PredictionPhaseSection = {
   matches: PredictionMatch[];
 };
 
+type ChronologicalSection = {
+  id: string;
+  label: string;
+  title: string;
+  matches: PredictionMatch[];
+};
+
+type ScheduleView = "structure" | "chronology";
+
 const groups = [
   { name: "Groupe A", teams: ["Mexico", "South Africa", "South Korea", "Czech Republic"] },
   { name: "Groupe B", teams: ["Canada", "Qatar", "Switzerland", "Bosnia-Herzegovina"] },
@@ -71,6 +80,20 @@ const twoLeggedStages = new Set([
   "QUARTER_FINALS",
   "SEMI_FINALS",
 ]);
+
+const dayKeyFormatter = new Intl.DateTimeFormat("fr-CA", {
+  day: "2-digit",
+  month: "2-digit",
+  timeZone: "Europe/Paris",
+  year: "numeric",
+});
+
+const dayLabelFormatter = new Intl.DateTimeFormat("fr-FR", {
+  day: "numeric",
+  month: "short",
+  timeZone: "Europe/Paris",
+  weekday: "short",
+});
 
 function teamKey(name: string) {
   return (aliases[name] ?? name).toLowerCase().replace(/[^a-z0-9]+/g, "");
@@ -142,6 +165,52 @@ function getPhaseMatchSections(section: PredictionPhaseSection) {
   ];
 }
 
+function getDayKey(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return dayKeyFormatter.format(date);
+}
+
+function getDayLabel(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Date à confirmer";
+  }
+
+  return dayLabelFormatter.format(date);
+}
+
+function getChronologicalSections(matches: PredictionMatch[]) {
+  const sections = new Map<string, ChronologicalSection>();
+
+  for (const match of sortMatchesByKickoff(matches)) {
+    const usesMatchday = match.stage === "LEAGUE_STAGE" && match.matchday !== null;
+    const id = usesMatchday
+      ? `${match.stage}-${match.matchday}`
+      : `day-${getDayKey(match.kickoffAt)}`;
+    const label = usesMatchday
+      ? `J${match.matchday}`
+      : getDayLabel(match.kickoffAt);
+    const title = usesMatchday
+      ? `Journée ${match.matchday}`
+      : getDayLabel(match.kickoffAt);
+
+    sections.set(id, {
+      id,
+      label,
+      title,
+      matches: [...(sections.get(id)?.matches ?? []), match],
+    });
+  }
+
+  return Array.from(sections.values());
+}
+
 export function PredictionSchedule({ matches, slug }: PredictionScheduleProps) {
   const groupSections = useMemo(
     () =>
@@ -202,46 +271,111 @@ export function PredictionSchedule({ matches, slug }: PredictionScheduleProps) {
       ...phaseSections,
     ];
   }, [groupSections.length, matches]);
+  const chronologicalSections = useMemo(
+    () => getChronologicalSections(matches),
+    [matches],
+  );
+  const [view, setView] = useState<ScheduleView>("structure");
   const [activeStageIndex, setActiveStageIndex] = useState(0);
   const [activeGroupId, setActiveGroupId] = useState(groupSections[0]?.id ?? "");
+  const [activeDayId, setActiveDayId] = useState(
+    chronologicalSections[0]?.id ?? "",
+  );
   const activeStage = stages[activeStageIndex] ?? stages[0];
   const activeGroup =
     groupSections.find((section) => section.id === activeGroupId) ?? groupSections[0];
+  const activeDay =
+    chronologicalSections.find((section) => section.id === activeDayId) ??
+    chronologicalSections[0];
   const previousStage = stages[activeStageIndex - 1];
   const nextStage = stages[activeStageIndex + 1];
 
-  if (!activeStage) {
+  if (!activeStage && !activeDay) {
     return null;
   }
 
   return (
     <div className="schedule-browser">
-      <div className="phase-pager">
+      <div className="schedule-view-switch" aria-label="Vue des matchs">
         <button
-          className="phase-arrow"
-          disabled={!previousStage}
-          onClick={() => setActiveStageIndex((index) => Math.max(0, index - 1))}
+          aria-pressed={view === "structure"}
+          onClick={() => setView("structure")}
           type="button"
         >
-          {"<"}
+          Par phase
         </button>
-        <div>
-          <p className="badge badge-live">{activeStage.label}</p>
-          <h2>{activeStage.title}</h2>
-        </div>
         <button
-          className="phase-arrow"
-          disabled={!nextStage}
-          onClick={() =>
-            setActiveStageIndex((index) => Math.min(stages.length - 1, index + 1))
-          }
+          aria-pressed={view === "chronology"}
+          onClick={() => setView("chronology")}
           type="button"
         >
-          {">"}
+          Par journée
         </button>
       </div>
 
-      {activeStage.kind === "groups" && activeGroup ? (
+      {view === "chronology" && activeDay ? (
+        <div className="day-browser">
+          <nav aria-label="Journées" className="day-nav">
+            {chronologicalSections.map((section) => (
+              <button
+                aria-pressed={section.id === activeDay.id}
+                className="day-nav-button"
+                key={section.id}
+                onClick={() => setActiveDayId(section.id)}
+                type="button"
+              >
+                <span>{section.label}</span>
+                <small>{section.matches.length} matchs</small>
+              </button>
+            ))}
+          </nav>
+
+          <div className="group-panel">
+            <div className="section-heading">
+              <div>
+                <p className="badge badge-live">Chronologie</p>
+                <h2>{activeDay.title}</h2>
+              </div>
+              <p>{activeDay.matches.length} matchs.</p>
+            </div>
+
+            <div className="prediction-list">
+              {activeDay.matches.map((match) => (
+                <PredictionMatchForm key={match.id} match={match} slug={slug} />
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {view === "structure" && activeStage ? (
+        <div className="phase-pager">
+          <button
+            className="phase-arrow"
+            disabled={!previousStage}
+            onClick={() => setActiveStageIndex((index) => Math.max(0, index - 1))}
+            type="button"
+          >
+            {"<"}
+          </button>
+          <div>
+            <p className="badge badge-live">{activeStage.label}</p>
+            <h2>{activeStage.title}</h2>
+          </div>
+          <button
+            className="phase-arrow"
+            disabled={!nextStage}
+            onClick={() =>
+              setActiveStageIndex((index) => Math.min(stages.length - 1, index + 1))
+            }
+            type="button"
+          >
+            {">"}
+          </button>
+        </div>
+      ) : null}
+
+      {view === "structure" && activeStage?.kind === "groups" && activeGroup ? (
         <div className="group-browser">
           <nav aria-label="Groupes" className="group-nav">
             {groupSections.map((section) => (
@@ -275,7 +409,7 @@ export function PredictionSchedule({ matches, slug }: PredictionScheduleProps) {
         </div>
       ) : null}
 
-      {activeStage.kind === "phase" ? (
+      {view === "structure" && activeStage?.kind === "phase" ? (
         <div className="phase-panel">
           <div className="section-heading">
             <div>
