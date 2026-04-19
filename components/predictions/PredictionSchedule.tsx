@@ -234,6 +234,20 @@ function getChronologicalSections<TMatch extends ScheduleMatch>(matches: TMatch[
   return Array.from(sections.values());
 }
 
+function getDefaultChronologicalSectionId<TMatch extends ScheduleMatch>(
+  sections: ChronologicalSection<TMatch>[],
+) {
+  const now = Date.now();
+
+  return (
+    sections.find((section) =>
+      section.matches.some((match) => new Date(match.kickoffAt).getTime() >= now),
+    )?.id ??
+    sections[sections.length - 1]?.id ??
+    ""
+  );
+}
+
 export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
   groupHeading,
   matches,
@@ -303,11 +317,11 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
     () => getChronologicalSections(matches),
     [matches],
   );
-  const [view, setView] = useState<ScheduleView>("structure");
+  const [view, setView] = useState<ScheduleView>("chronology");
   const [activeStageIndex, setActiveStageIndex] = useState(0);
   const [activeGroupId, setActiveGroupId] = useState(groupSections[0]?.id ?? "");
   const [activeDayId, setActiveDayId] = useState(
-    chronologicalSections[0]?.id ?? "",
+    getDefaultChronologicalSectionId(chronologicalSections),
   );
   const activeStage = stages[activeStageIndex] ?? stages[0];
   const activeGroup =
