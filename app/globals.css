@@ -658,6 +658,51 @@
     @apply min-w-0 truncate text-2xl font-black text-foreground;
   }
 
+  .leaderboard-rules {
+    @apply mb-5 grid gap-3 rounded-lg border border-line bg-surface p-4;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--card) 18%, white), white 48%),
+      var(--surface);
+    box-shadow: 0 14px 34px color-mix(in srgb, var(--foreground) 7%, transparent);
+    grid-template-columns: minmax(0, 1.15fr) repeat(3, minmax(130px, 0.8fr));
+  }
+
+  .leaderboard-rules > div:first-child {
+    @apply grid content-center gap-1;
+  }
+
+  .leaderboard-rules > div:first-child span {
+    @apply text-xs font-black uppercase tracking-normal text-muted;
+  }
+
+  .leaderboard-rules > div:first-child strong {
+    @apply text-lg font-black leading-tight text-foreground;
+  }
+
+  .leaderboard-rule {
+    @apply grid gap-1 rounded-lg border border-line bg-white p-3;
+  }
+
+  .leaderboard-rule strong {
+    @apply text-2xl font-black leading-none text-pitch-strong;
+  }
+
+  .leaderboard-rule:nth-child(2) strong {
+    color: var(--navy);
+  }
+
+  .leaderboard-rule:nth-child(3) strong {
+    color: var(--pitch-strong);
+  }
+
+  .leaderboard-rule:nth-child(4) strong {
+    color: var(--coral);
+  }
+
+  .leaderboard-rule span {
+    @apply text-sm font-bold text-muted;
+  }
+
   .leaderboard-table-wrap {
     @apply overflow-x-auto rounded-lg border border-line bg-surface;
   }
@@ -798,6 +843,10 @@
 
   @media (max-width: 760px) {
     .leaderboard-summary {
+      grid-template-columns: 1fr;
+    }
+
+    .leaderboard-rules {
       grid-template-columns: 1fr;
     }
 

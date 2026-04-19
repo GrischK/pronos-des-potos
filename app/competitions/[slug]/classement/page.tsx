@@ -28,7 +28,7 @@ export default async function ClassementPage({ params }: ClassementPageProps) {
       <PageHeader
         eyebrow={competition.kind}
         title={`Classement - ${competition.name}`}
-        description="Les points sont calculés sur les matchs terminés avec score officiel."
+        description="Le live s’emballe à chaque but. Le classement officiel tranche."
       />
 
       <section className="page-section">

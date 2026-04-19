@@ -62,6 +62,31 @@ function LeaderboardTable({ snapshot }: { snapshot: LeaderboardSnapshot }) {
   );
 }
 
+function LeaderboardRulesCard({ isLive }: { isLive: boolean }) {
+  const rules = [
+    { points: "1 pt", label: "Bon résultat" },
+    { points: "3 pts", label: "Score exact" },
+    { points: "4 pts", label: "Score exact unique" },
+  ];
+
+  return (
+    <div className="leaderboard-rules" aria-label="Barème des points">
+      <div>
+        <strong>Barème</strong>
+        {/*<strong>*/}
+        {/*  {isLive ? "Même règle, scores provisoires" : "Matchs terminés seulement"}*/}
+        {/*</strong>*/}
+      </div>
+      {rules.map((rule) => (
+        <div className="leaderboard-rule" key={rule.label}>
+          <strong>{rule.points}</strong>
+          <span>{rule.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function LeaderboardTabs({ leaderboard }: LeaderboardTabsProps) {
   const [mode, setMode] = useState<LeaderboardMode>("official");
   const snapshot = leaderboard[mode];
@@ -111,16 +136,18 @@ export function LeaderboardTabs({ leaderboard }: LeaderboardTabsProps) {
         <div className="section-heading">
           <div>
             <p className={isLive ? "badge badge-warning" : "badge badge-live"}>
-              {isLive ? "Live provisoire" : "Points"}
+              {isLive ? "Live provisoire" : "Officiel"}
             </p>
-            <h2>{isLive ? "Classement live" : "Classement officiel"}</h2>
+            {/*<h2>{isLive ? "Classement live" : "Classement officiel"}</h2>*/}
           </div>
           <p>
             {isLive
               ? "Basé sur les matchs terminés et les scores live en cours."
-              : "1 pt bon résultat, 3 pts score exact, 4 pts score exact unique."}
+              : "Basé uniquement sur les matchs terminés."}
           </p>
         </div>
+
+        <LeaderboardRulesCard isLive={isLive} />
 
         <LeaderboardTable snapshot={snapshot} />
       </section>
