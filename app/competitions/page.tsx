@@ -29,8 +29,8 @@ export default async function CompetitionsPage() {
     <main className="page-shell">
       <PageHeader
         eyebrow="Compétitions"
-        title="Choisis le tournoi."
-        description="Chaque Euro, Coupe du monde ou tournoi garde ses matchs, ses pronos et son vainqueur."
+        title="Choisis ton terrain de jeu."
+        description="Retrouve tes tournois, pose tes prochains pronos et surveille les classements quand les scores tombent."
       />
 
       <section className="page-section">
