@@ -248,6 +248,48 @@ function getDefaultChronologicalSectionId<TMatch extends ScheduleMatch>(
   );
 }
 
+function PendingPredictionPanel({
+  matches,
+  slug,
+}: {
+  matches: PredictionMatch[];
+  slug: string;
+}) {
+  const pendingMatches = sortMatchesByKickoff(
+    matches.filter((match) => match.canPredict && !match.prediction),
+  );
+
+  if (pendingMatches.length === 0) {
+    return (
+      <div className="pending-predictions-panel pending-predictions-panel-done">
+        <p className="badge badge-live">Pronos à poser</p>
+        <strong>Tout est à jour.</strong>
+        <span>Aucun match ouvert n'attend ton score.</span>
+      </div>
+    );
+  }
+
+  return (
+    <details className="pending-predictions-panel">
+      <summary>
+        <span>
+          <span className="badge badge-warning">Pronos à poser</span>
+          <strong>
+            {pendingMatches.length} match{pendingMatches.length > 1 ? "s" : ""}
+          </strong>
+        </span>
+        <span className="pending-predictions-summary-action">Ouvrir</span>
+      </summary>
+
+      <div className="pending-predictions-list">
+        {pendingMatches.map((match) => (
+          <PredictionMatchForm key={`pending-${match.id}`} match={match} slug={slug} />
+        ))}
+      </div>
+    </details>
+  );
+}
+
 export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
   groupHeading,
   matches,
@@ -482,13 +524,16 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
 
 export function PredictionSchedule({ matches, slug }: PredictionScheduleProps) {
   return (
-    <PredictionScheduleBrowser
-      groupHeading="Mes scores"
-      matches={matches}
-      phaseHeading="Mes scores"
-      renderMatch={(match) => (
-        <PredictionMatchForm key={match.id} match={match} slug={slug} />
-      )}
-    />
+    <>
+      <PendingPredictionPanel matches={matches} slug={slug} />
+      <PredictionScheduleBrowser
+        groupHeading="Mes scores"
+        matches={matches}
+        phaseHeading="Mes scores"
+        renderMatch={(match) => (
+          <PredictionMatchForm key={match.id} match={match} slug={slug} />
+        )}
+      />
+    </>
   );
 }

@@ -615,6 +615,58 @@
     @apply grid gap-5;
   }
 
+  .pending-predictions-panel {
+    @apply mb-5 rounded-lg border border-line bg-surface p-3;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--card) 14%, white), white 48%),
+      var(--surface);
+    box-shadow: 0 12px 30px color-mix(in srgb, var(--foreground) 6%, transparent);
+  }
+
+  .pending-predictions-panel summary {
+    @apply flex cursor-pointer list-none items-center justify-between gap-4;
+  }
+
+  .pending-predictions-panel summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .pending-predictions-panel summary > span:first-child {
+    @apply flex min-w-0 flex-wrap items-center gap-3;
+  }
+
+  .pending-predictions-panel summary strong {
+    @apply text-lg font-black text-foreground;
+  }
+
+  .pending-predictions-summary-action {
+    @apply shrink-0 rounded-lg bg-foreground px-3 py-2 text-sm font-black text-surface;
+  }
+
+  .pending-predictions-panel[open] .pending-predictions-summary-action {
+    @apply bg-surface-alt text-foreground;
+  }
+
+  .pending-predictions-list {
+    @apply mt-3 grid max-h-[620px] gap-3 overflow-y-auto pr-1;
+  }
+
+  .pending-predictions-list .prediction-row {
+    @apply p-3;
+  }
+
+  .pending-predictions-panel-done {
+    @apply grid gap-1;
+  }
+
+  .pending-predictions-panel-done strong {
+    @apply text-lg font-black text-foreground;
+  }
+
+  .pending-predictions-panel-done span {
+    @apply text-sm font-bold text-muted;
+  }
+
   .schedule-view-switch {
     @apply flex w-fit flex-wrap gap-2 rounded-lg border border-line bg-surface p-1;
   }
