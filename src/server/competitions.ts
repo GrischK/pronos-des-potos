@@ -1,6 +1,10 @@
 import { unstable_cache } from "next/cache";
 
 import { getCurrentUser } from "@/src/auth/current-user";
+import {
+  competitionStageOrder,
+  getCompetitionStageLabel,
+} from "@/src/domain/competition-stage";
 import { computePredictionPoints } from "@/src/domain/scoring";
 
 const WORLD_CUP_2026_GROUPS = [
@@ -234,30 +238,6 @@ function buildWorldCup2026Groups(matches: CompetitionMatch[]): CompetitionGroup[
   });
 }
 
-const PHASE_LABELS: Record<string, string> = {
-  GROUP_STAGE: "Phase de groupes",
-  LEAGUE_STAGE: "Phase de ligue",
-  PLAYOFFS: "Barrages",
-  LAST_32: "16es de finale",
-  LAST_16: "8es de finale",
-  QUARTER_FINALS: "Quarts de finale",
-  SEMI_FINALS: "Demi-finales",
-  THIRD_PLACE: "Match pour la 3e place",
-  FINAL: "Finale",
-};
-
-const PHASE_ORDER = [
-  "GROUP_STAGE",
-  "LEAGUE_STAGE",
-  "PLAYOFFS",
-  "LAST_32",
-  "LAST_16",
-  "QUARTER_FINALS",
-  "SEMI_FINALS",
-  "THIRD_PLACE",
-  "FINAL",
-];
-
 function serializeMatch(match: CompetitionMatch): CompetitionScheduleMatch {
   return {
     ...match,
@@ -265,15 +245,11 @@ function serializeMatch(match: CompetitionMatch): CompetitionScheduleMatch {
   };
 }
 
-function getStageLabel(stage: string) {
-  return PHASE_LABELS[stage] ?? stage.replace(/_/g, " ");
-}
-
 function buildCompetitionPhases(
   matches: CompetitionMatch[],
   excludedStages: string[] = [],
 ): CompetitionPhase[] {
-  const knownStages = new Set(PHASE_ORDER);
+  const knownStages = new Set(competitionStageOrder);
   const excludedStageSet = new Set(excludedStages);
   const extraStages = Array.from(
     new Set(
@@ -283,9 +259,9 @@ function buildCompetitionPhases(
     ),
   ).sort();
 
-  return [...PHASE_ORDER, ...extraStages]
+  return [...competitionStageOrder, ...extraStages]
     .map((stage) => ({
-      name: getStageLabel(stage),
+      name: getCompetitionStageLabel(stage),
       stage,
       matches: matches
         .filter((match) => match.stage === stage && !excludedStageSet.has(stage))
@@ -324,6 +300,7 @@ export async function getCompetitionsOverview() {
       id: true,
       name: true,
       slug: true,
+      kind: true,
       status: true,
       emblemUrl: true,
       matches: {
@@ -481,6 +458,7 @@ export async function getCompetitionsOverview() {
         id: competition.id,
         name: competition.name,
         slug: competition.slug,
+        kind: competition.kind,
         status: competition.status,
         emblemUrl: competition.emblemUrl,
         matchCount: competition._count.matches,

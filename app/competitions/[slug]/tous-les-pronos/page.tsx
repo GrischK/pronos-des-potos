@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { PageHeader } from "@/components/PageHeader";
 import { AllPredictionsSchedule } from "@/components/predictions/AllPredictionsSchedule";
+import { getCompetitionKindLabel } from "@/src/domain/competition-kind";
 import { getAllPredictionsPageData } from "@/src/server/all-predictions";
 
 export const dynamic = "force-dynamic";
@@ -28,7 +29,7 @@ export default async function TousLesPronosPage({
     <main className="page-shell">
       <AutoRefresh intervalMs={30000} />
       <PageHeader
-        eyebrow={competition.kind}
+        eyebrow={getCompetitionKindLabel(competition.kind)}
         title={`Tous les pronos - ${competition.name}`}
         description="Compare les scores des potos une fois les matchs verrouillés."
       />

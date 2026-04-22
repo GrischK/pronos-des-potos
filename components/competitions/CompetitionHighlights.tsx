@@ -2,6 +2,7 @@ import type {
   CompetitionHighlightMatch,
   CompetitionHighlightsData,
 } from "@/src/server/competition-highlights";
+import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
 
 type CompetitionHighlightsProps = {
   highlights: CompetitionHighlightsData;
@@ -49,7 +50,7 @@ function MatchCard({ match }: { match: CompetitionHighlightMatch }) {
     <article className="highlight-match-card">
       <div className="match-meta">
         <span>{formatKickoffAt(match.kickoffAt)}</span>
-        <span>{match.stage}</span>
+        <span>{getCompetitionStageLabel(match.stage)}</span>
         <span>{match.status}</span>
       </div>
 
@@ -125,10 +126,8 @@ function HighlightSection({
     <section className="highlight-panel">
       <div className="section-heading">
         <div>
-          <p className="badge badge-live">À suivre</p>
-          <h2>{title}</h2>
+          <h2 className="badge badge-live">{title}</h2>
         </div>
-        <p>{matches.length} matchs.</p>
       </div>
 
       {matches.length === 0 ? (

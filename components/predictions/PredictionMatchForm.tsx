@@ -6,6 +6,7 @@ import {
   savePredictionAction,
   type PredictionActionState,
 } from "@/src/server/prediction-actions";
+import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
 import type { PredictionMatch } from "@/src/server/predictions";
 
 type PredictionMatchFormProps = {
@@ -88,7 +89,7 @@ export function PredictionMatchForm({ match, slug }: PredictionMatchFormProps) {
 
       <div className="match-meta">
         <span>{formatKickoffAt(match.kickoffAt)}</span>
-        <span>{match.stage}</span>
+        <span>{getCompetitionStageLabel(match.stage)}</span>
         {lockReason ? <span>{lockReason}</span> : null}
       </div>
 

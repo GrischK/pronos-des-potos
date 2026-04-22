@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { PageHeader } from "@/components/PageHeader";
 import { PredictionSchedule } from "@/components/predictions/PredictionSchedule";
+import { getCompetitionKindLabel } from "@/src/domain/competition-kind";
 import { getPredictionPageData } from "@/src/server/predictions";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +27,7 @@ export default async function PronosticsPage({ params }: PronosticsPageProps) {
     <main className="page-shell">
       <AutoRefresh intervalMs={30000} />
       <PageHeader
-        eyebrow={competition.kind}
+        eyebrow={getCompetitionKindLabel(competition.kind)}
         title={`Mes pronos - ${competition.name}`}
         description={
           competition.isOpen

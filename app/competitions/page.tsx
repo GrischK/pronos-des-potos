@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
+import { competitionKindLabels } from "@/src/domain/competition-kind";
 import {
   getCompetitionsOverview,
   getNextPredictionOpportunity,
@@ -23,6 +24,13 @@ const statusBadgeClasses = {
   LIVE: "badge badge-live",
   FINISHED: "badge badge-warning",
   ARCHIVED: "badge badge-warning",
+} as const;
+
+const competitionCardKindClasses = {
+  WORLD_CUP: "competition-card--world-cup",
+  EURO: "competition-card--euro",
+  CHAMPIONS_LEAGUE: "competition-card--champions-league",
+  OTHER: "competition-card--other",
 } as const;
 
 const kickoffFormatter = new Intl.DateTimeFormat("fr-FR", {
@@ -117,13 +125,15 @@ export default async function CompetitionsPage() {
           <div className="content-grid">
             {competitions.map((competition) => (
               <Link
-                className="card competition-card"
+                className={`card competition-card ${competitionCardKindClasses[competition.kind]}`}
                 href={`/competitions/${competition.slug}`}
                 key={competition.id}
               >
-                <p className={statusBadgeClasses[competition.status]}>
-                  {statusLabels[competition.status]}
-                </p>
+                <div className="competition-card-badges">
+                  <p className={statusBadgeClasses[competition.status]}>
+                    {statusLabels[competition.status]}
+                  </p>
+                </div>
                 <div className="competition-card-title">
                   {competition.emblemUrl ? (
                     <img
@@ -164,7 +174,7 @@ export default async function CompetitionsPage() {
                 <div className="competition-card-stats">
                   <span>
                     <strong>{competition.remainingMatchCount}</strong>
-                    Restants
+                    Matchs restants
                   </span>
                   <span>
                     <strong>{competition.missingPredictionCount}</strong>

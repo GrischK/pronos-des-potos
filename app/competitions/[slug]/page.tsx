@@ -5,6 +5,7 @@ import { AutoRefresh } from "@/components/AutoRefresh";
 import { CompetitionGroups } from "@/components/competitions/CompetitionGroups";
 import { CompetitionHighlights } from "@/components/competitions/CompetitionHighlights";
 import { PageHeader } from "@/components/PageHeader";
+import { getCompetitionKindLabel } from "@/src/domain/competition-kind";
 import { getCompetitionHighlights } from "@/src/server/competition-highlights";
 import { getCompetitionBySlug } from "@/src/server/competitions";
 
@@ -31,7 +32,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
     <main className="page-shell">
       <AutoRefresh intervalMs={60000} />
       <PageHeader
-        eyebrow={competition.kind}
+        eyebrow={getCompetitionKindLabel(competition.kind)}
         emblemUrl={competition.emblemUrl}
         title={competition.name}
         description="Retrouve les pronos, les scores et le classement de cette compétition."
@@ -68,17 +69,6 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
       </section>
 
       <section className="page-section">
-        <div className="section-heading">
-          <div>
-            <p className="badge badge-live">Matchs importés</p>
-            <h2>Calendrier retourné par l'API</h2>
-          </div>
-          <p>
-            {competition.matchCount} matchs stockés avec les logos
-            disponibles depuis la source de données.
-          </p>
-        </div>
-
         {competition.groups.length === 0 && competition.phases.length === 0 ? (
           <p>Aucun match importé pour cette compétition.</p>
         ) : (

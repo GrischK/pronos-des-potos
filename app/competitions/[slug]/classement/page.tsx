@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { LeaderboardTabs } from "@/components/leaderboard/LeaderboardTabs";
 import { PageHeader } from "@/components/PageHeader";
+import { getCompetitionKindLabel } from "@/src/domain/competition-kind";
 import { getLeaderboardData } from "@/src/server/leaderboard";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +27,7 @@ export default async function ClassementPage({ params }: ClassementPageProps) {
     <main className="page-shell">
       <AutoRefresh intervalMs={30000} />
       <PageHeader
-        eyebrow={competition.kind}
+        eyebrow={getCompetitionKindLabel(competition.kind)}
         title={`Classement - ${competition.name}`}
         description="Le live s’emballe à chaque but. Le classement officiel tranche."
       />
