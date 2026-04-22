@@ -5,6 +5,10 @@ import { AutoRefresh } from "@/components/AutoRefresh";
 import { CompetitionGroups } from "@/components/competitions/CompetitionGroups";
 import { CompetitionHighlights } from "@/components/competitions/CompetitionHighlights";
 import { PageHeader } from "@/components/PageHeader";
+import {
+  getCompetitionHostCountries,
+  getCompetitionHostLabel,
+} from "@/src/domain/competition-hosts";
 import { getCompetitionKindLabel } from "@/src/domain/competition-kind";
 import { getCompetitionHighlights } from "@/src/server/competition-highlights";
 import { getCompetitionBySlug } from "@/src/server/competitions";
@@ -28,6 +32,8 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
     notFound();
   }
 
+  const hostCountries = getCompetitionHostCountries(competition);
+
   return (
     <main className="page-shell">
       <AutoRefresh intervalMs={60000} />
@@ -37,6 +43,26 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
         title={competition.name}
         description="Retrouve les pronos, les scores et le classement de cette compétition."
       />
+      {hostCountries.length > 0 ? (
+        <div className="host-countries" aria-label="Pays hôtes">
+          <span className="host-countries-label">
+            {getCompetitionHostLabel(competition, hostCountries)}
+          </span>
+          <div className="host-country-list">
+            {hostCountries.map((country) => (
+              <span className="host-country" key={country.name}>
+                <img
+                  alt=""
+                  className="host-country-flag"
+                  loading="lazy"
+                  src={country.flagUrl}
+                />
+                <span>{country.name}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <section className="page-section">
         <div className="content-grid">
