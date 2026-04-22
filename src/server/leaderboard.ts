@@ -19,6 +19,7 @@ export type LeaderboardData = {
   name: string;
   slug: string;
   kind: string;
+  emblemUrl: string | null;
   participantCount: number;
   official: LeaderboardSnapshot;
   live: LeaderboardSnapshot;
@@ -160,6 +161,7 @@ export async function getLeaderboardData(
       name: true,
       slug: true,
       kind: true,
+      emblemUrl: true,
       players: {
         select: {
           user: {
@@ -223,6 +225,7 @@ export async function getLeaderboardData(
     name: competition.name,
     slug: competition.slug,
     kind: competition.kind,
+    emblemUrl: competition.emblemUrl,
     participantCount: competition.players.length,
     official: buildLeaderboardSnapshot(competition.players, officialMatches),
     live: buildLeaderboardSnapshot(competition.players, liveMatches),

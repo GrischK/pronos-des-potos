@@ -30,6 +30,7 @@ export default async function TousLesPronosPage({
       <AutoRefresh intervalMs={30000} />
       <PageHeader
         eyebrow={getCompetitionKindLabel(competition.kind)}
+        emblemUrl={competition.emblemUrl}
         title={`Tous les pronos - ${competition.name}`}
         description="Compare les scores des potos une fois les matchs verrouillés."
       />

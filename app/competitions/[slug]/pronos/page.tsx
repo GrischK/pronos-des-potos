@@ -28,6 +28,7 @@ export default async function PronosticsPage({ params }: PronosticsPageProps) {
       <AutoRefresh intervalMs={30000} />
       <PageHeader
         eyebrow={getCompetitionKindLabel(competition.kind)}
+        emblemUrl={competition.emblemUrl}
         title={`Mes pronos - ${competition.name}`}
         description={
           competition.isOpen

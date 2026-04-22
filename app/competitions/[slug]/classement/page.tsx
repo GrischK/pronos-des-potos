@@ -28,6 +28,7 @@ export default async function ClassementPage({ params }: ClassementPageProps) {
       <AutoRefresh intervalMs={30000} />
       <PageHeader
         eyebrow={getCompetitionKindLabel(competition.kind)}
+        emblemUrl={competition.emblemUrl}
         title={`Classement - ${competition.name}`}
         description="Le live s’emballe à chaque but. Le classement officiel tranche."
       />

@@ -221,7 +221,7 @@
   }
 
   .page-title-emblem {
-    @apply h-14 w-14 p-2;
+    @apply h-16 w-16 border-0 bg-transparent p-0;
   }
 
   .lead {

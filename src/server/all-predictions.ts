@@ -53,6 +53,7 @@ export async function getAllPredictionsPageData(slug: string) {
       name: true,
       slug: true,
       kind: true,
+      emblemUrl: true,
       matches: {
         orderBy: [{ kickoffAt: "asc" }, { createdAt: "asc" }],
         select: {
@@ -107,6 +108,7 @@ export async function getAllPredictionsPageData(slug: string) {
     name: competition.name,
     slug: competition.slug,
     kind: competition.kind,
+    emblemUrl: competition.emblemUrl,
     matches: competition.matches.map((match): PublicPredictionMatch => ({
       id: match.id,
       kickoffAt: match.kickoffAt.toISOString(),

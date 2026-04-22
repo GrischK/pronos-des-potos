@@ -44,6 +44,7 @@ export async function getPredictionPageData(slug: string) {
       name: true,
       slug: true,
       kind: true,
+      emblemUrl: true,
       status: true,
       matches: {
         orderBy: [{ kickoffAt: "asc" }, { createdAt: "asc" }],
@@ -95,6 +96,7 @@ export async function getPredictionPageData(slug: string) {
     name: competition.name,
     slug: competition.slug,
     kind: competition.kind,
+    emblemUrl: competition.emblemUrl,
     status: competition.status,
     isOpen: competition.status === "OPEN",
     matches: competition.matches.map((match): PredictionMatch => ({
