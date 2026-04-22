@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
+import { competitionKindLabels } from "@/src/domain/competition-kind";
 import {
   getCompetitionsOverview,
   getNextPredictionOpportunity,
@@ -23,13 +24,6 @@ const statusBadgeClasses = {
   LIVE: "badge badge-live",
   FINISHED: "badge badge-warning",
   ARCHIVED: "badge badge-warning",
-} as const;
-
-const kindLabels = {
-  WORLD_CUP: "Coupe du monde",
-  EURO: "Euro",
-  CHAMPIONS_LEAGUE: "Champions League",
-  OTHER: "Autre",
 } as const;
 
 const competitionCardKindClasses = {
@@ -139,9 +133,6 @@ export default async function CompetitionsPage() {
                   <p className={statusBadgeClasses[competition.status]}>
                     {statusLabels[competition.status]}
                   </p>
-                  <p className="badge competition-kind-badge">
-                    {kindLabels[competition.kind]}
-                  </p>
                 </div>
                 <div className="competition-card-title">
                   {competition.emblemUrl ? (
@@ -183,7 +174,7 @@ export default async function CompetitionsPage() {
                 <div className="competition-card-stats">
                   <span>
                     <strong>{competition.remainingMatchCount}</strong>
-                    Restants
+                    Matchs restants
                   </span>
                   <span>
                     <strong>{competition.missingPredictionCount}</strong>

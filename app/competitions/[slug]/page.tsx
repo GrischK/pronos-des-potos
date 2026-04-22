@@ -5,6 +5,7 @@ import { AutoRefresh } from "@/components/AutoRefresh";
 import { CompetitionGroups } from "@/components/competitions/CompetitionGroups";
 import { CompetitionHighlights } from "@/components/competitions/CompetitionHighlights";
 import { PageHeader } from "@/components/PageHeader";
+import { getCompetitionKindLabel } from "@/src/domain/competition-kind";
 import { getCompetitionHighlights } from "@/src/server/competition-highlights";
 import { getCompetitionBySlug } from "@/src/server/competitions";
 
@@ -31,7 +32,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
     <main className="page-shell">
       <AutoRefresh intervalMs={60000} />
       <PageHeader
-        eyebrow={competition.kind}
+        eyebrow={getCompetitionKindLabel(competition.kind)}
         emblemUrl={competition.emblemUrl}
         title={competition.name}
         description="Retrouve les pronos, les scores et le classement de cette compétition."
