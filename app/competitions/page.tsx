@@ -129,11 +129,6 @@ export default async function CompetitionsPage() {
                 href={`/competitions/${competition.slug}`}
                 key={competition.id}
               >
-                <div className="competition-card-badges">
-                  <p className={statusBadgeClasses[competition.status]}>
-                    {statusLabels[competition.status]}
-                  </p>
-                </div>
                 <div className="competition-card-title">
                   {competition.emblemUrl ? (
                     <img
@@ -144,6 +139,11 @@ export default async function CompetitionsPage() {
                     />
                   ) : null}
                   <h2>{competition.name}</h2>
+                </div>
+                <div className="competition-card-badges">
+                  <p className={statusBadgeClasses[competition.status]}>
+                    {statusLabels[competition.status]}
+                  </p>
                 </div>
                 <div className="competition-card-summary">
                   <span>

@@ -538,11 +538,15 @@
   }
 
   .competition-card-title {
-    @apply flex min-w-0 items-center gap-3;
+    @apply grid min-w-0 justify-items-start gap-2.5;
   }
 
   .competition-card-title h2 {
     @apply mb-0 min-w-0;
+  }
+
+  .competition-card-title .competition-emblem {
+    @apply h-28 w-28 border-0 bg-transparent p-0;
   }
 
   .competition-card-summary {
