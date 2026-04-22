@@ -4,6 +4,7 @@ import { LogoutButton } from "@/components/LogoutButton";
 
 const navItems = [
   { href: "/competitions", label: "Compétitions" },
+  { href: "/mon-compte", label: "Mon compte" },
 ];
 
 type AppShellProps = {

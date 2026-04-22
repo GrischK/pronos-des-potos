@@ -339,6 +339,39 @@
     @apply mt-6 grid gap-4;
   }
 
+  .account-grid {
+    @apply grid gap-4;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .account-card {
+    @apply min-h-0;
+  }
+
+  .account-profile-card {
+    @apply flex items-center gap-4;
+  }
+
+  .account-profile-card h2 {
+    @apply mb-1;
+  }
+
+  .account-avatar {
+    @apply grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-lg bg-foreground text-4xl font-black text-surface;
+  }
+
+  .account-avatar img {
+    @apply h-full w-full object-cover;
+  }
+
+  .account-form {
+    @apply mt-5 grid gap-3.5;
+  }
+
+  .form-hint {
+    @apply m-0 text-sm font-bold text-muted;
+  }
+
   .form-grid {
     @apply grid gap-3.5;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
