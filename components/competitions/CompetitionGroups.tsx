@@ -134,7 +134,6 @@ function MatchList({ matches }: { matches: CompetitionScheduleMatch[] }) {
             <div className="match-meta">
               <span>{formatKickoffAt(match.kickoffAt)}</span>
               <span>{match.stage}</span>
-              {match.externalMatchId ? <span>API #{match.externalMatchId}</span> : null}
             </div>
 
             <div className="match-teams">
@@ -257,9 +256,7 @@ export function CompetitionGroups({ groups, phases }: CompetitionGroupsProps) {
             <div className="section-heading">
               <div>
                 <p className="badge badge-live">{activeGroup.name}</p>
-                <h2>Classement et matchs</h2>
               </div>
-              <p>{activeGroup.matches.length} matchs importés sur 6 attendus.</p>
             </div>
 
             <div className="standings-table-wrap">
@@ -313,9 +310,7 @@ export function CompetitionGroups({ groups, phases }: CompetitionGroupsProps) {
           <div className="section-heading">
             <div>
               <p className="badge badge-live">{activeStage.title}</p>
-              <h2>Matchs</h2>
             </div>
-            <p>{activeStage.phase.matches.length} matchs importés.</p>
           </div>
           {getPhaseMatchSections(activeStage.phase).map((section) => (
             <div className="match-subsection" key={section.id}>

@@ -417,10 +417,9 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
           <div className="group-panel">
             <div className="section-heading">
               <div>
-                <p className="badge badge-live">Chronologie</p>
-                <h2>{activeDay.title}</h2>
+                <p className="badge badge-live">{activeDay.title}</p>
               </div>
-              <p>{activeDay.matches.length} matchs.</p>
+              <p className="badge badge-warning mt-2">{activeDay.matches.length} matchs</p>
             </div>
 
             <div className="prediction-list">
@@ -479,9 +478,7 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
             <div className="section-heading">
               <div>
                 <p className="badge badge-live">{activeGroup.title}</p>
-                <h2>{groupHeading}</h2>
               </div>
-              <p>{activeGroup.matches.length} matchs.</p>
             </div>
 
             <div className="prediction-list">

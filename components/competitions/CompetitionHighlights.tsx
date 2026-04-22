@@ -125,10 +125,8 @@ function HighlightSection({
     <section className="highlight-panel">
       <div className="section-heading">
         <div>
-          <p className="badge badge-live">À suivre</p>
-          <h2>{title}</h2>
+          <h2 className="badge badge-live">{title}</h2>
         </div>
-        <p>{matches.length} matchs.</p>
       </div>
 
       {matches.length === 0 ? (

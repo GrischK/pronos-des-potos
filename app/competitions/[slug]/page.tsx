@@ -69,17 +69,6 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
       </section>
 
       <section className="page-section">
-        <div className="section-heading">
-          <div>
-            <p className="badge badge-live">Matchs importés</p>
-            <h2>Calendrier retourné par l'API</h2>
-          </div>
-          <p>
-            {competition.matchCount} matchs stockés avec les logos
-            disponibles depuis la source de données.
-          </p>
-        </div>
-
         {competition.groups.length === 0 && competition.phases.length === 0 ? (
           <p>Aucun match importé pour cette compétition.</p>
         ) : (
