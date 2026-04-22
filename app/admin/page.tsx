@@ -7,6 +7,7 @@ import {
   renameCompetitionAction,
   syncCompetitionAction,
   toggleCompetitionOpenAction,
+  updateCompetitionKindAction,
 } from "@/src/server/admin-actions";
 import { getAdminCompetitions } from "@/src/server/admin";
 
@@ -83,6 +84,28 @@ export default async function AdminPage() {
                       </label>
                       <button className="btn btn-secondary" type="submit">
                         Renommer
+                      </button>
+                    </form>
+                    <form
+                      action={updateCompetitionKindAction}
+                      className="admin-rename-form"
+                    >
+                      <input
+                        name="competitionId"
+                        type="hidden"
+                        value={competition.id}
+                      />
+                      <label className="field">
+                        <span>Type de compétition</span>
+                        <select name="kind" required defaultValue={competition.kind}>
+                          <option value="WORLD_CUP">Coupe du monde</option>
+                          <option value="EURO">Euro</option>
+                          <option value="CHAMPIONS_LEAGUE">Champions League</option>
+                          <option value="OTHER">Autre</option>
+                        </select>
+                      </label>
+                      <button className="btn btn-secondary" type="submit">
+                        Modifier
                       </button>
                     </form>
                     <div className="admin-item-actions">

@@ -324,6 +324,7 @@ export async function getCompetitionsOverview() {
       id: true,
       name: true,
       slug: true,
+      kind: true,
       status: true,
       emblemUrl: true,
       matches: {
@@ -481,6 +482,7 @@ export async function getCompetitionsOverview() {
         id: competition.id,
         name: competition.name,
         slug: competition.slug,
+        kind: competition.kind,
         status: competition.status,
         emblemUrl: competition.emblemUrl,
         matchCount: competition._count.matches,

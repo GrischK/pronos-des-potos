@@ -432,6 +432,10 @@
     transform: translateY(-2px);
   }
 
+  .card:hover.competition-card--champions-league {
+    border-color: var(--sky);
+  }
+
   .card h2,
   .card h3,
   .empty-state h2 {
@@ -467,6 +471,70 @@
   .competition-card,
   .action-card {
     @apply grid content-between gap-[18px];
+  }
+
+  .competition-card {
+    border-top: 4px solid var(--pitch);
+    background:
+      radial-gradient(
+        circle at 92% 18%,
+        color-mix(in srgb, var(--sky) 18%, transparent) 0 18%,
+        transparent 38%
+      ),
+      linear-gradient(135deg, color-mix(in srgb, var(--pitch) 10%, white), white 48%),
+      var(--surface);
+  }
+
+  .competition-card--world-cup {
+    border-top-color: var(--pitch);
+    background:
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--pitch) 14%, transparent) 1px,
+        transparent 1px 18px
+      ),
+      linear-gradient(
+        0deg,
+        color-mix(in srgb, var(--sky) 16%, transparent) 1px,
+        transparent 1px 18px
+      ),
+      linear-gradient(135deg, color-mix(in srgb, var(--mint) 18%, white), white 52%),
+      var(--surface);
+  }
+
+  .competition-card--euro {
+    border-top-color: var(--sky);
+    background:
+      radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--card) 58%, white) 0 2px, transparent 3px),
+      radial-gradient(circle at 90% 30%, color-mix(in srgb, var(--card) 44%, white) 0 1.5px, transparent 3px),
+      radial-gradient(circle at 74% 34%, color-mix(in srgb, var(--card) 48%, white) 0 1.5px, transparent 3px),
+      linear-gradient(135deg, color-mix(in srgb, var(--sky) 24%, white), white 54%),
+      var(--surface);
+  }
+
+  .competition-card--champions-league {
+    border-top-color: var(--navy);
+    background:
+      radial-gradient(circle at 80% 18%, color-mix(in srgb, var(--sky) 64%, white) 0 2px, transparent 3px),
+      radial-gradient(circle at 91% 28%, color-mix(in srgb, var(--sky) 46%, white) 0 1.5px, transparent 3px),
+      linear-gradient(135deg, color-mix(in srgb, var(--navy) 15%, white), white 56%),
+      var(--surface);
+  }
+
+  .competition-card--other {
+    border-top-color: var(--card);
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--card) 14%, white), white 50%),
+      var(--surface);
+  }
+
+  .competition-card-badges {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .competition-kind-badge {
+    @apply bg-white;
+    border: 1px solid color-mix(in srgb, var(--foreground) 8%, var(--line));
   }
 
   .competition-card-title {

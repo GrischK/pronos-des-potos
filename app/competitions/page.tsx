@@ -25,6 +25,20 @@ const statusBadgeClasses = {
   ARCHIVED: "badge badge-warning",
 } as const;
 
+const kindLabels = {
+  WORLD_CUP: "Coupe du monde",
+  EURO: "Euro",
+  CHAMPIONS_LEAGUE: "Champions League",
+  OTHER: "Autre",
+} as const;
+
+const competitionCardKindClasses = {
+  WORLD_CUP: "competition-card--world-cup",
+  EURO: "competition-card--euro",
+  CHAMPIONS_LEAGUE: "competition-card--champions-league",
+  OTHER: "competition-card--other",
+} as const;
+
 const kickoffFormatter = new Intl.DateTimeFormat("fr-FR", {
   dateStyle: "medium",
   timeStyle: "short",
@@ -117,13 +131,18 @@ export default async function CompetitionsPage() {
           <div className="content-grid">
             {competitions.map((competition) => (
               <Link
-                className="card competition-card"
+                className={`card competition-card ${competitionCardKindClasses[competition.kind]}`}
                 href={`/competitions/${competition.slug}`}
                 key={competition.id}
               >
-                <p className={statusBadgeClasses[competition.status]}>
-                  {statusLabels[competition.status]}
-                </p>
+                <div className="competition-card-badges">
+                  <p className={statusBadgeClasses[competition.status]}>
+                    {statusLabels[competition.status]}
+                  </p>
+                  <p className="badge competition-kind-badge">
+                    {kindLabels[competition.kind]}
+                  </p>
+                </div>
                 <div className="competition-card-title">
                   {competition.emblemUrl ? (
                     <img

@@ -32,6 +32,11 @@ const renameCompetitionSchema = z.object({
   name: z.string().trim().min(3, "Nom de compétition trop court."),
 });
 
+const updateCompetitionKindSchema = z.object({
+  competitionId: z.string().min(1),
+  kind: z.enum(["WORLD_CUP", "EURO", "CHAMPIONS_LEAGUE", "OTHER"]),
+});
+
 function slugify(value: string) {
   return value
     .normalize("NFD")
@@ -361,6 +366,31 @@ export async function renameCompetitionAction(formData: FormData) {
     },
     data: {
       name: parsed.name,
+    },
+    select: {
+      slug: true,
+    },
+  });
+
+  updateTag("competitions");
+  updateTag("admin-competitions");
+  updateTag(`competition:${competition.slug}`);
+}
+
+export async function updateCompetitionKindAction(formData: FormData) {
+  const admin = await getCurrentAdmin();
+
+  if (!admin) {
+    throw new Error("Accès réservé aux admins.");
+  }
+
+  const parsed = updateCompetitionKindSchema.parse(Object.fromEntries(formData));
+  const competition = await prisma.competition.update({
+    where: {
+      id: parsed.competitionId,
+    },
+    data: {
+      kind: parsed.kind,
     },
     select: {
       slug: true,
