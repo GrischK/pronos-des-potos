@@ -2,6 +2,10 @@
 
 import { useMemo, useState } from "react";
 
+import {
+  getCompetitionStageLabel,
+  twoLeggedCompetitionStages,
+} from "@/src/domain/competition-stage";
 import type {
   CompetitionGroup,
   CompetitionPhase,
@@ -12,14 +16,6 @@ type CompetitionGroupsProps = {
   groups: CompetitionGroup[];
   phases: CompetitionPhase[];
 };
-
-const TWO_LEGGED_STAGES = new Set([
-  "PLAYOFFS",
-  "LAST_32",
-  "LAST_16",
-  "QUARTER_FINALS",
-  "SEMI_FINALS",
-]);
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   dateStyle: "medium",
@@ -94,7 +90,7 @@ function getPhaseMatchSections(phase: CompetitionPhase) {
   }
 
   if (
-    TWO_LEGGED_STAGES.has(phase.stage) &&
+    twoLeggedCompetitionStages.has(phase.stage) &&
     matches.length > 1 &&
     matches.length % 2 === 0
   ) {
@@ -133,7 +129,7 @@ function MatchList({ matches }: { matches: CompetitionScheduleMatch[] }) {
           <article className="match-row" key={match.id}>
             <div className="match-meta">
               <span>{formatKickoffAt(match.kickoffAt)}</span>
-              <span>{match.stage}</span>
+              <span>{getCompetitionStageLabel(match.stage)}</span>
             </div>
 
             <div className="match-teams">

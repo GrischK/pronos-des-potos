@@ -4,6 +4,11 @@ import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
 import { PredictionMatchForm } from "@/components/predictions/PredictionMatchForm";
+import {
+  competitionStageOrder,
+  getCompetitionStageLabel,
+  twoLeggedCompetitionStages,
+} from "@/src/domain/competition-stage";
 import type { PredictionMatch } from "@/src/server/predictions";
 
 type PredictionScheduleProps = {
@@ -70,38 +75,6 @@ const aliases: Record<string, string> = {
   "United States": "USA",
 };
 
-const phaseLabels: Record<string, string> = {
-  GROUP_STAGE: "Phase de groupes",
-  LEAGUE_STAGE: "Phase de ligue",
-  PLAYOFFS: "Barrages",
-  LAST_32: "16es de finale",
-  LAST_16: "8es de finale",
-  QUARTER_FINALS: "Quarts de finale",
-  SEMI_FINALS: "Demi-finales",
-  THIRD_PLACE: "Match pour la 3e place",
-  FINAL: "Finale",
-};
-
-const phaseOrder = [
-  "GROUP_STAGE",
-  "LEAGUE_STAGE",
-  "PLAYOFFS",
-  "LAST_32",
-  "LAST_16",
-  "QUARTER_FINALS",
-  "SEMI_FINALS",
-  "THIRD_PLACE",
-  "FINAL",
-];
-
-const twoLeggedStages = new Set([
-  "PLAYOFFS",
-  "LAST_32",
-  "LAST_16",
-  "QUARTER_FINALS",
-  "SEMI_FINALS",
-]);
-
 const dayKeyFormatter = new Intl.DateTimeFormat("fr-CA", {
   day: "2-digit",
   month: "2-digit",
@@ -118,10 +91,6 @@ const dayLabelFormatter = new Intl.DateTimeFormat("fr-FR", {
 
 function teamKey(name: string) {
   return (aliases[name] ?? name).toLowerCase().replace(/[^a-z0-9]+/g, "");
-}
-
-function getStageLabel(stage: string) {
-  return phaseLabels[stage] ?? stage.replace(/_/g, " ");
 }
 
 function sortMatchesByKickoff<TMatch extends ScheduleMatch>(matches: TMatch[]) {
@@ -159,7 +128,7 @@ function getPhaseMatchSections<TMatch extends ScheduleMatch>(
   }
 
   if (
-    twoLeggedStages.has(section.id) &&
+    twoLeggedCompetitionStages.has(section.id) &&
     matches.length > 1 &&
     matches.length % 2 === 0
   ) {
@@ -319,7 +288,7 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
     [matches],
   );
   const stages = useMemo(() => {
-    const knownStages = new Set(phaseOrder);
+    const knownStages = new Set(competitionStageOrder);
     const excludedStages = new Set(groupSections.length > 0 ? ["GROUP_STAGE"] : []);
     const extraStages = Array.from(
       new Set(
@@ -330,12 +299,12 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
           ),
       ),
     ).sort();
-    const phaseSections = [...phaseOrder, ...extraStages]
+    const phaseSections = [...competitionStageOrder, ...extraStages]
       .filter((stage) => !excludedStages.has(stage))
       .map((stage) => ({
         id: stage,
-        label: getStageLabel(stage),
-        title: getStageLabel(stage),
+        label: getCompetitionStageLabel(stage),
+        title: getCompetitionStageLabel(stage),
         kind: "phase" as const,
         matches: matches.filter((match) => match.stage === stage),
       }))

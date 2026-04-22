@@ -1,6 +1,7 @@
 "use client";
 
 import { PredictionScheduleBrowser } from "@/components/predictions/PredictionSchedule";
+import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
 import type { PublicPredictionMatch } from "@/src/server/all-predictions";
 
 type AllPredictionsScheduleProps = {
@@ -59,7 +60,7 @@ function AllPredictionsMatchCard({ match }: { match: PublicPredictionMatch }) {
     <article className="prediction-row">
       <div className="match-meta">
         <span>{formatKickoffAt(match.kickoffAt)}</span>
-        <span>{match.stage}</span>
+        <span>{getCompetitionStageLabel(match.stage)}</span>
         <span>{match.status}</span>
       </div>
 

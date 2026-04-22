@@ -2,6 +2,7 @@ import type {
   CompetitionHighlightMatch,
   CompetitionHighlightsData,
 } from "@/src/server/competition-highlights";
+import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
 
 type CompetitionHighlightsProps = {
   highlights: CompetitionHighlightsData;
@@ -49,7 +50,7 @@ function MatchCard({ match }: { match: CompetitionHighlightMatch }) {
     <article className="highlight-match-card">
       <div className="match-meta">
         <span>{formatKickoffAt(match.kickoffAt)}</span>
-        <span>{match.stage}</span>
+        <span>{getCompetitionStageLabel(match.stage)}</span>
         <span>{match.status}</span>
       </div>
 
