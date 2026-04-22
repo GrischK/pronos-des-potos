@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { PageHeader } from "@/components/PageHeader";
+import { getSessionUserId } from "@/src/auth/session";
 
 const foundations = [
   {
@@ -23,7 +25,13 @@ const scoreRules = [
   { label: "Unique", value: "4 pts" },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const userId = await getSessionUserId();
+
+  if (userId) {
+    redirect("/competitions");
+  }
+
   return (
     <main className="landing-page">
       <section className="hero-section">
