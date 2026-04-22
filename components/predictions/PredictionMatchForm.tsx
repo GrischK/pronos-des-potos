@@ -79,6 +79,7 @@ export function PredictionMatchForm({ match, slug }: PredictionMatchFormProps) {
   );
   const lockReason = getLockReason(match);
   const hasResult = match.homeScore !== null && match.awayScore !== null;
+  const showReadonlyEmptyState = !match.canPredict && !match.prediction;
 
   return (
     <form action={formAction} className="prediction-row">
@@ -105,31 +106,35 @@ export function PredictionMatchForm({ match, slug }: PredictionMatchFormProps) {
         </span>
 
         <div className="prediction-score-block">
-          <div className="prediction-inputs">
-            <input
-              aria-label={`Score ${getTeamName(match, "home")}`}
-              defaultValue={match.prediction?.homeScore ?? ""}
-              disabled={!match.canPredict || pending}
-              inputMode="numeric"
-              max="99"
-              min="0"
-              name="homeScore"
-              required
-              type="number"
-            />
-            <span>·</span>
-            <input
-              aria-label={`Score ${getTeamName(match, "away")}`}
-              defaultValue={match.prediction?.awayScore ?? ""}
-              disabled={!match.canPredict || pending}
-              inputMode="numeric"
-              max="99"
-              min="0"
-              name="awayScore"
-              required
-              type="number"
-            />
-          </div>
+          {showReadonlyEmptyState ? (
+            <p className="prediction-empty">Aucun prono enregistré pour ce match.</p>
+          ) : (
+            <div className="prediction-inputs">
+              <input
+                aria-label={`Score ${getTeamName(match, "home")}`}
+                defaultValue={match.prediction?.homeScore ?? ""}
+                disabled={!match.canPredict || pending}
+                inputMode="numeric"
+                max="99"
+                min="0"
+                name="homeScore"
+                required
+                type="number"
+              />
+              <span>·</span>
+              <input
+                aria-label={`Score ${getTeamName(match, "away")}`}
+                defaultValue={match.prediction?.awayScore ?? ""}
+                disabled={!match.canPredict || pending}
+                inputMode="numeric"
+                max="99"
+                min="0"
+                name="awayScore"
+                required
+                type="number"
+              />
+            </div>
+          )}
 
           {hasResult ? (
             <p className="prediction-result">
@@ -152,19 +157,21 @@ export function PredictionMatchForm({ match, slug }: PredictionMatchFormProps) {
         </span>
       </div>
 
-      <div className="prediction-actions">
-        <button
-          className="btn btn-secondary"
-          disabled={!match.canPredict || pending}
-          type="submit"
-        >
-          {pending ? "Enregistrement..." : "Enregistrer"}
-        </button>
-        {state.error ? <span className="form-error">{state.error}</span> : null}
-        {state.success ? (
-          <span className="form-success">{state.success}</span>
-        ) : null}
-      </div>
+      {showReadonlyEmptyState ? null : (
+        <div className="prediction-actions">
+          <button
+            className="btn btn-secondary"
+            disabled={!match.canPredict || pending}
+            type="submit"
+          >
+            {pending ? "Enregistrement..." : "Enregistrer"}
+          </button>
+          {state.error ? <span className="form-error">{state.error}</span> : null}
+          {state.success ? (
+            <span className="form-success">{state.success}</span>
+          ) : null}
+        </div>
+      )}
     </form>
   );
 }

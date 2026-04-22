@@ -23,7 +23,7 @@ export function AuthForm({ action, buttonLabel, mode }: AuthFormProps) {
       {mode === "signup" ? (
         <label className="field">
           <span>Nom</span>
-          <input autoComplete="name" name="name" placeholder="Grisch" required />
+          <input autoComplete="name" name="name" placeholder="Tonton Prono" required />
         </label>
       ) : null}
 

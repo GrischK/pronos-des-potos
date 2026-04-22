@@ -4,16 +4,16 @@ import { PageHeader } from "@/components/PageHeader";
 
 const foundations = [
   {
-    title: "Une compétition, un classement",
-    text: "Euro, Coupe du monde ou tournoi entre potes restent séparés, avec leurs matchs, pronos, scores et vainqueur.",
+    title: "Un tournoi, un seul maestro",
+    text: "Euro, Coupe du monde ou Champions League entre potos: chaque compétition garde ses matchs, ses pronos et son champion à couronner.",
   },
   {
-    title: "Pronos verrouillés au bon moment",
-    text: "Les matchs peuvent être fermés avant le coup d'envoi, sans bloquer toute la compétition.",
+    title: "Plus de prono après le coup d'envoi",
+    text: "Chaque match se verrouille quand il faut. Les retardataires gardent leurs excuses, pas leurs points.",
   },
   {
-    title: "Points lisibles",
-    text: "Le calcul garde la règle existante: résultat, score exact partagé, score exact unique.",
+    title: "Des points simples à défendre",
+    text: "Bon résultat, score exact, score exact unique: tout le monde comprend pourquoi il gagne, surtout celui qui fanfaronne.",
   },
 ];
 
@@ -38,15 +38,15 @@ export default function Home() {
         <div className="hero-layout">
           <PageHeader
             eyebrow="Euro, Coupe du monde, chambrage"
-            title="Tes potes, leurs pronos, un vrai classement."
-            description="Crée ou rejoins une compétition, pronostique les matchs avant le coup d'envoi et laisse les scores décider qui a vraiment le flair."
+            title="Des potos, des pronos, un seul héros."
+            description="Crée ou rejoins une compétition, balance tes scores avant le coup d'envoi et laisse le classement trancher qui avait vraiment le nez creux."
           />
 
           <aside className="score-panel" aria-label="Règles de score">
             <div className="score-panel-header">
-              <span>France</span>
+              <span>Le favori</span>
               <strong>2 - 1</strong>
-              <span>Les potos</span>
+              <span>Le poto sûr de lui</span>
             </div>
             <div className="score-rules">
               {scoreRules.map((rule) => (

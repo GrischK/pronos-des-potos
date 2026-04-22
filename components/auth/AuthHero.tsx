@@ -22,9 +22,9 @@ export function AuthHero({ title, text }: AuthHeroProps) {
       </div>
 
       <div className="auth-badges">
-        <span>Pronos verrouillés</span>
-        <span>Classement live</span>
-        <span>Score exact unique</span>
+        <span>Tu poses ton prono avant le match</span>
+        <span>Le classement évolue en direct</span>
+        <span>Le score exact fait la diff</span>
       </div>
     </aside>
   );

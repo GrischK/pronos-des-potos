@@ -208,8 +208,20 @@
     @apply grid items-end gap-6;
   }
 
+  .page-title-row {
+    @apply flex min-w-0 flex-wrap items-center gap-3;
+  }
+
   .page-header h1 {
     @apply m-0 max-w-[880px] text-[2.75rem] font-[850] leading-[0.98] tracking-normal;
+  }
+
+  .competition-emblem {
+    @apply h-10 w-10 rounded-lg border border-line bg-white object-contain p-1.5;
+  }
+
+  .page-title-emblem {
+    @apply h-14 w-14 p-2;
   }
 
   .lead {
@@ -338,6 +350,11 @@
     @apply text-sm leading-[1.45] text-muted;
   }
 
+  .admin-rename-form {
+    @apply mt-3 grid items-end gap-2 rounded-lg border border-line bg-surface p-3;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
   .admin-item-actions {
     @apply mt-2 flex flex-wrap gap-2;
   }
@@ -452,6 +469,83 @@
     @apply grid content-between gap-[18px];
   }
 
+  .competition-card-title {
+    @apply flex min-w-0 items-center gap-3;
+  }
+
+  .competition-card-title h2 {
+    @apply mb-0 min-w-0;
+  }
+
+  .competition-card-summary {
+    @apply grid gap-2;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .competition-card-summary span {
+    @apply grid gap-1 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-normal text-muted;
+    background: color-mix(in srgb, var(--mint) 14%, white);
+  }
+
+  .competition-card-summary strong {
+    @apply text-2xl font-black leading-none text-pitch-strong;
+  }
+
+  .competition-card-next {
+    @apply grid gap-1 rounded-lg border border-line bg-surface-alt p-3;
+  }
+
+  .competition-card-next span {
+    @apply text-xs font-black uppercase tracking-normal text-foreground;
+  }
+
+  .competition-card-next strong {
+    @apply min-w-0 truncate text-base font-black leading-tight text-foreground;
+  }
+
+  .competition-card-next small {
+    @apply text-sm font-bold text-muted;
+  }
+
+  .competition-card-stats {
+    @apply grid gap-2;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .competition-card-stats span {
+    @apply grid min-w-0 gap-1 rounded-lg bg-white px-3 py-2 text-xs font-bold leading-tight text-muted;
+    border: 1px solid color-mix(in srgb, var(--pitch) 10%, var(--line));
+  }
+
+  .competition-card-stats strong {
+    @apply min-w-0 truncate text-base font-black leading-none text-foreground;
+  }
+
+  .next-prediction-panel {
+    @apply grid items-center gap-4 rounded-lg border border-line bg-surface p-5;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--mint) 18%, white), white 50%),
+      var(--surface);
+    box-shadow: 0 16px 38px color-mix(in srgb, var(--foreground) 8%, transparent);
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .next-prediction-panel h2 {
+    @apply mt-3 mb-0 text-3xl font-black leading-tight tracking-normal;
+  }
+
+  .next-prediction-panel p:not(.badge) {
+    @apply mt-2 mb-0 font-bold text-muted;
+  }
+
+  .next-prediction-action {
+    @apply grid justify-items-end gap-3 text-right;
+  }
+
+  .next-prediction-action strong {
+    @apply rounded-lg bg-foreground px-3 py-2 text-sm font-black text-surface;
+  }
+
   .action-card:nth-child(1) {
     border-left: 5px solid var(--pitch);
   }
@@ -462,6 +556,35 @@
 
   .action-card:nth-child(3) {
     border-left: 5px solid var(--navy);
+  }
+
+  .competition-highlights {
+    @apply grid gap-4;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .highlight-panel {
+    @apply grid min-w-0 gap-4 rounded-lg border border-line bg-surface p-4;
+  }
+
+  .highlight-match-list {
+    @apply grid gap-3;
+  }
+
+  .highlight-match-card {
+    @apply grid gap-3 rounded-lg border border-line bg-white p-4;
+  }
+
+  .highlight-prono-line {
+    @apply flex items-center justify-between gap-3 rounded-lg bg-surface-alt px-3 py-2;
+  }
+
+  .highlight-prono-line span {
+    @apply text-sm font-bold text-muted;
+  }
+
+  .highlight-prono-line strong {
+    @apply rounded-lg bg-foreground px-2.5 py-1 text-sm font-black text-white;
   }
 
   .match-list {
@@ -490,6 +613,70 @@
 
   .schedule-browser {
     @apply grid gap-5;
+  }
+
+  .pending-predictions-panel {
+    @apply mb-5 rounded-lg border border-line bg-surface p-3;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--card) 14%, white), white 48%),
+      var(--surface);
+    box-shadow: 0 12px 30px color-mix(in srgb, var(--foreground) 6%, transparent);
+  }
+
+  .pending-predictions-panel summary {
+    @apply flex cursor-pointer list-none items-center justify-between gap-4;
+  }
+
+  .pending-predictions-panel summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .pending-predictions-panel summary > span:first-child {
+    @apply flex min-w-0 flex-wrap items-center gap-3;
+  }
+
+  .pending-predictions-panel summary strong {
+    @apply text-lg font-black text-foreground;
+  }
+
+  .pending-predictions-summary-action {
+    @apply shrink-0 rounded-lg bg-foreground px-3 py-2 text-sm font-black text-surface;
+  }
+
+  .pending-predictions-panel[open] .pending-predictions-summary-action {
+    @apply bg-surface-alt text-foreground;
+  }
+
+  .pending-predictions-list {
+    @apply mt-3 grid max-h-[620px] gap-3 overflow-y-auto pr-1;
+  }
+
+  .pending-predictions-list .prediction-row {
+    @apply p-3;
+  }
+
+  .pending-predictions-panel-done {
+    @apply grid gap-1;
+  }
+
+  .pending-predictions-panel-done strong {
+    @apply text-lg font-black text-foreground;
+  }
+
+  .pending-predictions-panel-done span {
+    @apply text-sm font-bold text-muted;
+  }
+
+  .schedule-view-switch {
+    @apply flex w-fit flex-wrap gap-2 rounded-lg border border-line bg-surface p-1;
+  }
+
+  .schedule-view-switch button {
+    @apply min-h-10 rounded-lg px-3 text-sm font-black text-muted transition-colors;
+  }
+
+  .schedule-view-switch button[aria-pressed="true"] {
+    @apply bg-foreground text-white;
   }
 
   .phase-pager {
@@ -538,6 +725,35 @@
     @apply grid min-w-0 gap-5;
   }
 
+  .day-browser {
+    @apply grid gap-4;
+  }
+
+  .day-nav {
+    @apply flex gap-2 overflow-x-auto pb-1;
+  }
+
+  .day-nav-button {
+    @apply flex min-h-10 shrink-0 items-center gap-2 rounded-lg border border-line bg-surface-alt px-3 py-2 text-left transition-colors;
+  }
+
+  .day-nav-button span {
+    @apply text-sm font-black text-foreground;
+  }
+
+  .day-nav-button small {
+    @apply text-xs font-bold text-muted;
+  }
+
+  .day-nav-button[aria-pressed="true"] {
+    @apply border-pitch bg-foreground;
+  }
+
+  .day-nav-button[aria-pressed="true"] span,
+  .day-nav-button[aria-pressed="true"] small {
+    @apply text-white;
+  }
+
   .standings-table-wrap {
     @apply overflow-x-auto rounded-lg border border-line bg-surface;
   }
@@ -569,6 +785,97 @@
 
   .standings-team span {
     @apply min-w-0 truncate;
+  }
+
+  .leaderboard-summary {
+    @apply grid gap-3;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .leaderboard-summary div {
+    @apply grid gap-1 rounded-lg border border-line bg-surface p-4;
+  }
+
+  .leaderboard-summary span {
+    @apply text-sm font-bold text-muted;
+  }
+
+  .leaderboard-summary strong {
+    @apply min-w-0 truncate text-2xl font-black text-foreground;
+  }
+
+  .leaderboard-rules {
+    @apply mb-5 grid gap-3 rounded-lg border border-line bg-surface p-4;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--card) 18%, white), white 48%),
+      var(--surface);
+    box-shadow: 0 14px 34px color-mix(in srgb, var(--foreground) 7%, transparent);
+    grid-template-columns: minmax(0, 1.15fr) repeat(3, minmax(130px, 0.8fr));
+  }
+
+  .leaderboard-rules > div:first-child {
+    @apply grid content-center gap-1;
+  }
+
+  .leaderboard-rules > div:first-child span {
+    @apply text-xs font-black uppercase tracking-normal text-muted;
+  }
+
+  .leaderboard-rules > div:first-child strong {
+    @apply text-lg font-black leading-tight text-foreground;
+  }
+
+  .leaderboard-rule {
+    @apply grid gap-1 rounded-lg border border-line bg-white p-3;
+  }
+
+  .leaderboard-rule strong {
+    @apply text-2xl font-black leading-none text-pitch-strong;
+  }
+
+  .leaderboard-rule:nth-child(2) strong {
+    color: var(--navy);
+  }
+
+  .leaderboard-rule:nth-child(3) strong {
+    color: var(--pitch-strong);
+  }
+
+  .leaderboard-rule:nth-child(4) strong {
+    color: var(--coral);
+  }
+
+  .leaderboard-rule span {
+    @apply text-sm font-bold text-muted;
+  }
+
+  .leaderboard-table-wrap {
+    @apply overflow-x-auto rounded-lg border border-line bg-surface;
+  }
+
+  .leaderboard-table {
+    @apply w-full border-collapse text-left text-sm;
+  }
+
+  .leaderboard-table th {
+    @apply border-b border-line bg-surface-alt px-3 py-2 text-xs font-black uppercase tracking-normal text-muted;
+  }
+
+  .leaderboard-table td {
+    @apply border-b border-line px-3 py-3 font-bold;
+  }
+
+  .leaderboard-table tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  .leaderboard-table th:not(:nth-child(2)),
+  .leaderboard-table td:not(:nth-child(2)) {
+    @apply text-center;
+  }
+
+  .leaderboard-table tbody tr:first-child td {
+    @apply bg-surface-alt;
   }
 
   .match-row {
@@ -652,11 +959,59 @@
     @apply rounded-lg bg-surface-alt px-2.5 py-1 text-xs font-black text-muted;
   }
 
+  .prediction-empty {
+    @apply max-w-[220px] rounded-lg bg-surface-alt px-3 py-2 text-center text-xs font-black text-muted;
+  }
+
   .prediction-actions {
     @apply flex flex-wrap items-center gap-3;
   }
 
+  .public-predictions {
+    @apply grid gap-2 rounded-lg border border-line bg-surface-alt p-3;
+  }
+
+  .public-predictions > p {
+    @apply text-sm font-bold text-muted;
+  }
+
+  .public-prediction-row {
+    @apply flex items-center justify-between gap-3 rounded-lg bg-surface px-3 py-2;
+  }
+
+  .public-prediction-row strong {
+    @apply min-w-0 truncate font-black text-foreground;
+  }
+
+  .public-prediction-row span {
+    @apply shrink-0 rounded-lg bg-foreground px-2.5 py-1 text-sm font-black text-white;
+  }
+
   @media (max-width: 760px) {
+    .leaderboard-summary {
+      grid-template-columns: 1fr;
+    }
+
+    .leaderboard-rules {
+      grid-template-columns: 1fr;
+    }
+
+    .admin-rename-form {
+      grid-template-columns: 1fr;
+    }
+
+    .next-prediction-panel {
+      grid-template-columns: 1fr;
+    }
+
+    .next-prediction-action {
+      @apply justify-items-start text-left;
+    }
+
+    .competition-highlights {
+      grid-template-columns: 1fr;
+    }
+
     .prediction-grid {
       grid-template-columns: 1fr;
     }
@@ -682,6 +1037,10 @@
     .group-nav {
       @apply static grid max-h-none grid-cols-6 overflow-visible;
     }
+
+    .day-nav {
+      @apply -mx-1 px-1;
+    }
   }
 
   .badge {
@@ -706,7 +1065,7 @@
   }
 
   .auth-page {
-    @apply mx-auto grid items-center gap-6;
+    @apply mx-auto grid items-stretch gap-6;
     width: min(1180px, calc(100% - 32px));
     min-height: calc(100vh - 72px);
     padding: 44px 0 72px;

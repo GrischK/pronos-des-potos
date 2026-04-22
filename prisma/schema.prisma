@@ -64,6 +64,7 @@ model Competition {
   externalProvider ExternalDataProvider?
   externalCompetitionId String?
   externalSeason String?
+  emblemUrl String?
   externalLastSyncAt DateTime?
   startsAt  DateTime?
   endsAt    DateTime?

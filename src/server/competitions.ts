@@ -1,5 +1,8 @@
 import { unstable_cache } from "next/cache";
 
+import { getCurrentUser } from "@/src/auth/current-user";
+import { computePredictionPoints } from "@/src/domain/scoring";
+
 const WORLD_CUP_2026_GROUPS = [
   {
     name: "Groupe A",
@@ -311,7 +314,9 @@ export async function getCompetitionsOverview() {
     return [];
   }
 
+  const user = await getCurrentUser();
   const { prisma } = await import("@/src/db/prisma");
+  const now = new Date();
 
   return prisma.competition.findMany({
     orderBy: [{ startsAt: "desc" }, { createdAt: "desc" }],
@@ -320,6 +325,63 @@ export async function getCompetitionsOverview() {
       name: true,
       slug: true,
       status: true,
+      emblemUrl: true,
+      matches: {
+        where: {
+          OR: [
+            {
+              status: "SCHEDULED",
+              kickoffAt: {
+                gt: now,
+              },
+            },
+            {
+              status: "FINISHED",
+              homeScore: {
+                not: null,
+              },
+              awayScore: {
+                not: null,
+              },
+            },
+          ],
+        },
+        orderBy: [{ kickoffAt: "asc" }, { createdAt: "asc" }],
+        select: {
+          id: true,
+          kickoffAt: true,
+          status: true,
+          homeScore: true,
+          awayScore: true,
+          homePlaceholder: true,
+          awayPlaceholder: true,
+          homeTeamId: true,
+          awayTeamId: true,
+          homeTeam: {
+            select: {
+              name: true,
+            },
+          },
+          awayTeam: {
+            select: {
+              name: true,
+            },
+          },
+          predictions: {
+            select: {
+              userId: true,
+              homeScore: true,
+              awayScore: true,
+              user: {
+                select: {
+                  email: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      },
       _count: {
         select: {
           matches: true,
@@ -328,15 +390,212 @@ export async function getCompetitionsOverview() {
       },
     },
   }).then((competitions) =>
-    competitions.map((competition) => ({
-      id: competition.id,
-      name: competition.name,
-      slug: competition.slug,
-      status: competition.status,
-      matchCount: competition._count.matches,
-      playerCount: competition._count.players,
-    })),
+    competitions.map((competition) => {
+      const futureMatches = competition.matches.filter(
+        (match) => match.status === "SCHEDULED" && match.kickoffAt > now,
+      );
+      const nextMatch = futureMatches[0] ?? null;
+      const missingPredictionCount =
+        competition.status === "OPEN" && user
+          ? futureMatches.filter(
+              (match) =>
+                match.homeTeamId !== null &&
+                match.awayTeamId !== null &&
+                !match.predictions.some(
+                  (prediction) => prediction.userId === user.id,
+                ),
+            ).length
+          : 0;
+      const leaderRows = new Map<
+        string,
+        {
+          name: string;
+          points: number;
+          exactUnique: number;
+          exactShared: number;
+          correctOutcome: number;
+        }
+      >();
+
+      for (const match of competition.matches) {
+        if (
+          match.status !== "FINISHED" ||
+          match.homeScore === null ||
+          match.awayScore === null
+        ) {
+          continue;
+        }
+
+        const exactScorePredictionCount = match.predictions.filter(
+          (prediction) =>
+            prediction.homeScore === match.homeScore &&
+            prediction.awayScore === match.awayScore,
+        ).length;
+
+        for (const prediction of match.predictions) {
+          const row =
+            leaderRows.get(prediction.userId) ??
+            {
+              name: prediction.user.name?.trim() || prediction.user.email,
+              points: 0,
+              exactUnique: 0,
+              exactShared: 0,
+              correctOutcome: 0,
+            };
+          const points = computePredictionPoints({
+            prediction: {
+              homeScore: prediction.homeScore,
+              awayScore: prediction.awayScore,
+            },
+            result: {
+              homeScore: match.homeScore,
+              awayScore: match.awayScore,
+            },
+            exactScorePredictionCount,
+          });
+
+          row.points += points;
+
+          if (points === 4) {
+            row.exactUnique += 1;
+          } else if (points === 3) {
+            row.exactShared += 1;
+          } else if (points === 1) {
+            row.correctOutcome += 1;
+          }
+
+          leaderRows.set(prediction.userId, row);
+        }
+      }
+
+      const leader = Array.from(leaderRows.values()).sort(
+        (a, b) =>
+          b.points - a.points ||
+          b.exactUnique - a.exactUnique ||
+          b.exactShared - a.exactShared ||
+          b.correctOutcome - a.correctOutcome ||
+          a.name.localeCompare(b.name, "fr"),
+      )[0];
+
+      return {
+        id: competition.id,
+        name: competition.name,
+        slug: competition.slug,
+        status: competition.status,
+        emblemUrl: competition.emblemUrl,
+        matchCount: competition._count.matches,
+        playerCount: competition._count.players,
+        nextMatch: nextMatch
+          ? {
+              id: nextMatch.id,
+              kickoffAt: nextMatch.kickoffAt.toISOString(),
+              homeTeam: nextMatch.homeTeam,
+              awayTeam: nextMatch.awayTeam,
+              homePlaceholder: nextMatch.homePlaceholder,
+              awayPlaceholder: nextMatch.awayPlaceholder,
+            }
+          : null,
+        remainingMatchCount: futureMatches.length,
+        missingPredictionCount,
+        leader: leader
+          ? {
+              name: leader.name,
+              points: leader.points,
+            }
+          : null,
+      };
+    }),
   );
+}
+
+export type NextPredictionOpportunity = {
+  id: string;
+  kickoffAt: string;
+  competition: {
+    name: string;
+    slug: string;
+  };
+  homeTeam: {
+    name: string;
+  } | null;
+  awayTeam: {
+    name: string;
+  } | null;
+  homePlaceholder: string | null;
+  awayPlaceholder: string | null;
+};
+
+export async function getNextPredictionOpportunity(): Promise<NextPredictionOpportunity | null> {
+  if (!process.env.DATABASE_URL) {
+    return null;
+  }
+
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return null;
+  }
+
+  const { prisma } = await import("@/src/db/prisma");
+  const match = await prisma.match.findFirst({
+    where: {
+      status: "SCHEDULED",
+      kickoffAt: {
+        gt: new Date(),
+      },
+      homeTeamId: {
+        not: null,
+      },
+      awayTeamId: {
+        not: null,
+      },
+      competition: {
+        status: "OPEN",
+      },
+      predictions: {
+        none: {
+          userId: user.id,
+        },
+      },
+    },
+    orderBy: [{ kickoffAt: "asc" }, { createdAt: "asc" }],
+    select: {
+      id: true,
+      kickoffAt: true,
+      homePlaceholder: true,
+      awayPlaceholder: true,
+      competition: {
+        select: {
+          name: true,
+          slug: true,
+        },
+      },
+      homeTeam: {
+        select: {
+          name: true,
+        },
+      },
+      awayTeam: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  if (!match) {
+    return null;
+  }
+
+  return {
+    id: match.id,
+    kickoffAt: match.kickoffAt.toISOString(),
+    competition: match.competition,
+    homeTeam: match.homeTeam,
+    awayTeam: match.awayTeam,
+    homePlaceholder: match.homePlaceholder,
+    awayPlaceholder: match.awayPlaceholder,
+  };
 }
 
 export async function getCompetitionBySlug(slug: string) {
@@ -353,6 +612,7 @@ export async function getCompetitionBySlug(slug: string) {
       name: true,
       slug: true,
       kind: true,
+      emblemUrl: true,
       externalProvider: true,
       externalCompetitionId: true,
       externalSeason: true,
