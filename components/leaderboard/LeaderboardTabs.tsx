@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 import type { LeaderboardData, LeaderboardSnapshot } from "@/src/server/leaderboard";
@@ -10,15 +11,31 @@ type LeaderboardTabsProps = {
   leaderboard: LeaderboardData;
 };
 
-function getLeaderLabel(snapshot: LeaderboardSnapshot) {
-  return snapshot.rows[0]?.name ?? "Aucun prono scoré";
-}
-
 function getInitial(name: string) {
   return name.trim().slice(0, 1).toUpperCase();
 }
 
-function LeaderboardTable({ snapshot }: { snapshot: LeaderboardSnapshot }) {
+function PlayerAvatar({
+  image,
+  name,
+}: {
+  image: string | null;
+  name: string;
+}) {
+  return (
+    <span className="leaderboard-player-avatar">
+      {image ? <img alt="" loading="lazy" src={image} /> : getInitial(name)}
+    </span>
+  );
+}
+
+function LeaderboardTable({
+  slug,
+  snapshot,
+}: {
+  slug: string;
+  snapshot: LeaderboardSnapshot;
+}) {
   if (snapshot.rows.length === 0) {
     return (
       <p className="readonly-notice">
@@ -48,16 +65,13 @@ function LeaderboardTable({ snapshot }: { snapshot: LeaderboardSnapshot }) {
             <tr key={row.userId}>
               <td>{index + 1}</td>
               <td>
-                <span className="leaderboard-player">
-                  <span className="leaderboard-player-avatar">
-                    {row.image ? (
-                      <img alt="" loading="lazy" src={row.image} />
-                    ) : (
-                      getInitial(row.name)
-                    )}
-                  </span>
+                <Link
+                  className="leaderboard-player"
+                  href={`/competitions/${slug}/joueurs/${row.userId}`}
+                >
+                  <PlayerAvatar image={row.image} name={row.name} />
                   <strong>{row.name}</strong>
-                </span>
+                </Link>
               </td>
               <td>
                 <strong>{row.points}</strong>
@@ -104,6 +118,7 @@ export function LeaderboardTabs({ leaderboard }: LeaderboardTabsProps) {
   const [mode, setMode] = useState<LeaderboardMode>("official");
   const snapshot = leaderboard[mode];
   const isLive = mode === "live";
+  const leader = snapshot.rows[0] ?? null;
 
   return (
     <>
@@ -130,7 +145,14 @@ export function LeaderboardTabs({ leaderboard }: LeaderboardTabsProps) {
         <div className="leaderboard-summary">
           <div>
             <span>{isLive ? "Leader live" : "Leader"}</span>
-            <strong>{getLeaderLabel(snapshot)}</strong>
+            {leader ? (
+              <span className="leaderboard-leader">
+                <PlayerAvatar image={leader.image} name={leader.name} />
+                <strong>{leader.name}</strong>
+              </span>
+            ) : (
+              <strong>Aucun prono scoré</strong>
+            )}
           </div>
           <div>
             <span>{isLive ? "Matchs comptés" : "Matchs terminés"}</span>
@@ -162,7 +184,7 @@ export function LeaderboardTabs({ leaderboard }: LeaderboardTabsProps) {
 
         <LeaderboardRulesCard isLive={isLive} />
 
-        <LeaderboardTable snapshot={snapshot} />
+        <LeaderboardTable slug={leaderboard.slug} snapshot={snapshot} />
       </section>
     </>
   );

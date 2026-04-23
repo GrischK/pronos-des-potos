@@ -1032,6 +1032,18 @@
     @apply min-w-0 truncate text-2xl font-black text-foreground;
   }
 
+  .leaderboard-leader {
+    @apply flex min-w-0 items-center gap-2.5;
+  }
+
+  .leaderboard-leader .leaderboard-player-avatar {
+    @apply h-9 w-9;
+  }
+
+  .leaderboard-leader strong {
+    @apply min-w-0 truncate;
+  }
+
   .leaderboard-rules {
     @apply mb-5 grid gap-3 rounded-lg border border-line bg-surface p-4;
     background:
@@ -1107,6 +1119,86 @@
 
   .leaderboard-player strong {
     @apply min-w-0 truncate;
+  }
+
+  .leaderboard-player:hover strong {
+    @apply text-pitch;
+  }
+
+  .player-profile-header {
+    @apply flex min-w-0 items-center gap-4 rounded-lg border border-line bg-surface p-5;
+    box-shadow: 0 14px 34px color-mix(in srgb, var(--foreground) 7%, transparent);
+  }
+
+  .player-profile-avatar {
+    @apply grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-lg bg-foreground text-4xl font-black text-surface;
+  }
+
+  .player-profile-avatar img {
+    @apply h-full w-full object-cover;
+  }
+
+  .player-profile-header > div:last-child {
+    @apply min-w-0;
+  }
+
+  .player-profile-header h2 {
+    @apply mt-2 mb-1 truncate text-3xl font-black leading-none tracking-normal;
+  }
+
+  .player-profile-header p:not(.badge) {
+    @apply m-0 truncate text-muted;
+  }
+
+  .player-stat-grid {
+    @apply mt-4 grid gap-3;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+
+  .player-stat-card {
+    @apply grid gap-1 rounded-lg border border-line bg-surface p-4;
+  }
+
+  .player-stat-card span {
+    @apply text-sm font-bold text-muted;
+  }
+
+  .player-stat-card strong {
+    @apply text-3xl font-black leading-none text-foreground;
+  }
+
+  .player-match-list {
+    @apply overflow-hidden rounded-lg border border-line bg-surface;
+  }
+
+  .player-match-row {
+    @apply grid items-center gap-3 border-b border-line px-3 py-3 text-sm font-bold;
+    grid-template-columns: minmax(220px, 1fr) 86px 86px 70px;
+  }
+
+  .player-match-row:last-child {
+    @apply border-b-0;
+  }
+
+  .player-match-row > div {
+    @apply grid min-w-0 gap-1;
+  }
+
+  .player-match-row > div span {
+    @apply text-xs text-muted;
+  }
+
+  .player-match-row > div strong {
+    @apply min-w-0 truncate;
+  }
+
+  .player-match-row > span,
+  .player-match-row > strong {
+    @apply text-center;
+  }
+
+  .player-match-row-header {
+    @apply bg-surface-alt text-xs font-black uppercase text-muted;
   }
 
   .leaderboard-table tbody tr:last-child td {
@@ -1266,6 +1358,23 @@
 
     .prediction-score-block {
       @apply justify-items-start;
+    }
+
+    .player-profile-header {
+      @apply grid justify-items-start;
+    }
+
+    .player-match-row {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .player-match-row > span,
+    .player-match-row > strong {
+      @apply text-left;
+    }
+
+    .player-match-row-header {
+      @apply hidden;
     }
 
     .match-team-away {
