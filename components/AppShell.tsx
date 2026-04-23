@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useRef, useState } from "react";
 
 import { LogoutButton } from "@/components/LogoutButton";
+import { cn } from "@/src/lib/cn";
 import { useDismissibleLayer } from "@/src/lib/use-dismissible-layer";
 import { usePresence } from "@/src/lib/use-presence";
 
@@ -21,6 +23,7 @@ export function AppShell({ children, showAdminNav = false }: AppShellProps) {
   const mobileNavButtonRef = useRef<HTMLButtonElement>(null);
   const mobileNavPanelRef = useRef<HTMLElement>(null);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const pathname = usePathname();
   const visibleNavItems = showAdminNav
     ? [...navItems, { href: "/admin", label: "Admin" }]
     : navItems;
@@ -48,11 +51,18 @@ export function AppShell({ children, showAdminNav = false }: AppShellProps) {
 
         <nav className="site-nav" aria-label="Navigation principale">
           {visibleNavItems.map((item) => (
-            <Link className="nav-link" href={item.href} key={item.href}>
+            <Link
+              className={cn(
+                "nav-link nav-link-desktop",
+                pathname.startsWith(item.href) && "nav-link-active",
+              )}
+              href={item.href}
+              key={item.href}
+            >
               {item.label}
             </Link>
           ))}
-          <LogoutButton />
+          <LogoutButton className="nav-link-desktop nav-link-logout" />
         </nav>
 
         <div className="mobile-nav">
@@ -85,11 +95,18 @@ export function AppShell({ children, showAdminNav = false }: AppShellProps) {
                 ref={mobileNavPanelRef}
               >
                 {visibleNavItems.map((item) => (
-                  <Link className="nav-link" href={item.href} key={item.href}>
+                  <Link
+                    className={cn(
+                      "nav-link nav-link-mobile",
+                      pathname.startsWith(item.href) && "nav-link-active",
+                    )}
+                    href={item.href}
+                    key={item.href}
+                  >
                     {item.label}
                   </Link>
                 ))}
-                <LogoutButton />
+                <LogoutButton className="nav-link-mobile nav-link-logout" />
               </nav>
             </>
           ) : null}

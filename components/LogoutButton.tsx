@@ -1,9 +1,14 @@
+import { cn } from "@/src/lib/cn";
 import { logoutAction } from "@/src/auth/actions";
 
-export function LogoutButton() {
+type LogoutButtonProps = {
+  className?: string;
+};
+
+export function LogoutButton({ className }: LogoutButtonProps) {
   return (
     <form action={logoutAction}>
-      <button className="nav-link nav-button" type="submit">
+      <button className={cn("nav-link nav-button", className)} type="submit">
         Déconnexion
       </button>
     </form>
