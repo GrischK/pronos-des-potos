@@ -8,6 +8,8 @@ import {
   updateAccountAvatarAction,
   type AccountActionState,
 } from "@/src/server/account-actions";
+import { useDismissibleLayer } from "@/src/lib/use-dismissible-layer";
+import { usePresence } from "@/src/lib/use-presence";
 
 const MAX_SOURCE_SIZE = 5 * 1024 * 1024;
 const AVATAR_SIZE = 512;
@@ -103,6 +105,7 @@ function ActionMessage({ state }: { state: AccountActionState }) {
 
 export function AvatarUploadForm() {
   const inputRef = useRef<HTMLInputElement>(null);
+  const cropModalRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{
     pointerId: number;
     startPosition: CropPosition;
@@ -116,6 +119,7 @@ export function AvatarUploadForm() {
   const [selectedFileName, setSelectedFileName] = useState("");
   const [isPending, startTransition] = useTransition();
   const previewMetrics = previewImage ? getPreviewMetrics(previewImage) : null;
+  const cropModalPresence = usePresence(isCropOpen);
 
   useEffect(() => {
     return () => {
@@ -125,22 +129,13 @@ export function AvatarUploadForm() {
     };
   }, [previewImage]);
 
-  useEffect(() => {
-    if (!isCropOpen) {
-      return;
-    }
-
-    function closeOnEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setIsCropOpen(false);
-      }
-    }
-
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [isCropOpen]);
+  useDismissibleLayer({
+    active: isCropOpen,
+    layerRef: cropModalRef,
+    onDismiss: () => {
+      setIsCropOpen(false);
+    },
+  });
 
   async function handleFileChange(file: File | undefined) {
     setState({});
@@ -202,22 +197,30 @@ export function AvatarUploadForm() {
   }
 
   const cropModal =
-    isCropOpen && previewImage && previewMetrics
+    cropModalPresence.isMounted && previewImage && previewMetrics
       ? createPortal(
           <div
-            className="modal-backdrop"
-            onClick={(event) => {
-              if (event.target === event.currentTarget) {
-                setIsCropOpen(false);
-              }
-            }}
+            className={`modal-backdrop${cropModalPresence.isVisible ? " is-open" : ""}`}
           >
             <div
               aria-modal="true"
-              className="avatar-crop-modal"
+              className={`avatar-crop-modal${cropModalPresence.isVisible ? " is-open" : ""}`}
               role="dialog"
+              ref={cropModalRef}
             >
-              <h3>Cadrage de la photo</h3>
+              <div className="avatar-crop-modal-header">
+                <h3>Cadrage de la photo</h3>
+                <button
+                  aria-label="Fermer"
+                  className="modal-close-button"
+                  onClick={() => {
+                    setIsCropOpen(false);
+                  }}
+                  type="button"
+                >
+                  <span aria-hidden="true">+</span>
+                </button>
+              </div>
               <div className="avatar-crop-tool">
                 <div
                   aria-label="Cadrage de la photo"
