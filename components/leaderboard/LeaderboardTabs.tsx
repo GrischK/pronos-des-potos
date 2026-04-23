@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import type { LeaderboardData, LeaderboardSnapshot } from "@/src/server/leaderboard";
+import { useDismissibleLayer } from "@/src/lib/use-dismissible-layer";
 
 type LeaderboardMode = "official" | "live";
 
@@ -90,19 +91,61 @@ function LeaderboardTable({
 }
 
 function LeaderboardRulesCard({ isLive }: { isLive: boolean }) {
+  const infoButtonRef = useRef<HTMLButtonElement>(null);
+  const infoPopoverRef = useRef<HTMLDivElement>(null);
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
   const rules = [
     { points: "1 pt", label: "Bon résultat" },
     { points: "3 pts", label: "Score exact" },
     { points: "4 pts", label: "Score exact unique" },
   ];
 
+  useDismissibleLayer({
+    active: isInfoOpen,
+    ignoreRefs: [infoButtonRef],
+    layerRef: infoPopoverRef,
+    onDismiss: () => {
+      setIsInfoOpen(false);
+    },
+  });
+
   return (
     <div className="leaderboard-rules" aria-label="Barème des points">
       <div>
-        <strong>Barème</strong>
-        {/*<strong>*/}
-        {/*  {isLive ? "Même règle, scores provisoires" : "Matchs terminés seulement"}*/}
-        {/*</strong>*/}
+        <div className="leaderboard-rules-header">
+          <strong>Barème</strong>
+          <button
+            aria-expanded={isInfoOpen}
+            aria-label="Afficher les règles du classement"
+            className="leaderboard-info-button"
+            onClick={() => {
+              setIsInfoOpen((current) => !current);
+            }}
+            ref={infoButtonRef}
+            type="button"
+          >
+            ?
+          </button>
+        </div>
+        {isInfoOpen ? (
+          <div className="leaderboard-info-popover" ref={infoPopoverRef}>
+            <strong>Règles</strong>
+            <p>
+              1 pt pour le bon résultat, 3 pts pour le score exact, 4 pts si le
+              score exact est unique.
+            </p>
+            <p>
+              Le classement est trié par points, puis exact unique, score
+              exact, bon résultat, nombre de pronos joués et enfin ordre
+              alphabétique.
+            </p>
+            <p>
+              {isLive
+                ? "Le live prend aussi en compte les matchs en cours."
+                : "L'officiel ne prend en compte que les matchs terminés."}
+            </p>
+          </div>
+        ) : null}
       </div>
       {rules.map((rule) => (
         <div className="leaderboard-rule" key={rule.label}>

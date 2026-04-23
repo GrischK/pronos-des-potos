@@ -1190,6 +1190,7 @@
 
   .leaderboard-rules > div:first-child {
     @apply grid content-center gap-1;
+    @apply relative;
   }
 
   .leaderboard-rules > div:first-child span {
@@ -1198,6 +1199,39 @@
 
   .leaderboard-rules > div:first-child strong {
     @apply text-lg font-black leading-tight text-foreground;
+  }
+
+  .leaderboard-rules-header {
+    @apply flex items-center gap-2;
+  }
+
+  .leaderboard-info-button {
+    @apply inline-flex h-7 w-7 items-center justify-center rounded-full border border-line bg-white text-sm font-black text-muted;
+    transition:
+      border-color 160ms ease,
+      background-color 160ms ease,
+      color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .leaderboard-info-button:hover {
+    border-color: color-mix(in srgb, var(--pitch) 34%, var(--line));
+    background: color-mix(in srgb, var(--pitch) 8%, white);
+    color: var(--pitch-strong);
+    transform: translateY(-1px);
+  }
+
+  .leaderboard-info-popover {
+    @apply absolute top-full left-0 z-10 mt-3 grid min-w-[260px] gap-2 rounded-lg border border-line bg-white p-3;
+    box-shadow: 0 16px 34px color-mix(in srgb, var(--foreground) 10%, transparent);
+  }
+
+  .leaderboard-info-popover strong {
+    @apply text-sm font-black text-foreground;
+  }
+
+  .leaderboard-info-popover p {
+    @apply m-0 text-sm font-bold leading-[1.5] text-muted;
   }
 
   .leaderboard-rule {
