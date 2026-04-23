@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { PageHeader } from "@/components/PageHeader";
+import { PlayerProfileAvatar } from "@/components/player/PlayerProfileAvatar";
 import { getCompetitionKindLabel } from "@/src/domain/competition-kind";
 import { getPlayerProfileData } from "@/src/server/player-profile";
 import type { PlayerProfileMatch } from "@/src/server/player-profile";
@@ -27,10 +28,6 @@ function formatKickoffAt(value: string) {
   }
 
   return dateFormatter.format(date);
-}
-
-function getInitial(name: string) {
-  return name.trim().slice(0, 1).toUpperCase();
 }
 
 function getTeamName(match: PlayerProfileMatch, side: "home" | "away") {
@@ -147,13 +144,10 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
       <section className="page-section">
         <div className="player-profile-header">
-          <div className="player-profile-avatar">
-            {profile.player.image ? (
-              <img alt="" src={profile.player.image} />
-            ) : (
-              getInitial(profile.player.name)
-            )}
-          </div>
+          <PlayerProfileAvatar
+            image={profile.player.image}
+            name={profile.player.name}
+          />
           <div>
             <p className="badge badge-live">Participant</p>
             <h2>{profile.player.name}</h2>

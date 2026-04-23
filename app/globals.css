@@ -1269,8 +1269,42 @@
     @apply grid h-40 w-40 shrink-0 place-items-center overflow-hidden rounded-lg bg-foreground text-5xl font-black text-surface;
   }
 
+  .player-profile-avatar.is-clickable {
+    @apply cursor-pointer;
+    transition:
+      transform 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .player-profile-avatar.is-clickable:hover {
+    box-shadow: 0 16px 34px color-mix(in srgb, var(--foreground) 12%, transparent);
+    transform: translateY(-1px);
+  }
+
   .player-profile-avatar img {
     @apply h-full w-full object-cover;
+  }
+
+  .player-avatar-modal {
+    @apply relative w-full max-w-[min(92vw,720px)] rounded-lg border border-line bg-surface p-3 shadow-2xl;
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+    transition:
+      opacity 180ms ease,
+      transform 180ms ease;
+  }
+
+  .player-avatar-modal.is-open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .player-avatar-modal img {
+    @apply block h-auto max-h-[80vh] w-full rounded-md object-contain;
+  }
+
+  .player-avatar-modal-close {
+    @apply absolute top-3 right-3 z-10;
   }
 
   .player-profile-header > div:last-child {
