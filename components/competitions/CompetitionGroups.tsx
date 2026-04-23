@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { CompetitionKind } from "@prisma/client";
 
 import {
   getCompetitionStageLabel,
-  twoLeggedCompetitionStages,
+  isTwoLeggedCompetitionStage,
 } from "@/src/domain/competition-stage";
 import type {
   CompetitionGroup,
@@ -13,6 +14,7 @@ import type {
 } from "@/src/server/competitions";
 
 type CompetitionGroupsProps = {
+  competitionKind: CompetitionKind;
   groups: CompetitionGroup[];
   phases: CompetitionPhase[];
 };
@@ -63,7 +65,10 @@ function sortMatchesByKickoff(matches: CompetitionScheduleMatch[]) {
   );
 }
 
-function getPhaseMatchSections(phase: CompetitionPhase) {
+function getPhaseMatchSections(
+  competitionKind: CompetitionKind,
+  phase: CompetitionPhase,
+) {
   const matches = sortMatchesByKickoff(phase.matches);
 
   if (
@@ -90,7 +95,7 @@ function getPhaseMatchSections(phase: CompetitionPhase) {
   }
 
   if (
-    twoLeggedCompetitionStages.has(phase.stage) &&
+    isTwoLeggedCompetitionStage(competitionKind, phase.stage) &&
     matches.length > 1 &&
     matches.length % 2 === 0
   ) {
@@ -170,7 +175,11 @@ function MatchList({ matches }: { matches: CompetitionScheduleMatch[] }) {
   );
 }
 
-export function CompetitionGroups({ groups, phases }: CompetitionGroupsProps) {
+export function CompetitionGroups({
+  competitionKind,
+  groups,
+  phases,
+}: CompetitionGroupsProps) {
   const stages = useMemo(
     () => [
       ...(groups.length > 0
@@ -308,7 +317,7 @@ export function CompetitionGroups({ groups, phases }: CompetitionGroupsProps) {
               <p className="badge badge-live">{activeStage.title}</p>
             </div>
           </div>
-          {getPhaseMatchSections(activeStage.phase).map((section) => (
+          {getPhaseMatchSections(competitionKind, activeStage.phase).map((section) => (
             <div className="match-subsection" key={section.id}>
               <div className="match-subsection-header">
                 <h3>{section.title}</h3>

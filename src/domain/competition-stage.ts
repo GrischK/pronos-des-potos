@@ -1,3 +1,5 @@
+import type { CompetitionKind } from "@prisma/client";
+
 export const competitionStageLabels: Record<string, string> = {
   GROUP_STAGE: "Phase de groupes",
   LEAGUE_STAGE: "Phase de ligue",
@@ -30,6 +32,17 @@ export const twoLeggedCompetitionStages = new Set([
   "SEMI_FINALS",
 ]);
 
+export function isTwoLeggedCompetitionStage(
+  kind: CompetitionKind | string,
+  stage: string,
+) {
+  if (!twoLeggedCompetitionStages.has(stage)) {
+    return false;
+  }
+
+  return kind === "CHAMPIONS_LEAGUE" || kind === "OTHER";
+}
+
 export function getCompetitionStageLabel(stage: string) {
   const label = competitionStageLabels[stage];
 
@@ -45,4 +58,3 @@ export function getCompetitionStageLabel(stage: string) {
 
   return words.charAt(0).toUpperCase() + words.slice(1);
 }
-

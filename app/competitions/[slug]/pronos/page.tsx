@@ -52,7 +52,11 @@ export default async function PronosticsPage({ params }: PronosticsPageProps) {
           </p>
         ) : null}
 
-        <PredictionSchedule matches={competition.matches} slug={competition.slug} />
+        <PredictionSchedule
+          competitionKind={competition.kind}
+          matches={competition.matches}
+          slug={competition.slug}
+        />
       </section>
     </main>
   );

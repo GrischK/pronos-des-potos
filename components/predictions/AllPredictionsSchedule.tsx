@@ -1,10 +1,13 @@
 "use client";
 
+import type { CompetitionKind } from "@prisma/client";
+
 import { PredictionScheduleBrowser } from "@/components/predictions/PredictionSchedule";
 import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
 import type { PublicPredictionMatch } from "@/src/server/all-predictions";
 
 type AllPredictionsScheduleProps = {
+  competitionKind: CompetitionKind;
   matches: PublicPredictionMatch[];
 };
 
@@ -125,9 +128,13 @@ function AllPredictionsMatchCard({ match }: { match: PublicPredictionMatch }) {
   );
 }
 
-export function AllPredictionsSchedule({ matches }: AllPredictionsScheduleProps) {
+export function AllPredictionsSchedule({
+  competitionKind,
+  matches,
+}: AllPredictionsScheduleProps) {
   return (
     <PredictionScheduleBrowser
+      competitionKind={competitionKind}
       groupHeading="Les pronos"
       matches={matches}
       phaseHeading="Les pronos"

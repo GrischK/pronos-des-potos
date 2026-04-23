@@ -44,7 +44,10 @@ export default async function TousLesPronosPage({
       </section>
 
       <section className="page-section">
-        <AllPredictionsSchedule matches={competition.matches} />
+        <AllPredictionsSchedule
+          competitionKind={competition.kind}
+          matches={competition.matches}
+        />
       </section>
     </main>
   );

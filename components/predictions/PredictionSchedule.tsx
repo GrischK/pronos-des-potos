@@ -2,16 +2,18 @@
 
 import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import type { CompetitionKind } from "@prisma/client";
 
 import { PredictionMatchForm } from "@/components/predictions/PredictionMatchForm";
 import {
   competitionStageOrder,
   getCompetitionStageLabel,
-  twoLeggedCompetitionStages,
+  isTwoLeggedCompetitionStage,
 } from "@/src/domain/competition-stage";
 import type { PredictionMatch } from "@/src/server/predictions";
 
 type PredictionScheduleProps = {
+  competitionKind: CompetitionKind;
   matches: PredictionMatch[];
   slug: string;
 };
@@ -30,6 +32,7 @@ export type ScheduleMatch = {
 };
 
 type PredictionScheduleBrowserProps<TMatch extends ScheduleMatch> = {
+  competitionKind: CompetitionKind;
   groupHeading: string;
   matches: TMatch[];
   phaseHeading: string;
@@ -100,6 +103,7 @@ function sortMatchesByKickoff<TMatch extends ScheduleMatch>(matches: TMatch[]) {
 }
 
 function getPhaseMatchSections<TMatch extends ScheduleMatch>(
+  competitionKind: CompetitionKind,
   section: PredictionPhaseSection<TMatch>,
 ) {
   const matches = sortMatchesByKickoff(section.matches);
@@ -128,7 +132,7 @@ function getPhaseMatchSections<TMatch extends ScheduleMatch>(
   }
 
   if (
-    twoLeggedCompetitionStages.has(section.id) &&
+    isTwoLeggedCompetitionStage(competitionKind, section.id) &&
     matches.length > 1 &&
     matches.length % 2 === 0
   ) {
@@ -260,6 +264,7 @@ function PendingPredictionPanel({
 }
 
 export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
+  competitionKind,
   groupHeading,
   matches,
   phaseHeading,
@@ -469,7 +474,7 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
             <p>{activeStage.matches.length} matchs.</p>
           </div>
 
-          {getPhaseMatchSections(activeStage).map((section) => (
+          {getPhaseMatchSections(competitionKind, activeStage).map((section) => (
             <div className="match-subsection" key={section.id}>
               <div className="match-subsection-header">
                 <h3>{section.title}</h3>
@@ -488,11 +493,16 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
   );
 }
 
-export function PredictionSchedule({ matches, slug }: PredictionScheduleProps) {
+export function PredictionSchedule({
+  competitionKind,
+  matches,
+  slug,
+}: PredictionScheduleProps) {
   return (
     <>
       <PendingPredictionPanel matches={matches} slug={slug} />
       <PredictionScheduleBrowser
+        competitionKind={competitionKind}
         groupHeading="Mes scores"
         matches={matches}
         phaseHeading="Mes scores"
