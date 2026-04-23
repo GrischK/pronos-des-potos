@@ -89,11 +89,11 @@
   }
 
   .site-header {
-    @apply sticky top-0 z-20 flex items-center justify-between gap-4 mx-auto;
-    width: min(1180px, calc(100% - 32px));
+    @apply sticky top-0 z-20 w-full;
     min-height: 72px;
     border-bottom: 1px solid color-mix(in srgb, var(--pitch) 28%, var(--line));
-    background: color-mix(in srgb, var(--background) 92%, white);
+    background: color-mix(in srgb, var(--background) 90%, white);
+    backdrop-filter: blur(14px);
   }
 
   .site-header::before {
@@ -108,6 +108,11 @@
       var(--navy)
     );
     content: "";
+  }
+
+  .site-header-inner {
+    @apply mx-auto flex min-h-[72px] items-center justify-between gap-4;
+    width: min(1180px, calc(100% - 32px));
   }
 
   .brand {
