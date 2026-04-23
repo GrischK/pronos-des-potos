@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { AvatarUploadForm } from "@/components/account/AvatarUploadForm";
+import { PlayerProfileAvatar } from "@/components/player/PlayerProfileAvatar";
 import {
   updateAccountEmailAction,
   updateAccountNameAction,
@@ -49,13 +50,11 @@ export function AccountForms({ user }: AccountFormsProps) {
   return (
     <div className="account-grid">
       <section className="card account-card account-profile-card">
-        <div className="account-avatar">
-          {user.image ? (
-            <img alt="" src={user.image} />
-          ) : (
-            <span>{(user.name ?? user.email).slice(0, 1).toUpperCase()}</span>
-          )}
-        </div>
+        <PlayerProfileAvatar
+          className="account-avatar"
+          image={user.image}
+          name={user.name ?? user.email}
+        />
         <div className="account-profile-info">
           <h2>{user.name ?? "Compte joueur"}</h2>
           <p>{user.email}</p>

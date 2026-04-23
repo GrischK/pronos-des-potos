@@ -3,10 +3,12 @@
 import { createPortal } from "react-dom";
 import { useRef, useState } from "react";
 
+import { cn } from "@/src/lib/cn";
 import { useDismissibleLayer } from "@/src/lib/use-dismissible-layer";
 import { usePresence } from "@/src/lib/use-presence";
 
 type PlayerProfileAvatarProps = {
+  className?: string;
   image: string | null;
   name: string;
 };
@@ -16,6 +18,7 @@ function getInitial(name: string) {
 }
 
 export function PlayerProfileAvatar({
+  className,
   image,
   name,
 }: PlayerProfileAvatarProps) {
@@ -70,7 +73,7 @@ export function PlayerProfileAvatar({
     <>
       <button
         aria-label={image ? "Agrandir la photo du joueur" : "Avatar du joueur"}
-        className={`player-profile-avatar${image ? " is-clickable" : ""}`}
+        className={cn(className ?? "player-profile-avatar", image && "is-clickable")}
         onClick={() => {
           if (image) {
             setIsOpen(true);
