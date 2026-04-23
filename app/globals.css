@@ -479,7 +479,7 @@
   }
 
   .file-picker-input {
-    @apply sr-only;
+    display: none;
   }
 
   .file-picker-name {
