@@ -6,6 +6,7 @@ import { prisma } from "@/src/db/prisma";
 export type LeaderboardRow = {
   userId: string;
   name: string;
+  image: string | null;
   points: number;
   predictedMatches: number;
   exactUnique: number;
@@ -47,6 +48,7 @@ type LeaderboardMatch = {
     user: {
       id: string;
       email: string;
+      image: string | null;
       name: string | null;
     };
   }[];
@@ -56,6 +58,7 @@ type CompetitionPlayer = {
   user: {
     id: string;
     email: string;
+    image: string | null;
     name: string | null;
   };
 };
@@ -70,6 +73,7 @@ function buildLeaderboardSnapshot(
     rowsByUser.set(player.user.id, {
       userId: player.user.id,
       name: getUserDisplayName(player.user),
+      image: player.user.image,
       points: 0,
       predictedMatches: 0,
       exactUnique: 0,
@@ -96,6 +100,7 @@ function buildLeaderboardSnapshot(
         {
           userId: prediction.userId,
           name: getUserDisplayName(prediction.user),
+          image: prediction.user.image,
           points: 0,
           predictedMatches: 0,
           exactUnique: 0,
@@ -168,6 +173,7 @@ export async function getLeaderboardData(
             select: {
               id: true,
               email: true,
+              image: true,
               name: true,
             },
           },
@@ -199,6 +205,7 @@ export async function getLeaderboardData(
                 select: {
                   id: true,
                   email: true,
+                  image: true,
                   name: true,
                 },
               },

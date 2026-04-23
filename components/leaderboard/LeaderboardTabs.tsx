@@ -14,6 +14,10 @@ function getLeaderLabel(snapshot: LeaderboardSnapshot) {
   return snapshot.rows[0]?.name ?? "Aucun prono scoré";
 }
 
+function getInitial(name: string) {
+  return name.trim().slice(0, 1).toUpperCase();
+}
+
 function LeaderboardTable({ snapshot }: { snapshot: LeaderboardSnapshot }) {
   if (snapshot.rows.length === 0) {
     return (
@@ -44,7 +48,16 @@ function LeaderboardTable({ snapshot }: { snapshot: LeaderboardSnapshot }) {
             <tr key={row.userId}>
               <td>{index + 1}</td>
               <td>
-                <strong>{row.name}</strong>
+                <span className="leaderboard-player">
+                  <span className="leaderboard-player-avatar">
+                    {row.image ? (
+                      <img alt="" loading="lazy" src={row.image} />
+                    ) : (
+                      getInitial(row.name)
+                    )}
+                  </span>
+                  <strong>{row.name}</strong>
+                </span>
               </td>
               <td>
                 <strong>{row.points}</strong>

@@ -1093,6 +1093,22 @@
     @apply border-b border-line px-3 py-3 font-bold;
   }
 
+  .leaderboard-player {
+    @apply flex min-w-0 items-center gap-2.5;
+  }
+
+  .leaderboard-player-avatar {
+    @apply grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-lg bg-foreground text-xs font-black text-surface;
+  }
+
+  .leaderboard-player-avatar img {
+    @apply h-full w-full object-cover;
+  }
+
+  .leaderboard-player strong {
+    @apply min-w-0 truncate;
+  }
+
   .leaderboard-table tbody tr:last-child td {
     @apply border-b-0;
   }
