@@ -40,10 +40,12 @@
 
   html {
     @apply min-h-full;
+    overflow-x: clip;
   }
 
   body {
     @apply m-0 min-h-full text-foreground font-sans;
+    overflow-x: clip;
     background:
       linear-gradient(
         90deg,
@@ -340,20 +342,29 @@
   }
 
   .account-grid {
-    @apply grid gap-4;
+    @apply grid min-w-0 gap-4;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
 
   .account-card {
-    @apply min-h-0;
+    @apply flex min-h-0 min-w-0 flex-col;
   }
 
   .account-profile-card {
-    @apply flex items-center gap-4;
+    @apply flex-col items-start justify-start gap-3;
+    min-width: 0;
   }
 
   .account-profile-card h2 {
-    @apply mb-1;
+    @apply mb-1 truncate;
+  }
+
+  .account-profile-card p {
+    @apply truncate;
+  }
+
+  .account-profile-info {
+    @apply min-w-0 flex-1;
   }
 
   .account-avatar {
@@ -365,7 +376,84 @@
   }
 
   .account-form {
-    @apply mt-5 grid gap-3.5;
+    @apply mt-5 flex min-w-0 flex-1 flex-col gap-3.5;
+  }
+
+  .account-form > button[type="submit"] {
+    @apply mt-auto;
+  }
+
+  .file-picker {
+    @apply grid min-w-0 gap-2;
+  }
+
+  .file-picker-input {
+    @apply sr-only;
+  }
+
+  .file-picker-name {
+    @apply min-w-0 truncate text-sm font-bold text-muted;
+  }
+
+  .avatar-crop-tool {
+    @apply grid justify-items-center gap-4;
+  }
+
+  .avatar-crop-preview {
+    @apply relative cursor-grab overflow-hidden rounded-lg border border-line bg-surface-alt;
+    height: 260px;
+    touch-action: none;
+    width: min(260px, calc(100vw - 72px));
+  }
+
+  .avatar-crop-preview:active {
+    @apply cursor-grabbing;
+  }
+
+  .avatar-crop-preview img {
+    @apply absolute left-1/2 top-1/2 max-w-none select-none;
+  }
+
+  .avatar-crop-preview::after {
+    @apply pointer-events-none absolute inset-0 rounded-lg;
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--pitch) 34%, transparent);
+    content: "";
+  }
+
+  .avatar-crop-controls {
+    @apply grid w-full gap-2;
+  }
+
+  .avatar-crop-controls label {
+    @apply grid gap-1.5;
+  }
+
+  .avatar-crop-controls span {
+    @apply text-[0.82rem] font-[850] text-muted;
+  }
+
+  .avatar-crop-controls input {
+    @apply w-full accent-pitch;
+  }
+
+  .avatar-crop-controls input:disabled {
+    @apply opacity-40;
+  }
+
+  .modal-backdrop {
+    @apply fixed inset-0 z-50 grid place-items-center bg-foreground/45 p-4;
+  }
+
+  .avatar-crop-modal {
+    @apply w-full max-w-[380px] rounded-lg border border-line bg-surface p-5 shadow-2xl;
+  }
+
+  .avatar-crop-modal h3 {
+    @apply mt-0 mb-4 text-2xl font-black leading-none tracking-normal;
+  }
+
+  .modal-actions {
+    @apply mt-5 flex flex-wrap justify-end gap-2;
   }
 
   .form-hint {
@@ -419,7 +507,7 @@
   }
 
   .btn {
-    @apply inline-flex min-h-11 items-center justify-center rounded-lg border border-transparent px-[18px] font-extrabold tracking-normal;
+    @apply inline-flex min-h-11 min-w-0 items-center justify-center rounded-lg border border-transparent px-[18px] font-extrabold tracking-normal;
     transition:
       background-color 160ms ease,
       border-color 160ms ease,
@@ -479,6 +567,19 @@
       border-color 160ms ease,
       box-shadow 160ms ease,
       transform 160ms ease;
+  }
+
+  .card.account-card {
+    @apply flex min-h-0;
+  }
+
+  .card.account-card:not(.account-profile-card) {
+    @apply flex-col;
+  }
+
+  .card.account-profile-card {
+    @apply flex-col items-start justify-start gap-3;
+    min-width: 0;
   }
 
   .card:hover {

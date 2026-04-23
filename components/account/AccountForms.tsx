@@ -56,7 +56,7 @@ export function AccountForms({ user }: AccountFormsProps) {
             <span>{(user.name ?? user.email).slice(0, 1).toUpperCase()}</span>
           )}
         </div>
-        <div>
+        <div className="account-profile-info">
           <h2>{user.name ?? "Compte joueur"}</h2>
           <p>{user.email}</p>
         </div>
