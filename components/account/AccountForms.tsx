@@ -2,8 +2,8 @@
 
 import { useActionState } from "react";
 
+import { AvatarUploadForm } from "@/components/account/AvatarUploadForm";
 import {
-  updateAccountAvatarAction,
   updateAccountEmailAction,
   updateAccountNameAction,
   updateAccountPasswordAction,
@@ -33,10 +33,6 @@ function ActionMessage({ state }: { state: AccountActionState }) {
 }
 
 export function AccountForms({ user }: AccountFormsProps) {
-  const [avatarState, avatarAction, avatarPending] = useActionState(
-    updateAccountAvatarAction,
-    initialState,
-  );
   const [nameState, nameAction, namePending] = useActionState(
     updateAccountNameAction,
     initialState,
@@ -68,22 +64,7 @@ export function AccountForms({ user }: AccountFormsProps) {
 
       <section className="card account-card">
         <h2>Photo</h2>
-        <form action={avatarAction} className="account-form">
-          <label className="field">
-            <span>Image de profil</span>
-            <input
-              accept="image/jpeg,image/png,image/webp"
-              name="image"
-              required
-              type="file"
-            />
-          </label>
-          <p className="form-hint">JPG, PNG ou WebP. 2 Mo maximum.</p>
-          <ActionMessage state={avatarState} />
-          <button className="btn btn-primary" disabled={avatarPending} type="submit">
-            {avatarPending ? "Upload..." : "Mettre à jour la photo"}
-          </button>
-        </form>
+        <AvatarUploadForm />
       </section>
 
       <section className="card account-card">

@@ -9,8 +9,8 @@ import { getSessionUserId } from "@/src/auth/session";
 import { hashPassword, verifyPassword } from "@/src/auth/password";
 import { prisma } from "@/src/db/prisma";
 
-const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
-const ALLOWED_AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_AVATAR_SIZE = 512 * 1024;
+const ALLOWED_AVATAR_TYPES = ["image/webp"];
 
 const nameSchema = z.object({
   name: z.string().trim().min(2, "Ton nom doit contenir au moins 2 caractères."),
@@ -178,17 +178,17 @@ export async function updateAccountAvatarAction(
   }
 
   if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
-    return { error: "Format accepté : JPG, PNG ou WebP." };
+    return { error: "La photo doit être convertie en WebP." };
   }
 
   if (file.size > MAX_AVATAR_SIZE) {
-    return { error: "L'image doit faire 2 Mo maximum." };
+    return { error: "L'image convertie doit faire 512 Ko maximum." };
   }
 
   let blob;
 
   try {
-    blob = await put(`avatars/${user.id}-${file.name}`, file, {
+    blob = await put(`avatars/${user.id}.webp`, file, {
       access: "public",
       addRandomSuffix: true,
     });
