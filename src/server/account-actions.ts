@@ -198,8 +198,7 @@ export async function updateAccountAvatarAction(
     }
 
     return {
-      error:
-        "Upload impossible. Vérifie que BLOB_READ_WRITE_TOKEN est configuré.",
+      error: "Upload impossible pour le moment.",
     };
   }
 

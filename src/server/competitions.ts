@@ -1,3 +1,5 @@
+import "server-only";
+
 import { unstable_cache } from "next/cache";
 
 import { getCurrentUser } from "@/src/auth/current-user";
