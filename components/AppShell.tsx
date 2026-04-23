@@ -71,8 +71,9 @@ export function AppShell({ children, showAdminNav = false }: AppShellProps) {
               aria-expanded={isMobileNavOpen}
               aria-label="Ouvrir le menu"
               className={`burger-button${isMobileNavOpen ? " is-open" : ""}`}
-              onClick={() => {
-                setIsMobileNavOpen((current) => !current);
+              onClick={(event) => {
+                event.stopPropagation();
+                setIsMobileNavOpen(isMobileNavOpen ? false : true);
               }}
               ref={mobileNavButtonRef}
               type="button"

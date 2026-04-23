@@ -29,7 +29,7 @@ export function useDismissibleLayer({
       return ignoreRefs.some((ref) => ref.current?.contains(target));
     }
 
-    function handlePointerDown(event: PointerEvent) {
+    function handleClick(event: MouseEvent) {
       if (event.target instanceof Node && !isIgnoredTarget(event.target)) {
         onDismiss();
       }
@@ -41,11 +41,11 @@ export function useDismissibleLayer({
       }
     }
 
-    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("click", handleClick);
     document.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("click", handleClick);
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [active, ignoreRefs, layerRef, onDismiss]);
