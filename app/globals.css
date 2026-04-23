@@ -1037,7 +1037,7 @@
   }
 
   .leaderboard-leader .leaderboard-player-avatar {
-    @apply h-9 w-9;
+    @apply h-20 w-20 text-sm;
   }
 
   .leaderboard-leader strong {
@@ -1131,7 +1131,7 @@
   }
 
   .player-profile-avatar {
-    @apply grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-lg bg-foreground text-4xl font-black text-surface;
+    @apply grid h-40 w-40 shrink-0 place-items-center overflow-hidden rounded-lg bg-foreground text-5xl font-black text-surface;
   }
 
   .player-profile-avatar img {
