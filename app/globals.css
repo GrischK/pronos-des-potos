@@ -16,6 +16,22 @@
   --sky: #8fc6df;
 }
 
+:root[data-theme="dark"] {
+  --background: #0f1318;
+  --foreground: #edf2f7;
+  --muted: #9aa8b8;
+  --line: #2a3440;
+  --surface: #141b23;
+  --surface-alt: #1b2430;
+  --pitch: #57a874;
+  --pitch-strong: #7dc793;
+  --coral: #ff8364;
+  --card: #f0c441;
+  --mint: #7ac9a7;
+  --navy: #8fb0d8;
+  --sky: #6fbad6;
+}
+
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -113,6 +129,10 @@
   .site-header-inner {
     @apply mx-auto flex min-h-[72px] items-center justify-between gap-4;
     width: min(1180px, calc(100% - 32px));
+  }
+
+  .header-tools {
+    @apply flex items-center gap-3;
   }
 
   .brand {
@@ -295,6 +315,14 @@
 
   .landing-brand {
     @apply mb-7 inline-flex w-fit items-center gap-3;
+  }
+
+  .landing-topbar {
+    @apply flex flex-wrap items-center justify-between gap-4;
+  }
+
+  .landing-topbar .landing-brand {
+    @apply mb-0;
   }
 
   .page-header {
@@ -700,6 +728,48 @@
   .btn-danger:hover {
     border-color: color-mix(in srgb, #dc2626 54%, var(--line));
     color: #b91c1c;
+  }
+
+  .theme-toggle {
+    @apply inline-flex min-h-[42px] items-center gap-2 rounded-lg border border-line px-3 text-sm font-black text-foreground;
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--surface) 88%, white), var(--surface));
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--foreground) 8%, transparent);
+    transition:
+      border-color 160ms ease,
+      background-color 160ms ease,
+      color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .theme-toggle:hover {
+    border-color: color-mix(in srgb, var(--pitch) 38%, var(--line));
+    transform: translateY(-1px);
+  }
+
+  .theme-toggle-track {
+    @apply relative inline-flex h-6 w-11 rounded-full;
+    background: color-mix(in srgb, var(--foreground) 16%, var(--surface));
+  }
+
+  .theme-toggle-thumb {
+    @apply absolute top-0.5 left-0.5 h-5 w-5 rounded-full;
+    background:
+      linear-gradient(135deg, var(--card), color-mix(in srgb, var(--coral) 55%, white));
+    box-shadow: 0 4px 10px color-mix(in srgb, var(--foreground) 24%, transparent);
+    transition:
+      transform 180ms ease,
+      background-color 180ms ease;
+  }
+
+  .theme-toggle-thumb[data-theme="dark"] {
+    transform: translateX(20px);
+    background:
+      linear-gradient(135deg, var(--sky), color-mix(in srgb, var(--navy) 60%, white));
+  }
+
+  .theme-toggle-label {
+    @apply leading-none;
   }
 
   .card,
@@ -1793,6 +1863,141 @@
   .auth-switch a {
     @apply font-black text-pitch-strong;
   }
+
+  :root[data-theme="dark"] body {
+    background:
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--pitch) 12%, transparent) 0,
+        transparent 24%
+      ),
+      linear-gradient(
+        135deg,
+        transparent 0 72%,
+        color-mix(in srgb, var(--card) 10%, transparent) 72% 82%,
+        transparent 82%
+      ),
+      radial-gradient(
+        circle at 88% 12%,
+        color-mix(in srgb, var(--sky) 14%, transparent) 0 12%,
+        transparent 32%
+      ),
+      var(--background);
+  }
+
+  :root[data-theme="dark"] .site-header,
+  :root[data-theme="dark"] .site-nav,
+  :root[data-theme="dark"] .burger-button,
+  :root[data-theme="dark"] .mobile-nav-panel,
+  :root[data-theme="dark"] .nav-link-mobile,
+  :root[data-theme="dark"] .score-panel,
+  :root[data-theme="dark"] .card,
+  :root[data-theme="dark"] .empty-state,
+  :root[data-theme="dark"] .next-prediction-panel,
+  :root[data-theme="dark"] .pending-predictions-panel,
+  :root[data-theme="dark"] .highlight-panel,
+  :root[data-theme="dark"] .highlight-match-card,
+  :root[data-theme="dark"] .phase-pager,
+  :root[data-theme="dark"] .standings-table-wrap,
+  :root[data-theme="dark"] .leaderboard-table-wrap,
+  :root[data-theme="dark"] .leaderboard-info-popover,
+  :root[data-theme="dark"] .public-prediction-row,
+  :root[data-theme="dark"] .prediction-row,
+  :root[data-theme="dark"] .auth-card {
+    border-color: color-mix(in srgb, var(--pitch) 18%, var(--line));
+    box-shadow: 0 18px 40px color-mix(in srgb, black 32%, transparent);
+  }
+
+  :root[data-theme="dark"] .site-header {
+    background: color-mix(in srgb, var(--background) 88%, black);
+  }
+
+  :root[data-theme="dark"] .site-nav,
+  :root[data-theme="dark"] .burger-button,
+  :root[data-theme="dark"] .pending-predictions-summary-action {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--surface-alt) 92%, white),
+        var(--surface)
+      );
+  }
+
+  :root[data-theme="dark"] .nav-link-mobile,
+  :root[data-theme="dark"] .competition-kind-badge,
+  :root[data-theme="dark"] .competition-card-stats span,
+  :root[data-theme="dark"] .highlight-match-card,
+  :root[data-theme="dark"] .leaderboard-info-button,
+  :root[data-theme="dark"] .prediction-inputs input,
+  :root[data-theme="dark"] .field input,
+  :root[data-theme="dark"] .field select,
+  :root[data-theme="dark"] .btn-danger {
+    background: var(--surface);
+    color: var(--foreground);
+  }
+
+  :root[data-theme="dark"] .competition-emblem,
+  :root[data-theme="dark"] .player-avatar,
+  :root[data-theme="dark"] .leaderboard-player-avatar,
+  :root[data-theme="dark"] .account-avatar,
+  :root[data-theme="dark"] .player-profile-avatar {
+    border-color: color-mix(in srgb, var(--foreground) 12%, var(--line));
+  }
+
+  :root[data-theme="dark"] .score-panel,
+  :root[data-theme="dark"] .feature-card,
+  :root[data-theme="dark"] .competition-card,
+  :root[data-theme="dark"] .competition-card--world-cup,
+  :root[data-theme="dark"] .competition-card--euro,
+  :root[data-theme="dark"] .competition-card--champions-league,
+  :root[data-theme="dark"] .competition-card--other,
+  :root[data-theme="dark"] .next-prediction-panel,
+  :root[data-theme="dark"] .pending-predictions-panel,
+  :root[data-theme="dark"] .auth-card {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--surface-alt) 92%, transparent),
+        var(--surface)
+      ),
+      var(--surface);
+  }
+
+  :root[data-theme="dark"] .feature-card:nth-child(2),
+  :root[data-theme="dark"] .feature-card:nth-child(3) {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--surface-alt) 92%, transparent),
+        var(--surface)
+      ),
+      var(--surface);
+  }
+
+  :root[data-theme="dark"] .competition-card-summary span,
+  :root[data-theme="dark"] .score-rule,
+  :root[data-theme="dark"] .competition-card-next,
+  :root[data-theme="dark"] .highlight-prono-line,
+  :root[data-theme="dark"] .day-nav-button,
+  :root[data-theme="dark"] .group-nav-button,
+  :root[data-theme="dark"] .phase-arrow,
+  :root[data-theme="dark"] .schedule-view-switch,
+  :root[data-theme="dark"] .avatar-crop-preview,
+  :root[data-theme="dark"] .modal-close-button {
+    background: var(--surface-alt);
+  }
+
+  :root[data-theme="dark"] .form-error {
+    border-color: color-mix(in srgb, var(--coral) 42%, var(--line));
+    background: color-mix(in srgb, var(--coral) 12%, var(--surface));
+    color: #ffd1c7;
+  }
+
+  :root[data-theme="dark"] .form-success {
+    border-color: color-mix(in srgb, var(--pitch) 42%, var(--line));
+    background: color-mix(in srgb, var(--pitch) 14%, var(--surface));
+    color: #c8f5d8;
+  }
 }
 
 @layer utilities {
@@ -1826,6 +2031,10 @@
 
   .site-nav {
     @apply hidden;
+  }
+
+  .header-tools {
+    @apply gap-2;
   }
 
   .mobile-nav {

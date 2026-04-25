@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { PageHeader } from "@/components/PageHeader";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { getSessionUserId } from "@/src/auth/session";
 
 const foundations = [
@@ -35,13 +36,17 @@ export default async function Home() {
   return (
     <main className="landing-page">
       <section className="hero-section">
-        <Link className="landing-brand" href="/">
-          <span className="brand-mark">P</span>
-          <span>
-            <span className="brand-name">Pronos des potos</span>
-            <span className="brand-tagline">Tournois entre amis</span>
-          </span>
-        </Link>
+        <div className="landing-topbar">
+          <Link className="landing-brand" href="/">
+            <span className="brand-mark">P</span>
+            <span>
+              <span className="brand-name">Pronos des potos</span>
+              <span className="brand-tagline">Tournois entre amis</span>
+            </span>
+          </Link>
+
+          <ThemeToggle />
+        </div>
 
         <div className="hero-layout">
           <PageHeader
