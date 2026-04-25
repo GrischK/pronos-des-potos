@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import type { CompetitionKind } from "@prisma/client";
@@ -251,7 +252,12 @@ function PendingPredictionPanel({
             {pendingMatches.length} match{pendingMatches.length > 1 ? "s" : ""}
           </strong>
         </span>
-        <span className="pending-predictions-summary-action">Ouvrir</span>
+        <span
+          aria-hidden="true"
+          className="pending-predictions-summary-action"
+        >
+          <ChevronDown size={18} strokeWidth={3} />
+        </span>
       </summary>
 
       <div className="pending-predictions-list">
@@ -408,18 +414,20 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
       {view === "structure" && activeStage ? (
         <div className="phase-pager">
           <button
+            aria-label="Phase précédente"
             className="phase-arrow"
             disabled={!previousStage}
             onClick={() => setActiveStageIndex((index) => Math.max(0, index - 1))}
             type="button"
           >
-            {"<"}
+            <ChevronLeft aria-hidden="true" size={18} strokeWidth={3} />
           </button>
           <div>
             <p className="badge badge-live">{activeStage.label}</p>
             <h2>{activeStage.title}</h2>
           </div>
           <button
+            aria-label="Phase suivante"
             className="phase-arrow"
             disabled={!nextStage}
             onClick={() =>
@@ -427,7 +435,7 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
             }
             type="button"
           >
-            {">"}
+            <ChevronRight aria-hidden="true" size={18} strokeWidth={3} />
           </button>
         </div>
       ) : null}

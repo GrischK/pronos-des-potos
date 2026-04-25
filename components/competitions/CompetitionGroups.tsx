@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { CompetitionKind } from "@prisma/client";
 
@@ -218,18 +219,20 @@ export function CompetitionGroups({
     <div className="schedule-browser">
       <div className="phase-pager">
         <button
+          aria-label="Phase précédente"
           className="phase-arrow"
           disabled={!previousStage}
           onClick={() => setActiveStageIndex((index) => Math.max(0, index - 1))}
           type="button"
         >
-          {"<"}
+          <ChevronLeft aria-hidden="true" size={18} strokeWidth={3} />
         </button>
         <div>
           <p className="badge badge-live">{activeStage.label}</p>
           <h2>{activeStage.title}</h2>
         </div>
         <button
+          aria-label="Phase suivante"
           className="phase-arrow"
           disabled={!nextStage}
           onClick={() =>
@@ -237,7 +240,7 @@ export function CompetitionGroups({
           }
           type="button"
         >
-          {">"}
+          <ChevronRight aria-hidden="true" size={18} strokeWidth={3} />
         </button>
       </div>
 

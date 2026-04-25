@@ -1016,11 +1016,32 @@
   }
 
   .pending-predictions-summary-action {
-    @apply shrink-0 rounded-lg bg-foreground px-3 py-2 text-sm font-black text-surface;
+    @apply inline-flex shrink-0 items-center justify-center rounded-lg border border-line;
+    height: 42px;
+    width: 42px;
+    background:
+      linear-gradient(180deg, white, color-mix(in srgb, var(--pitch) 6%, white));
+    transition:
+      border-color 180ms ease,
+      background-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
+  }
+
+  .pending-predictions-panel summary:hover .pending-predictions-summary-action {
+    border-color: color-mix(in srgb, var(--coral) 42%, var(--line));
+  }
+
+  .pending-predictions-summary-action svg {
+    transition: transform 180ms ease;
   }
 
   .pending-predictions-panel[open] .pending-predictions-summary-action {
-    @apply bg-surface-alt text-foreground;
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--foreground) 10%, transparent);
+  }
+
+  .pending-predictions-panel[open] .pending-predictions-summary-action svg {
+    transform: rotate(180deg);
   }
 
   .pending-predictions-list {

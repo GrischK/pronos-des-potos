@@ -1,5 +1,6 @@
 "use client";
 
+import { Check } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
 
 import {
@@ -208,15 +209,7 @@ export function PredictionMatchForm({ match, slug }: PredictionMatchFormProps) {
             ) : showSavedState ? (
               <>
                 <span aria-hidden="true" className="btn-check-icon">
-                  <svg fill="none" height="14" viewBox="0 0 14 14" width="14">
-                    <path
-                      d="M3 7.5 5.5 10 11 4.5"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.8"
-                    />
-                  </svg>
+                  <Check size={14} strokeWidth={3} />
                 </span>
                 Enregistré
               </>
