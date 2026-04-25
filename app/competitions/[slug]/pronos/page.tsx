@@ -32,7 +32,7 @@ export default async function PronosticsPage({ params }: PronosticsPageProps) {
         title={`Mes pronos - ${competition.name}`}
         description={
           competition.isOpen
-            ? "Saisis tes scores avant le coup d'envoi de chaque match."
+            ? "Saisis ou modifie tes scores avant le coup d'envoi de chaque match."
             : "La compétition est fermée aux pronos. Tes scores restent consultables."
         }
       />

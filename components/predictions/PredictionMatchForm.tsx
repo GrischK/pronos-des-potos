@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
 
 import {
   savePredictionAction,
@@ -73,14 +73,49 @@ function getResultLabel(status: string) {
   return "Score final";
 }
 
+function getPredictionValue(value: number | null | undefined) {
+  return value === null || value === undefined ? "" : String(value);
+}
+
 export function PredictionMatchForm({ match, slug }: PredictionMatchFormProps) {
   const [state, formAction, pending] = useActionState(
     savePredictionAction,
     initialState,
   );
+  const initialHomeScore = getPredictionValue(match.prediction?.homeScore);
+  const initialAwayScore = getPredictionValue(match.prediction?.awayScore);
+  const [homeScore, setHomeScore] = useState(initialHomeScore);
+  const [awayScore, setAwayScore] = useState(initialAwayScore);
+  const [savedHomeScore, setSavedHomeScore] = useState(initialHomeScore);
+  const [savedAwayScore, setSavedAwayScore] = useState(initialAwayScore);
+  const [hasSavedState, setHasSavedState] = useState(
+    initialHomeScore !== "" && initialAwayScore !== "",
+  );
+
+  useEffect(() => {
+    setHomeScore(initialHomeScore);
+    setAwayScore(initialAwayScore);
+    setSavedHomeScore(initialHomeScore);
+    setSavedAwayScore(initialAwayScore);
+    setHasSavedState(initialHomeScore !== "" && initialAwayScore !== "");
+  }, [initialAwayScore, initialHomeScore, match.id]);
+
+  useEffect(() => {
+    if (!state.success) {
+      return;
+    }
+
+    setSavedHomeScore(homeScore);
+    setSavedAwayScore(awayScore);
+    setHasSavedState(true);
+  }, [awayScore, homeScore, state.success]);
+
   const lockReason = getLockReason(match);
   const hasResult = match.homeScore !== null && match.awayScore !== null;
   const showReadonlyEmptyState = !match.canPredict && !match.prediction;
+  const isDirty = homeScore !== savedHomeScore || awayScore !== savedAwayScore;
+  const hasCompleteScore = homeScore !== "" && awayScore !== "";
+  const showSavedState = hasSavedState && !isDirty;
 
   return (
     <form action={formAction} className="prediction-row">
@@ -113,7 +148,7 @@ export function PredictionMatchForm({ match, slug }: PredictionMatchFormProps) {
             <div className="prediction-inputs">
               <input
                 aria-label={`Score ${getTeamName(match, "home")}`}
-                defaultValue={match.prediction?.homeScore ?? ""}
+                onChange={(event) => setHomeScore(event.target.value)}
                 disabled={!match.canPredict || pending}
                 inputMode="numeric"
                 max="99"
@@ -121,11 +156,12 @@ export function PredictionMatchForm({ match, slug }: PredictionMatchFormProps) {
                 name="homeScore"
                 required
                 type="number"
+                value={homeScore}
               />
               <span>·</span>
               <input
                 aria-label={`Score ${getTeamName(match, "away")}`}
-                defaultValue={match.prediction?.awayScore ?? ""}
+                onChange={(event) => setAwayScore(event.target.value)}
                 disabled={!match.canPredict || pending}
                 inputMode="numeric"
                 max="99"
@@ -133,6 +169,7 @@ export function PredictionMatchForm({ match, slug }: PredictionMatchFormProps) {
                 name="awayScore"
                 required
                 type="number"
+                value={awayScore}
               />
             </div>
           )}
@@ -161,16 +198,33 @@ export function PredictionMatchForm({ match, slug }: PredictionMatchFormProps) {
       {showReadonlyEmptyState ? null : (
         <div className="prediction-actions">
           <button
-            className="btn btn-secondary"
-            disabled={!match.canPredict || pending}
+            aria-label={showSavedState ? "Prono enregistré" : "Enregistrer le prono"}
+            className={`btn ${showSavedState ? "btn-saved" : "btn-secondary"}`}
+            disabled={!match.canPredict || pending || !hasCompleteScore || !isDirty}
             type="submit"
           >
-            {pending ? "Enregistrement..." : "Enregistrer"}
+            {pending ? (
+              "Enregistrement..."
+            ) : showSavedState ? (
+              <>
+                <span aria-hidden="true" className="btn-check-icon">
+                  <svg fill="none" height="14" viewBox="0 0 14 14" width="14">
+                    <path
+                      d="M3 7.5 5.5 10 11 4.5"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.8"
+                    />
+                  </svg>
+                </span>
+                Enregistré
+              </>
+            ) : (
+              "Enregistrer"
+            )}
           </button>
           {state.error ? <span className="form-error">{state.error}</span> : null}
-          {state.success ? (
-            <span className="form-success">{state.success}</span>
-          ) : null}
         </div>
       )}
     </form>

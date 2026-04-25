@@ -671,6 +671,19 @@
     color: var(--coral);
   }
 
+  .btn-saved {
+    @apply border-pitch bg-surface-alt text-pitch-strong;
+  }
+
+  .btn-saved:hover {
+    transform: none;
+  }
+
+  .btn-check-icon {
+    @apply inline-flex h-5 w-5 items-center justify-center rounded-full mr-2;
+    background: color-mix(in srgb, var(--pitch) 14%, white);
+  }
+
   .btn-warning {
     @apply border-line bg-surface text-foreground;
   }
