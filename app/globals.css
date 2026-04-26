@@ -1936,6 +1936,16 @@
     color: var(--foreground);
   }
 
+  :root[data-theme="dark"] .nav-link:hover {
+    background: color-mix(in srgb, var(--pitch) 18%, var(--surface));
+    color: var(--foreground);
+  }
+
+  :root[data-theme="dark"] .nav-link-logout:hover {
+    background: color-mix(in srgb, var(--coral) 14%, var(--surface));
+    color: #ffc2b5;
+  }
+
   :root[data-theme="dark"] .competition-emblem,
   :root[data-theme="dark"] .player-avatar,
   :root[data-theme="dark"] .leaderboard-player-avatar,
