@@ -1978,6 +1978,8 @@
   :root[data-theme="dark"] .score-rule,
   :root[data-theme="dark"] .competition-card-next,
   :root[data-theme="dark"] .highlight-prono-line,
+  :root[data-theme="dark"] .leaderboard-rules,
+  :root[data-theme="dark"] .leaderboard-rule,
   :root[data-theme="dark"] .day-nav-button,
   :root[data-theme="dark"] .group-nav-button,
   :root[data-theme="dark"] .phase-arrow,
@@ -1997,6 +1999,50 @@
     border-color: color-mix(in srgb, var(--pitch) 42%, var(--line));
     background: color-mix(in srgb, var(--pitch) 14%, var(--surface));
     color: #c8f5d8;
+  }
+
+  :root[data-theme="dark"] .badge-live {
+    background: color-mix(in srgb, var(--mint) 22%, var(--surface-alt));
+    color: #bdf0d2;
+  }
+
+  :root[data-theme="dark"] .badge-warning {
+    background: color-mix(in srgb, var(--card) 20%, var(--surface-alt));
+    color: #ffe1a1;
+  }
+
+  :root[data-theme="dark"] .leaderboard-rules > div:first-child strong {
+    color: var(--foreground);
+  }
+
+  :root[data-theme="dark"] .leaderboard-rule span {
+    color: var(--muted);
+  }
+
+  :root[data-theme="dark"] .leaderboard-info-popover {
+    background: var(--surface);
+  }
+
+  :root[data-theme="dark"] .leaderboard-rules {
+    box-shadow: none;
+  }
+
+  :root[data-theme="dark"] .schedule-view-switch button[aria-pressed="true"] {
+    background: color-mix(in srgb, var(--pitch) 22%, var(--surface));
+    color: var(--foreground);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pitch) 30%, transparent);
+  }
+
+  :root[data-theme="dark"] .match-score {
+    background: color-mix(in srgb, var(--pitch) 22%, var(--surface));
+    color: var(--foreground);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pitch) 30%, transparent);
+  }
+
+  :root[data-theme="dark"] .highlight-prono-line strong {
+    background: color-mix(in srgb, var(--pitch) 22%, var(--surface));
+    color: var(--foreground);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pitch) 30%, transparent);
   }
 }
 
