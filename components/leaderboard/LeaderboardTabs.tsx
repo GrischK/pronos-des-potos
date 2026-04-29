@@ -374,7 +374,7 @@ export function LeaderboardTabs({
         </div>
       </section>
 
-      <LiveMatchesPanel matches={leaderboard.liveMatches} />
+      {isLive ? <LiveMatchesPanel matches={leaderboard.liveMatches} /> : null}
 
       <section className="page-section">
         <div className="section-heading">
