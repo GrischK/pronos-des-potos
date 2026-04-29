@@ -51,6 +51,15 @@ export type LeaderboardLiveMatch = {
     name: string;
     flagUrl: string | null;
   } | null;
+  predictions: {
+    id: string;
+    homeScore: number;
+    awayScore: number;
+    user: {
+      id: string;
+      name: string;
+    };
+  }[];
 };
 
 function getUserDisplayName(user: { name: string | null; email: string }) {
@@ -236,6 +245,7 @@ export async function getLeaderboardData(
           },
           predictions: {
             select: {
+              id: true,
               userId: true,
               homeScore: true,
               awayScore: true,
@@ -278,6 +288,17 @@ export async function getLeaderboardData(
       awayPlaceholder: match.awayPlaceholder,
       homeTeam: match.homeTeam,
       awayTeam: match.awayTeam,
+      predictions: match.predictions
+        .map((prediction) => ({
+          id: prediction.id,
+          homeScore: prediction.homeScore,
+          awayScore: prediction.awayScore,
+          user: {
+            id: prediction.user.id,
+            name: getUserDisplayName(prediction.user),
+          },
+        }))
+        .sort((a, b) => a.user.name.localeCompare(b.user.name, "fr")),
     }));
 
   return {

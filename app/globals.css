@@ -1202,6 +1202,38 @@
     @apply text-sm font-bold text-muted;
   }
 
+  .live-match-predictions-panel {
+    @apply rounded-lg border border-line bg-surface-alt p-3;
+  }
+
+  .live-match-predictions-panel summary {
+    @apply flex cursor-pointer list-none items-center justify-between gap-4;
+  }
+
+  .live-match-predictions-panel summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .live-match-predictions-panel summary > span:first-child {
+    @apply flex min-w-0 flex-wrap items-center gap-3;
+  }
+
+  .live-match-predictions-panel summary strong {
+    @apply text-base font-black text-foreground;
+  }
+
+  .live-match-predictions-panel .public-predictions {
+    @apply mt-3;
+  }
+
+  .live-match-predictions-panel[open] .pending-predictions-summary-action {
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--foreground) 10%, transparent);
+  }
+
+  .live-match-predictions-panel[open] .pending-predictions-summary-action svg {
+    transform: rotate(180deg);
+  }
+
   .schedule-view-switch {
     @apply flex w-fit flex-wrap gap-2 rounded-lg border border-line bg-surface p-1;
   }

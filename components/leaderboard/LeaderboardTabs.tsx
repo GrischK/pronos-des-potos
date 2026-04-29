@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ChevronDown } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
@@ -277,6 +278,39 @@ function LiveMatchesPanel({
             <span className="match-status match-live-status">
               {renderStatus(match.status, match.liveMinute)}
             </span>
+
+            <details className="live-match-predictions-panel">
+              <summary>
+                <span>
+                  <span className="badge badge-warning">Pronos</span>
+                  <strong>
+                    {match.predictions.length} participant
+                    {match.predictions.length > 1 ? "s" : ""}
+                  </strong>
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="pending-predictions-summary-action"
+                >
+                  <ChevronDown size={18} strokeWidth={3} />
+                </span>
+              </summary>
+
+              <div className="public-predictions">
+                {match.predictions.length === 0 ? (
+                  <p>Aucun prono enregistré pour ce match.</p>
+                ) : (
+                  match.predictions.map((prediction) => (
+                    <div className="public-prediction-row" key={prediction.id}>
+                      <strong>{prediction.user.name}</strong>
+                      <span>
+                        {prediction.homeScore} · {prediction.awayScore}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </details>
           </article>
         ))}
       </div>
