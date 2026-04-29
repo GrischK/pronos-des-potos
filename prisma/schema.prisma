@@ -129,6 +129,7 @@ model Match {
   stage         String
   matchday      Int?
   status        MatchStatus @default(SCHEDULED)
+  liveMinute    Int?
   homeScore     Int?
   awayScore     Int?
   createdAt     DateTime    @default(now())

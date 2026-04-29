@@ -61,6 +61,21 @@ function renderScore(homeScore: number | null, awayScore: number | null) {
   return `${homeScore} · ${awayScore}`;
 }
 
+function renderStatus(status: string, liveMinute: number | null) {
+  if (status !== "LIVE") {
+    return status;
+  }
+
+  return (
+    <>
+      <span>LIVE</span>
+      <span className="live-minute">
+        {liveMinute === 45 ? "Mi-temps" : liveMinute !== null ? `${liveMinute}'` : ""}
+      </span>
+    </>
+  );
+}
+
 function PlayerAvatar({
   image,
   name,
@@ -259,7 +274,9 @@ function LiveMatchesPanel({
               </span>
             </div>
 
-            <span className="match-status">{match.status}</span>
+            <span className="match-status match-live-status">
+              {renderStatus(match.status, match.liveMinute)}
+            </span>
           </article>
         ))}
       </div>

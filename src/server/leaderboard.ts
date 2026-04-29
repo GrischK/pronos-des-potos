@@ -38,6 +38,7 @@ export type LeaderboardLiveMatch = {
   kickoffAt: string;
   stage: string;
   status: string;
+  liveMinute: number | null;
   homeScore: number | null;
   awayScore: number | null;
   homePlaceholder: string | null;
@@ -216,6 +217,7 @@ export async function getLeaderboardData(
           kickoffAt: true,
           stage: true,
           status: true,
+          liveMinute: true,
           homeScore: true,
           awayScore: true,
           homePlaceholder: true,
@@ -269,6 +271,7 @@ export async function getLeaderboardData(
       kickoffAt: match.kickoffAt.toISOString(),
       stage: match.stage,
       status: match.status,
+      liveMinute: match.liveMinute,
       homeScore: match.homeScore,
       awayScore: match.awayScore,
       homePlaceholder: match.homePlaceholder,

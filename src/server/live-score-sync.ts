@@ -63,6 +63,7 @@ async function updateMatchFromExternalData(
       stage: importedMatch.stage,
       matchday: importedMatch.matchday,
       status: importedMatch.status,
+      liveMinute: importedMatch.liveMinute,
       homeScore: importedMatch.homeScore,
       awayScore: importedMatch.awayScore,
     },

@@ -19,6 +19,7 @@ export type CompetitionHighlightMatch = {
   stage: string;
   matchday: number | null;
   status: string;
+  liveMinute: number | null;
   homeScore: number | null;
   awayScore: number | null;
   homePlaceholder: string | null;
@@ -97,6 +98,7 @@ export async function getCompetitionHighlights(
           stage: true,
           matchday: true,
           status: true,
+          liveMinute: true,
           homeScore: true,
           awayScore: true,
           homePlaceholder: true,
@@ -191,6 +193,7 @@ export async function getCompetitionHighlights(
       stage: match.stage,
       matchday: match.matchday,
       status: match.status,
+      liveMinute: match.liveMinute,
       homeScore: match.homeScore,
       awayScore: match.awayScore,
       homePlaceholder: match.homePlaceholder,

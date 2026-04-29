@@ -48,13 +48,28 @@ function renderScore(homeScore: number | null, awayScore: number | null) {
   return `${homeScore} · ${awayScore}`;
 }
 
+function renderStatus(status: string, liveMinute: number | null) {
+  if (status !== "LIVE") {
+    return <span className="match-status">{status}</span>;
+  }
+
+  return (
+    <span className="match-status match-live-status">
+      <span>LIVE</span>
+      <span className="live-minute">
+        {liveMinute === 45 ? "Mi-temps" : liveMinute !== null ? `${liveMinute}'` : ""}
+      </span>
+    </span>
+  );
+}
+
 function MatchCard({ match }: { match: CompetitionHighlightMatch }) {
   return (
     <>
       <div className="match-meta">
         <span>{formatKickoffAt(match.kickoffAt)}</span>
         <span>{getCompetitionStageLabel(match.stage)}</span>
-        <span>{match.status}</span>
+        {renderStatus(match.status, match.liveMinute)}
       </div>
 
       <div className="match-teams">

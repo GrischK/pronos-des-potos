@@ -946,10 +946,54 @@
   }
 
   .competition-card-next strong {
-    @apply min-w-0 truncate text-base font-black leading-tight text-foreground;
+    @apply min-w-0 text-base font-black leading-tight text-foreground;
   }
 
   .competition-card-next small {
+    @apply text-sm font-bold text-muted;
+  }
+
+  .competition-card-live {
+    @apply grid gap-2 rounded-lg border border-line bg-surface-alt p-3;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--coral) 8%, white), white 72%),
+      var(--surface-alt);
+  }
+
+  .competition-card-live > span:first-child {
+    @apply text-xs font-black uppercase tracking-normal text-muted;
+  }
+
+  .competition-card-live strong {
+    @apply min-w-0 text-base font-black leading-tight text-foreground;
+  }
+
+  .competition-card-matchup {
+    @apply grid min-w-0 items-center gap-2;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .competition-card-team {
+    @apply flex min-w-0 items-center gap-2 font-black;
+  }
+
+  .competition-card-team span {
+    @apply min-w-0 truncate;
+  }
+
+  .competition-card-team-away {
+    @apply justify-end text-right;
+  }
+
+  .competition-card-match-separator {
+    @apply text-sm font-black text-muted;
+  }
+
+  .competition-card-live-scoreline {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .competition-card-live small {
     @apply text-sm font-bold text-muted;
   }
 
@@ -1559,6 +1603,10 @@
     color: var(--line-strong);
   }
 
+  .match-meta .match-status::after {
+    content: none;
+  }
+
   .match-teams {
     @apply grid items-center gap-3;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
@@ -1586,6 +1634,14 @@
 
   .match-status {
     @apply w-fit rounded-lg bg-surface-alt px-2.5 py-1 text-xs font-black text-muted;
+  }
+
+  .match-live-status {
+    @apply inline-flex items-center gap-1.5;
+  }
+
+  .live-minute {
+    color: var(--coral);
   }
 
   .readonly-notice {
@@ -2123,6 +2179,7 @@
   :root[data-theme="dark"] .competition-card-summary span,
   :root[data-theme="dark"] .score-rule,
   :root[data-theme="dark"] .competition-card-next,
+  :root[data-theme="dark"] .competition-card-live,
   :root[data-theme="dark"] .highlight-prono-line,
   :root[data-theme="dark"] .leaderboard-rules,
   :root[data-theme="dark"] .leaderboard-rule,
@@ -2230,6 +2287,17 @@
     background: color-mix(in srgb, var(--surface-alt) 84%, white);
     box-shadow: 0 10px 24px color-mix(in srgb, black 18%, transparent);
     padding: 0.9rem;
+  }
+
+  :root[data-theme="dark"] .competition-card-live {
+    border-color: color-mix(in srgb, var(--coral) 22%, var(--line));
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--coral) 14%, var(--surface-alt)),
+        var(--surface) 72%
+      ),
+      var(--surface);
   }
 }
 

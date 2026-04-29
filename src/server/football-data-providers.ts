@@ -20,6 +20,7 @@ export type ImportedMatch = {
   stage: string;
   matchday: number | null;
   status: MatchStatus;
+  liveMinute: number | null;
   homeScore: number | null;
   awayScore: number | null;
 };
@@ -44,6 +45,7 @@ type FootballDataMatch = {
   id: number;
   utcDate: string;
   status: string;
+  minute?: number | null;
   stage: string;
   matchday?: number | null;
   homeTeam: FootballDataTeam;
@@ -80,6 +82,14 @@ function mapFootballDataStatus(status: string): MatchStatus {
   }
 
   return "SCHEDULED";
+}
+
+function getFootballDataLiveMinute(match: FootballDataMatch) {
+  if (match.status === "PAUSED" && match.minute == null) {
+    return 45;
+  }
+
+  return match.minute ?? null;
 }
 
 async function footballDataGet<T>(path: string, params: Record<string, string>) {
@@ -137,6 +147,7 @@ function footballDataMatch(match: FootballDataMatch): ImportedMatch {
     stage: match.stage || (match.matchday ? `Journée ${match.matchday}` : "Phase à confirmer"),
     matchday: match.matchday ?? null,
     status: mapFootballDataStatus(match.status),
+    liveMinute: getFootballDataLiveMinute(match),
     homeScore: match.score.fullTime.home,
     awayScore: match.score.fullTime.away,
   };

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { AutoRefresh } from "@/components/AutoRefresh";
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 import { competitionKindLabels } from "@/src/domain/competition-kind";
@@ -42,12 +43,24 @@ const kickoffFormatter = new Intl.DateTimeFormat("fr-FR", {
 type MatchPreview = {
   homeTeam: {
     name: string;
+    flagUrl?: string | null;
   } | null;
   awayTeam: {
     name: string;
+    flagUrl?: string | null;
   } | null;
   homePlaceholder: string | null;
   awayPlaceholder: string | null;
+};
+
+type LiveMatchPreview = MatchPreview & {
+  liveMinute: number | null;
+  homeScore: number | null;
+  awayScore: number | null;
+  ownPrediction: {
+    homeScore: number;
+    awayScore: number;
+  } | null;
 };
 
 function getTeamName(match: MatchPreview, side: "home" | "away") {
@@ -56,6 +69,12 @@ function getTeamName(match: MatchPreview, side: "home" | "away") {
     side === "home" ? match.homePlaceholder : match.awayPlaceholder;
 
   return team?.name ?? placeholder ?? "À déterminer";
+}
+
+function getTeamFlag(match: MatchPreview, side: "home" | "away") {
+  const team = side === "home" ? match.homeTeam : match.awayTeam;
+
+  return team?.flagUrl ?? null;
 }
 
 function formatKickoffAt(value: string) {
@@ -96,6 +115,64 @@ function formatKickoffCountdown(value: string) {
   return `Plus que ${days} j avant fermeture`;
 }
 
+function renderScore(homeScore: number | null, awayScore: number | null) {
+  if (homeScore === null || awayScore === null) {
+    return "- · -";
+  }
+
+  return `${homeScore} · ${awayScore}`;
+}
+
+function renderOwnPrediction(match: LiveMatchPreview | null) {
+  if (!match?.ownPrediction) {
+    return "Ton prono : aucun";
+  }
+
+  return `Ton prono : ${match.ownPrediction.homeScore} · ${match.ownPrediction.awayScore}`;
+}
+
+function renderLiveIndicator(liveMinute: number | null) {
+  if (liveMinute === 45) {
+    return "Mi-temps";
+  }
+
+  if (liveMinute !== null) {
+    return `${liveMinute}'`;
+  }
+
+  return "";
+}
+
+function MatchTeamsInline({ match }: { match: MatchPreview }) {
+  return (
+    <div className="competition-card-matchup">
+      <span className="competition-card-team">
+        {getTeamFlag(match, "home") ? (
+          <img
+            alt=""
+            className="team-flag"
+            loading="lazy"
+            src={getTeamFlag(match, "home") ?? undefined}
+          />
+        ) : null}
+        <span>{getTeamName(match, "home")}</span>
+      </span>
+      <span className="competition-card-match-separator">-</span>
+      <span className="competition-card-team competition-card-team-away">
+        <span>{getTeamName(match, "away")}</span>
+        {getTeamFlag(match, "away") ? (
+          <img
+            alt=""
+            className="team-flag"
+            loading="lazy"
+            src={getTeamFlag(match, "away") ?? undefined}
+          />
+        ) : null}
+      </span>
+    </div>
+  );
+}
+
 export default async function CompetitionsPage() {
   const [competitions, nextPrediction] = await Promise.all([
     getCompetitionsOverview(),
@@ -104,6 +181,7 @@ export default async function CompetitionsPage() {
 
   return (
     <main className="page-shell">
+      <AutoRefresh intervalMs={30000} />
       <PageHeader
         eyebrow="Compétitions"
         title="À toi de jouer."
@@ -156,16 +234,43 @@ export default async function CompetitionsPage() {
                   </span>
                 </div>
 
+                {competition.liveMatch ? (
+                  <div className="competition-card-live">
+                    <span>
+                      {competition.liveMatchCount > 1
+                        ? `${competition.liveMatchCount} matchs en cours`
+                        : "Match en cours"}
+                    </span>
+                    <strong>
+                      <MatchTeamsInline match={competition.liveMatch} />
+                    </strong>
+                    <div className="competition-card-live-scoreline">
+                      <span className="match-score">
+                        {renderScore(
+                          competition.liveMatch.homeScore,
+                          competition.liveMatch.awayScore,
+                        )}
+                      </span>
+                      <span className="match-status match-live-status">
+                        <span>LIVE</span>
+                        <span className="live-minute">
+                          {renderLiveIndicator(competition.liveMatch.liveMinute)}
+                        </span>
+                      </span>
+                    </div>
+                    <small>{renderOwnPrediction(competition.liveMatch)}</small>
+                  </div>
+                ) : null}
+
                 <div className="competition-card-next">
                   <span>Prochain match</span>
-                  <strong>
-                    {competition.nextMatch
-                      ? `${getTeamName(competition.nextMatch, "home")} - ${getTeamName(
-                          competition.nextMatch,
-                          "away",
-                        )}`
-                      : "Aucun match à venir"}
-                  </strong>
+                  {competition.nextMatch ? (
+                    <strong>
+                      <MatchTeamsInline match={competition.nextMatch} />
+                    </strong>
+                  ) : (
+                    <strong>Aucun match à venir</strong>
+                  )}
                   {competition.nextMatch ? (
                     <small>{formatKickoffAt(competition.nextMatch.kickoffAt)}</small>
                   ) : null}

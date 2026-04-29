@@ -81,6 +81,7 @@ type CompetitionMatch = {
   stage: string;
   matchday: number | null;
   status: string;
+  liveMinute: number | null;
   homeScore: number | null;
   awayScore: number | null;
   homePlaceholder: string | null;
@@ -96,6 +97,7 @@ export type CompetitionScheduleMatch = {
   stage: string;
   matchday: number | null;
   status: string;
+  liveMinute: number | null;
   homeScore: number | null;
   awayScore: number | null;
   homePlaceholder: string | null;
@@ -309,6 +311,9 @@ export async function getCompetitionsOverview() {
         where: {
           OR: [
             {
+              status: "LIVE",
+            },
+            {
               status: "SCHEDULED",
               kickoffAt: {
                 gt: now,
@@ -330,6 +335,7 @@ export async function getCompetitionsOverview() {
           id: true,
           kickoffAt: true,
           status: true,
+          liveMinute: true,
           homeScore: true,
           awayScore: true,
           homePlaceholder: true,
@@ -339,11 +345,13 @@ export async function getCompetitionsOverview() {
           homeTeam: {
             select: {
               name: true,
+              flagUrl: true,
             },
           },
           awayTeam: {
             select: {
               name: true,
+              flagUrl: true,
             },
           },
           predictions: {
@@ -373,6 +381,10 @@ export async function getCompetitionsOverview() {
       const futureMatches = competition.matches.filter(
         (match) => match.status === "SCHEDULED" && match.kickoffAt > now,
       );
+      const liveMatches = competition.matches.filter(
+        (match) => match.status === "LIVE",
+      );
+      const liveMatch = liveMatches[0] ?? null;
       const nextMatch = futureMatches[0] ?? null;
       const missingPredictionCount =
         competition.status === "OPEN" && user
@@ -465,6 +477,36 @@ export async function getCompetitionsOverview() {
         emblemUrl: competition.emblemUrl,
         matchCount: competition._count.matches,
         playerCount: competition._count.players,
+        liveMatchCount: liveMatches.length,
+        liveMatch: liveMatch
+          ? {
+              id: liveMatch.id,
+              kickoffAt: liveMatch.kickoffAt.toISOString(),
+              status: liveMatch.status,
+              liveMinute: liveMatch.liveMinute,
+              homeScore: liveMatch.homeScore,
+              awayScore: liveMatch.awayScore,
+              homeTeam: liveMatch.homeTeam,
+              awayTeam: liveMatch.awayTeam,
+              homePlaceholder: liveMatch.homePlaceholder,
+              awayPlaceholder: liveMatch.awayPlaceholder,
+              ownPrediction: user
+                ? (() => {
+                    const ownPrediction =
+                      liveMatch.predictions.find(
+                        (prediction) => prediction.userId === user.id,
+                      ) ?? null;
+
+                    return ownPrediction
+                      ? {
+                          homeScore: ownPrediction.homeScore,
+                          awayScore: ownPrediction.awayScore,
+                        }
+                      : null;
+                  })()
+                : null,
+            }
+          : null,
         nextMatch: nextMatch
           ? {
               id: nextMatch.id,
@@ -607,6 +649,7 @@ export async function getCompetitionBySlug(slug: string) {
           stage: true,
           matchday: true,
           status: true,
+          liveMinute: true,
           homeScore: true,
           awayScore: true,
           homePlaceholder: true,
