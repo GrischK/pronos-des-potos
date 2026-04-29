@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { CompetitionKind } from "@prisma/client";
 
@@ -24,6 +24,8 @@ export type ScheduleMatch = {
   kickoffAt: string;
   stage: string;
   matchday: number | null;
+  status?: string;
+  liveMinute?: number | null;
   homeTeam: {
     name: string;
   } | null;
@@ -210,15 +212,33 @@ function getChronologicalSections<TMatch extends ScheduleMatch>(matches: TMatch[
 
 function getDefaultChronologicalSectionId<TMatch extends ScheduleMatch>(
   sections: ChronologicalSection<TMatch>[],
+  targetMatch: TMatch | null,
 ) {
+  if (targetMatch) {
+    const targetSection = sections.find((section) =>
+      section.matches.some((match) => match.id === targetMatch.id),
+    );
+
+    if (targetSection) {
+      return targetSection.id;
+    }
+  }
+
+  return (
+    sections[0]?.id ??
+    sections[sections.length - 1]?.id ??
+    ""
+  );
+}
+
+function getPriorityMatch<TMatch extends ScheduleMatch>(matches: TMatch[]) {
   const now = Date.now();
 
   return (
-    sections.find((section) =>
-      section.matches.some((match) => new Date(match.kickoffAt).getTime() >= now),
-    )?.id ??
-    sections[sections.length - 1]?.id ??
-    ""
+    matches.find((match) => match.status === "LIVE") ??
+    matches.find((match) => new Date(match.kickoffAt).getTime() >= now) ??
+    matches[matches.length - 1] ??
+    null
   );
 }
 
@@ -276,6 +296,10 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
   phaseHeading,
   renderMatch,
 }: PredictionScheduleBrowserProps<TMatch>) {
+  const dayNavRef = useRef<HTMLElement>(null);
+  const groupNavRef = useRef<HTMLElement>(null);
+  const dayButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const groupButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const groupSections = useMemo(
     () =>
       groups
@@ -339,11 +363,18 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
     () => getChronologicalSections(matches),
     [matches],
   );
+  const priorityMatch = useMemo(() => getPriorityMatch(matches), [matches]);
   const [view, setView] = useState<ScheduleView>("chronology");
-  const [activeStageIndex, setActiveStageIndex] = useState(0);
+  const [activeStageIndex, setActiveStageIndex] = useState(() => {
+    if (!priorityMatch) {
+      return 0;
+    }
+
+    return 0;
+  });
   const [activeGroupId, setActiveGroupId] = useState(groupSections[0]?.id ?? "");
   const [activeDayId, setActiveDayId] = useState(
-    getDefaultChronologicalSectionId(chronologicalSections),
+    getDefaultChronologicalSectionId(chronologicalSections, priorityMatch),
   );
   const activeStage = stages[activeStageIndex] ?? stages[0];
   const activeGroup =
@@ -353,6 +384,65 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
     chronologicalSections[0];
   const previousStage = stages[activeStageIndex - 1];
   const nextStage = stages[activeStageIndex + 1];
+
+  useEffect(() => {
+    if (!priorityMatch) {
+      return;
+    }
+
+    const targetDayId = getDefaultChronologicalSectionId(
+      chronologicalSections,
+      priorityMatch,
+    );
+
+    if (targetDayId) {
+      setActiveDayId(targetDayId);
+    }
+
+    const targetGroup = groupSections.find((section) =>
+      section.matches.some((match) => match.id === priorityMatch.id),
+    );
+
+    if (targetGroup) {
+      setActiveStageIndex(0);
+      setActiveGroupId(targetGroup.id);
+      return;
+    }
+
+    const targetStageIndex = stages.findIndex(
+      (stage) =>
+        stage.kind === "phase" &&
+        stage.matches.some((match) => match.id === priorityMatch.id),
+    );
+
+    if (targetStageIndex >= 0) {
+      setActiveStageIndex(targetStageIndex);
+    }
+  }, [chronologicalSections, groupSections, priorityMatch, stages]);
+
+  useEffect(() => {
+    if (view !== "chronology" || !activeDayId) {
+      return;
+    }
+
+    dayButtonRefs.current[activeDayId]?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }, [activeDayId, view]);
+
+  useEffect(() => {
+    if (view !== "structure" || !activeGroupId) {
+      return;
+    }
+
+    groupButtonRefs.current[activeGroupId]?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "nearest",
+    });
+  }, [activeGroupId, view]);
 
   if (!activeStage && !activeDay) {
     return null;
@@ -379,12 +469,15 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
 
       {view === "chronology" && activeDay ? (
         <div className="day-browser">
-          <nav aria-label="Journées" className="day-nav">
+          <nav aria-label="Journées" className="day-nav" ref={dayNavRef}>
             {chronologicalSections.map((section) => (
               <button
                 aria-pressed={section.id === activeDay.id}
                 className="day-nav-button"
                 key={section.id}
+                ref={(element) => {
+                  dayButtonRefs.current[section.id] = element;
+                }}
                 onClick={() => setActiveDayId(section.id)}
                 type="button"
               >
@@ -442,12 +535,15 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
 
       {view === "structure" && activeStage?.kind === "groups" && activeGroup ? (
         <div className="group-browser">
-          <nav aria-label="Groupes" className="group-nav">
+          <nav aria-label="Groupes" className="group-nav" ref={groupNavRef}>
             {groupSections.map((section) => (
               <button
                 aria-pressed={section.id === activeGroup.id}
                 className="group-nav-button"
                 key={section.id}
+                ref={(element) => {
+                  groupButtonRefs.current[section.id] = element;
+                }}
                 onClick={() => setActiveGroupId(section.id)}
                 type="button"
               >
