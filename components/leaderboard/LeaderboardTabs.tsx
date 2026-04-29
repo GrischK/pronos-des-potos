@@ -3,17 +3,62 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 
+import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
 import type { LeaderboardData, LeaderboardSnapshot } from "@/src/server/leaderboard";
 import { useDismissibleLayer } from "@/src/lib/use-dismissible-layer";
 
 type LeaderboardMode = "official" | "live";
 
 type LeaderboardTabsProps = {
+  initialMode?: LeaderboardMode;
   leaderboard: LeaderboardData;
 };
 
 function getInitial(name: string) {
   return name.trim().slice(0, 1).toUpperCase();
+}
+
+const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
+  dateStyle: "medium",
+  timeStyle: "short",
+  timeZone: "Europe/Paris",
+});
+
+function formatKickoffAt(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Date à confirmer";
+  }
+
+  return dateFormatter.format(date);
+}
+
+function getTeamName(
+  match: LeaderboardData["liveMatches"][number],
+  side: "home" | "away",
+) {
+  const team = side === "home" ? match.homeTeam : match.awayTeam;
+  const placeholder = side === "home" ? match.homePlaceholder : match.awayPlaceholder;
+
+  return team?.name ?? placeholder ?? "À déterminer";
+}
+
+function getTeamFlag(
+  match: LeaderboardData["liveMatches"][number],
+  side: "home" | "away",
+) {
+  const team = side === "home" ? match.homeTeam : match.awayTeam;
+
+  return team?.flagUrl ?? null;
+}
+
+function renderScore(homeScore: number | null, awayScore: number | null) {
+  if (homeScore === null || awayScore === null) {
+    return "- · -";
+  }
+
+  return `${homeScore} · ${awayScore}`;
 }
 
 function PlayerAvatar({
@@ -157,8 +202,76 @@ function LeaderboardRulesCard({ isLive }: { isLive: boolean }) {
   );
 }
 
-export function LeaderboardTabs({ leaderboard }: LeaderboardTabsProps) {
-  const [mode, setMode] = useState<LeaderboardMode>("official");
+function LiveMatchesPanel({
+  matches,
+}: {
+  matches: LeaderboardData["liveMatches"];
+}) {
+  if (matches.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="page-section">
+      <div className="section-heading">
+        <div>
+          <p className="badge badge-warning">En direct</p>
+          <h2>Matchs en cours</h2>
+        </div>
+        <p>Les scores live qui alimentent le classement provisoire.</p>
+      </div>
+
+      <div className="match-list">
+        {matches.map((match) => (
+          <article className="match-row" key={match.id}>
+            <div className="match-meta">
+              <span>{formatKickoffAt(match.kickoffAt)}</span>
+              <span>{getCompetitionStageLabel(match.stage)}</span>
+            </div>
+
+            <div className="match-teams">
+              <span className="match-team">
+                {getTeamFlag(match, "home") ? (
+                  <img
+                    alt=""
+                    className="team-flag"
+                    loading="lazy"
+                    src={getTeamFlag(match, "home") ?? undefined}
+                  />
+                ) : null}
+                <span>{getTeamName(match, "home")}</span>
+              </span>
+
+              <span className="match-score">
+                {renderScore(match.homeScore, match.awayScore)}
+              </span>
+
+              <span className="match-team match-team-away">
+                <span>{getTeamName(match, "away")}</span>
+                {getTeamFlag(match, "away") ? (
+                  <img
+                    alt=""
+                    className="team-flag"
+                    loading="lazy"
+                    src={getTeamFlag(match, "away") ?? undefined}
+                  />
+                ) : null}
+              </span>
+            </div>
+
+            <span className="match-status">{match.status}</span>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function LeaderboardTabs({
+  initialMode = "official",
+  leaderboard,
+}: LeaderboardTabsProps) {
+  const [mode, setMode] = useState<LeaderboardMode>(initialMode);
   const snapshot = leaderboard[mode];
   const isLive = mode === "live";
   const leader = snapshot.rows[0] ?? null;
@@ -209,6 +322,8 @@ export function LeaderboardTabs({ leaderboard }: LeaderboardTabsProps) {
           </div>
         </div>
       </section>
+
+      <LiveMatchesPanel matches={leaderboard.liveMatches} />
 
       <section className="page-section">
         <div className="section-heading">

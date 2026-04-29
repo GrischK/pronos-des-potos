@@ -91,7 +91,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
       </section>
 
       <section className="page-section">
-        <CompetitionHighlights highlights={highlights} />
+        <CompetitionHighlights highlights={highlights} slug={competition.slug} />
       </section>
 
       <section className="page-section">

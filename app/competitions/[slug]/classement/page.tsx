@@ -13,15 +13,24 @@ type ClassementPageProps = {
   params: Promise<{
     slug: string;
   }>;
+  searchParams?: Promise<{
+    mode?: string;
+  }>;
 };
 
-export default async function ClassementPage({ params }: ClassementPageProps) {
+export default async function ClassementPage({
+  params,
+  searchParams,
+}: ClassementPageProps) {
   const { slug } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const competition = await getLeaderboardData(slug);
 
   if (!competition) {
     notFound();
   }
+
+  const initialMode = resolvedSearchParams?.mode === "live" ? "live" : "official";
 
   return (
     <main className="page-shell">
@@ -41,7 +50,7 @@ export default async function ClassementPage({ params }: ClassementPageProps) {
         </div>
       </section>
 
-      <LeaderboardTabs leaderboard={competition} />
+      <LeaderboardTabs initialMode={initialMode} leaderboard={competition} />
     </main>
   );
 }

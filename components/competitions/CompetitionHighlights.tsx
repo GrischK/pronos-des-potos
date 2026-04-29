@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import type {
   CompetitionHighlightMatch,
   CompetitionHighlightsData,
@@ -6,6 +8,7 @@ import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
 
 type CompetitionHighlightsProps = {
   highlights: CompetitionHighlightsData;
+  slug?: string;
 };
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
@@ -47,7 +50,7 @@ function renderScore(homeScore: number | null, awayScore: number | null) {
 
 function MatchCard({ match }: { match: CompetitionHighlightMatch }) {
   return (
-    <article className="highlight-match-card">
+    <>
       <div className="match-meta">
         <span>{formatKickoffAt(match.kickoffAt)}</span>
         <span>{getCompetitionStageLabel(match.stage)}</span>
@@ -109,17 +112,38 @@ function MatchCard({ match }: { match: CompetitionHighlightMatch }) {
           )}
         </div>
       ) : null}
-    </article>
+    </>
+  );
+}
+
+function ClickableTodayMatchCard({
+  match,
+  slug,
+}: {
+  match: CompetitionHighlightMatch;
+  slug: string;
+}) {
+  return (
+    <Link
+      aria-label={`Voir le classement live pour ${getTeamName(match, "home")} contre ${getTeamName(match, "away")}`}
+      className="highlight-match-card highlight-match-card-link"
+      href={`/competitions/${slug}/classement?mode=live`}
+    >
+      <MatchCard match={match} />
+      <span className="highlight-match-card-cta">Voir le classement live</span>
+    </Link>
   );
 }
 
 function HighlightSection({
   emptyText,
   matches,
+  slug,
   title,
 }: {
   emptyText: string;
   matches: CompetitionHighlightMatch[];
+  slug?: string;
   title: string;
 }) {
   return (
@@ -135,7 +159,13 @@ function HighlightSection({
       ) : (
         <div className="highlight-match-list">
           {matches.map((match) => (
-            <MatchCard key={match.id} match={match} />
+            slug ? (
+              <ClickableTodayMatchCard key={match.id} match={match} slug={slug} />
+            ) : (
+              <article className="highlight-match-card" key={match.id}>
+                <MatchCard match={match} />
+              </article>
+            )
           ))}
         </div>
       )}
@@ -143,12 +173,16 @@ function HighlightSection({
   );
 }
 
-export function CompetitionHighlights({ highlights }: CompetitionHighlightsProps) {
+export function CompetitionHighlights({
+  highlights,
+  slug,
+}: CompetitionHighlightsProps) {
   return (
     <div className="competition-highlights">
       <HighlightSection
         emptyText="Aucun match aujourd'hui."
         matches={highlights.todayMatches}
+        slug={slug}
         title="Matchs du jour"
       />
       <HighlightSection

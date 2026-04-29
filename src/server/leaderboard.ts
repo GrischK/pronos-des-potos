@@ -24,12 +24,32 @@ export type LeaderboardData = {
   participantCount: number;
   official: LeaderboardSnapshot;
   live: LeaderboardSnapshot;
+  liveMatches: LeaderboardLiveMatch[];
 };
 
 export type LeaderboardSnapshot = {
   rows: LeaderboardRow[];
   matchCount: number;
   liveMatchCount: number;
+};
+
+export type LeaderboardLiveMatch = {
+  id: string;
+  kickoffAt: string;
+  stage: string;
+  status: string;
+  homeScore: number | null;
+  awayScore: number | null;
+  homePlaceholder: string | null;
+  awayPlaceholder: string | null;
+  homeTeam: {
+    name: string;
+    flagUrl: string | null;
+  } | null;
+  awayTeam: {
+    name: string;
+    flagUrl: string | null;
+  } | null;
 };
 
 function getUserDisplayName(user: { name: string | null; email: string }) {
@@ -193,9 +213,25 @@ export async function getLeaderboardData(
         },
         select: {
           id: true,
+          kickoffAt: true,
+          stage: true,
           status: true,
           homeScore: true,
           awayScore: true,
+          homePlaceholder: true,
+          awayPlaceholder: true,
+          homeTeam: {
+            select: {
+              name: true,
+              flagUrl: true,
+            },
+          },
+          awayTeam: {
+            select: {
+              name: true,
+              flagUrl: true,
+            },
+          },
           predictions: {
             select: {
               userId: true,
@@ -226,6 +262,20 @@ export async function getLeaderboardData(
   const liveMatches = competition.matches.filter(
     (match) => match.status === "FINISHED" || match.status === "LIVE",
   );
+  const liveMatchCards = competition.matches
+    .filter((match) => match.status === "LIVE")
+    .map((match) => ({
+      id: match.id,
+      kickoffAt: match.kickoffAt.toISOString(),
+      stage: match.stage,
+      status: match.status,
+      homeScore: match.homeScore,
+      awayScore: match.awayScore,
+      homePlaceholder: match.homePlaceholder,
+      awayPlaceholder: match.awayPlaceholder,
+      homeTeam: match.homeTeam,
+      awayTeam: match.awayTeam,
+    }));
 
   return {
     id: competition.id,
@@ -236,5 +286,6 @@ export async function getLeaderboardData(
     participantCount: competition.players.length,
     official: buildLeaderboardSnapshot(competition.players, officialMatches),
     live: buildLeaderboardSnapshot(competition.players, liveMatches),
+    liveMatches: liveMatchCards,
   };
 }
