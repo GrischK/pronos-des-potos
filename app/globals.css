@@ -140,11 +140,15 @@
   }
 
   .brand-mark {
-    @apply inline-flex h-10 w-10 items-center justify-center rounded-lg text-surface font-extrabold;
+    @apply inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg text-surface font-extrabold;
     flex: 0 0 40px;
     border: 1px solid color-mix(in srgb, var(--foreground) 16%, transparent);
     background:
       linear-gradient(135deg, var(--pitch) 0 50%, var(--coral) 50% 100%);
+  }
+
+  .brand-logo {
+    @apply block h-full w-full object-contain;
   }
 
   .brand-name,

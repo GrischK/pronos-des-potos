@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef, useState } from "react";
@@ -9,6 +10,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { cn } from "@/src/lib/cn";
 import { useDismissibleLayer } from "@/src/lib/use-dismissible-layer";
 import { usePresence } from "@/src/lib/use-presence";
+import pronosLogo from "../logo.png";
 
 const navItems = [
   { href: "/competitions", label: "Compétitions" },
@@ -44,7 +46,17 @@ export function AppShell({ children, showAdminNav = false }: AppShellProps) {
       <header className="site-header">
         <div className="site-header-inner">
           <Link className="brand" href="/competitions">
-            <span className="brand-mark">P</span>
+            <span className="brand-mark">
+              <Image
+                alt=""
+                aria-hidden="true"
+                className="brand-logo"
+                height={48}
+                priority
+                src={pronosLogo}
+                width={48}
+              />
+            </span>
             <span>
               <span className="brand-name">Pronos des potos</span>
               <span className="brand-tagline">Tournois entre amis</span>
