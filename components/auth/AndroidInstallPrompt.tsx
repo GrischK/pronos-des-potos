@@ -65,16 +65,18 @@ export function AndroidInstallPrompt() {
     };
   }, []);
 
-  if (!isAndroid || isStandalone || !deferredPrompt) {
+  if (!isAndroid || isStandalone) {
     return null;
   }
 
   return (
     <div className="mt-5 grid gap-2">
-      <p className="form-hint">Sur Android, installe l'app en un tap.</p>
+      <p className="form-hint">
+        Sur Android, Chrome peut proposer l'installation de l'app.
+      </p>
       <button
         className="btn btn-secondary auth-submit"
-        disabled={isInstalling}
+        disabled={isInstalling || !deferredPrompt}
         type="button"
         onClick={async () => {
           const prompt = deferredPrompt;
@@ -96,6 +98,12 @@ export function AndroidInstallPrompt() {
       >
         {isInstalling ? "Ouverture..." : "Installer l'app"}
       </button>
+      {!deferredPrompt ? (
+        <p className="form-hint">
+          Si le bouton reste grisé, Chrome n'a pas encore jugé la page installable.
+          Reste quelques secondes sur la page, puis réessaie.
+        </p>
+      ) : null}
     </div>
   );
 }
