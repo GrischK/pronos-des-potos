@@ -1972,6 +1972,28 @@
     @apply cursor-wait opacity-[0.72] transform-none;
   }
 
+  .pwa-diagnostic {
+    @apply mt-5 rounded-lg border border-line p-4;
+    background: color-mix(in srgb, var(--pitch) 6%, white);
+  }
+
+  .pwa-diagnostic-grid {
+    @apply mt-3 grid gap-3;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  }
+
+  .pwa-diagnostic-grid div {
+    @apply rounded-lg border border-line bg-white px-3 py-2.5;
+  }
+
+  .pwa-diagnostic-grid span {
+    @apply block text-[0.78rem] font-bold text-muted;
+  }
+
+  .pwa-diagnostic-grid strong {
+    @apply mt-1 block text-[0.95rem] font-black text-foreground;
+  }
+
   .auth-switch {
     @apply mt-[18px] mb-0 text-center text-muted;
   }

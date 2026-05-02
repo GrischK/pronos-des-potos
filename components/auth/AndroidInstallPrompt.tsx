@@ -36,11 +36,19 @@ export function AndroidInstallPrompt() {
   const [isInstalling, setIsInstalling] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [hasServiceWorker, setHasServiceWorker] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     const androidMobile = isAndroidMobile();
     setIsAndroid(androidMobile);
     setIsStandalone(window.matchMedia("(display-mode: standalone)").matches);
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistration().then((registration) => {
+        setHasServiceWorker(Boolean(registration));
+      });
+    }
 
     if (!androidMobile) {
       return;
@@ -54,6 +62,7 @@ export function AndroidInstallPrompt() {
     const handleAppInstalled = () => {
       setDeferredPrompt(null);
       setIsStandalone(true);
+      setFeedback("L'application est installée.");
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -69,27 +78,42 @@ export function AndroidInstallPrompt() {
     return null;
   }
 
+  const installStatus = deferredPrompt
+    ? "Prêt à installer"
+    : hasServiceWorker
+      ? "En attente du signal d'installation"
+      : "Service worker non détecté";
+
   return (
-    <div className="mt-5 grid gap-2">
+    <div className="pwa-diagnostic">
       <p className="form-hint">
         Sur Android, Chrome peut proposer l'installation de l'app.
       </p>
       <button
         className="btn btn-secondary auth-submit"
-        disabled={isInstalling || !deferredPrompt}
+        disabled={isInstalling}
         type="button"
         onClick={async () => {
           const prompt = deferredPrompt;
 
           if (!prompt) {
+            setFeedback(
+              "Chrome n'a pas encore rendu l'installation disponible. Reste quelques secondes sur la page, puis recharge.",
+            );
             return;
           }
 
           setIsInstalling(true);
+          setFeedback(null);
 
           try {
             await prompt.prompt();
-            await prompt.userChoice;
+            const choice = await prompt.userChoice;
+            setFeedback(
+              choice.outcome === "accepted"
+                ? "Installation lancée."
+                : "Installation annulée.",
+            );
           } finally {
             setDeferredPrompt(null);
             setIsInstalling(false);
@@ -98,12 +122,31 @@ export function AndroidInstallPrompt() {
       >
         {isInstalling ? "Ouverture..." : "Installer l'app"}
       </button>
+      <div className="pwa-diagnostic-grid" aria-live="polite">
+        <div>
+          <span>Android</span>
+          <strong>Oui</strong>
+        </div>
+        <div>
+          <span>Service worker</span>
+          <strong>{hasServiceWorker ? "Actif" : "Pas vu"}</strong>
+        </div>
+        <div>
+          <span>Prompt install</span>
+          <strong>{deferredPrompt ? "Disponible" : "Pas encore"}</strong>
+        </div>
+        <div>
+          <span>Statut</span>
+          <strong>{installStatus}</strong>
+        </div>
+      </div>
       {!deferredPrompt ? (
         <p className="form-hint">
-          Si le bouton reste grisé, Chrome n'a pas encore jugé la page installable.
-          Reste quelques secondes sur la page, puis réessaie.
+          Si Chrome n'a pas encore jugé la page installable, laisse la page ouverte
+          un moment puis réessaie.
         </p>
       ) : null}
+      {feedback ? <p className="form-hint">{feedback}</p> : null}
     </div>
   );
 }
