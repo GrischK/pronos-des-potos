@@ -35,22 +35,47 @@ export function AndroidInstallPrompt() {
     useState<BeforeInstallPromptEventLike | null>(null);
   const [isInstalling, setIsInstalling] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
+  const [isLocalhost, setIsLocalhost] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [hasServiceWorker, setHasServiceWorker] = useState(false);
+  const [hasManifest, setHasManifest] = useState(false);
+  const [supportsInstallPrompt, setSupportsInstallPrompt] = useState(false);
+  const [isSecureContext, setIsSecureContext] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     const androidMobile = isAndroidMobile();
+    const localhost =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1" ||
+      window.location.hostname === "[::1]";
+
     setIsAndroid(androidMobile);
+    setIsLocalhost(localhost);
     setIsStandalone(window.matchMedia("(display-mode: standalone)").matches);
+    setIsSecureContext(window.isSecureContext);
+    setSupportsInstallPrompt("onbeforeinstallprompt" in window);
 
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.getRegistration().then((registration) => {
-        setHasServiceWorker(Boolean(registration));
-      });
+      navigator.serviceWorker
+        .ready
+        .then(() => {
+          setHasServiceWorker(true);
+        })
+        .catch(() => {
+          setHasServiceWorker(false);
+        });
     }
 
-    if (!androidMobile) {
+    fetch("/manifest.webmanifest", { cache: "no-store" })
+      .then((response) => {
+        setHasManifest(response.ok);
+      })
+      .catch(() => {
+        setHasManifest(false);
+      });
+
+    if (!androidMobile && !localhost) {
       return;
     }
 
@@ -74,7 +99,7 @@ export function AndroidInstallPrompt() {
     };
   }, []);
 
-  if (!isAndroid || isStandalone) {
+  if ((!isAndroid && !isLocalhost) || isStandalone) {
     return null;
   }
 
@@ -87,7 +112,9 @@ export function AndroidInstallPrompt() {
   return (
     <div className="pwa-diagnostic">
       <p className="form-hint">
-        Sur Android, Chrome peut proposer l'installation de l'app.
+        {isLocalhost
+          ? "Mode debug local: tu peux tester l'install PWA sur ce PC."
+          : "Sur Android, Chrome peut proposer l'installation de l'app."}
       </p>
       <button
         className="btn btn-secondary auth-submit"
@@ -124,12 +151,24 @@ export function AndroidInstallPrompt() {
       </button>
       <div className="pwa-diagnostic-grid" aria-live="polite">
         <div>
-          <span>Android</span>
-          <strong>Oui</strong>
+          <span>Plateforme</span>
+          <strong>{isAndroid ? "Android" : isLocalhost ? "Localhost" : "Autre"}</strong>
+        </div>
+        <div>
+          <span>Secure</span>
+          <strong>{isSecureContext ? "Oui" : "Non"}</strong>
         </div>
         <div>
           <span>Service worker</span>
           <strong>{hasServiceWorker ? "Actif" : "Pas vu"}</strong>
+        </div>
+        <div>
+          <span>Manifest</span>
+          <strong>{hasManifest ? "Visible" : "Pas vu"}</strong>
+        </div>
+        <div>
+          <span>API install</span>
+          <strong>{supportsInstallPrompt ? "Oui" : "Non"}</strong>
         </div>
         <div>
           <span>Prompt install</span>

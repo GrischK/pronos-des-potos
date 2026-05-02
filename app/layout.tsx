@@ -26,6 +26,7 @@ const themeScript = `
 `;
 
 export const metadata: Metadata = {
+  manifest: "/manifest.webmanifest",
   title: "Pronos des potos",
   description: "Pronostics entre potes, compétition par compétition.",
 };

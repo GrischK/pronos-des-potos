@@ -8,19 +8,25 @@ export default function manifest(): MetadataRoute.Manifest {
       {
         purpose: "any",
         sizes: "192x192",
-        src: "/pwa/icon-192.png",
+        src: "/android-chrome-192x192.png",
         type: "image/png",
       },
       {
         purpose: "any",
         sizes: "512x512",
-        src: "/pwa/icon-512.png",
+        src: "/android-chrome-512x512.png",
         type: "image/png",
       },
       {
         purpose: "maskable",
         sizes: "512x512",
-        src: "/pwa/icon-maskable-512.png",
+        src: "/android-chrome-512x512.png",
+        type: "image/png",
+      },
+      {
+        purpose: "any",
+        sizes: "180x180",
+        src: "/apple-touch-icon.png",
         type: "image/png",
       },
     ],
