@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { AndroidInstallPrompt } from "@/components/auth/AndroidInstallPrompt";
 import { PageHeader } from "@/components/PageHeader";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { getSessionUserId } from "@/src/auth/session";
@@ -80,6 +81,8 @@ export default async function Home() {
             Se connecter
           </Link>
         </div>
+
+        <AndroidInstallPrompt variant="compact" />
       </section>
 
       <section className="page-section">

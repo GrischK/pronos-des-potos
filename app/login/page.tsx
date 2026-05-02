@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { AndroidInstallPrompt } from "@/components/auth/AndroidInstallPrompt";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { AuthHero } from "@/components/auth/AuthHero";
 import { loginAction } from "@/src/auth/actions";
@@ -27,8 +26,6 @@ export default async function LoginPage() {
         <p>Entre dans le vestiaire et retrouve tes pronos.</p>
 
         <AuthForm action={loginAction} buttonLabel="Se connecter" mode="login" />
-
-        <AndroidInstallPrompt />
 
         <p className="auth-switch">
           Pas encore dans la bande ? <Link href="/signup">Créer un compte</Link>

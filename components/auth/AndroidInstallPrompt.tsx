@@ -12,6 +12,10 @@ type BeforeInstallPromptEventLike = Event & {
   }>;
 };
 
+type AndroidInstallPromptProps = {
+  variant?: "default" | "compact";
+};
+
 function isAndroidMobile() {
   if (typeof navigator === "undefined") {
     return false;
@@ -30,52 +34,19 @@ function isAndroidMobile() {
   return isAndroid && isMobile;
 }
 
-export function AndroidInstallPrompt() {
+export function AndroidInstallPrompt({ variant = "default" }: AndroidInstallPromptProps) {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEventLike | null>(null);
-  const [isInstalling, setIsInstalling] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
-  const [isLocalhost, setIsLocalhost] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
-  const [hasServiceWorker, setHasServiceWorker] = useState(false);
-  const [hasManifest, setHasManifest] = useState(false);
-  const [supportsInstallPrompt, setSupportsInstallPrompt] = useState(false);
-  const [isSecureContext, setIsSecureContext] = useState(false);
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [isInstalling, setIsInstalling] = useState(false);
 
   useEffect(() => {
     const androidMobile = isAndroidMobile();
-    const localhost =
-      window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1" ||
-      window.location.hostname === "[::1]";
-
     setIsAndroid(androidMobile);
-    setIsLocalhost(localhost);
     setIsStandalone(window.matchMedia("(display-mode: standalone)").matches);
-    setIsSecureContext(window.isSecureContext);
-    setSupportsInstallPrompt("onbeforeinstallprompt" in window);
 
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker
-        .ready
-        .then(() => {
-          setHasServiceWorker(true);
-        })
-        .catch(() => {
-          setHasServiceWorker(false);
-        });
-    }
-
-    fetch("/manifest.webmanifest", { cache: "no-store" })
-      .then((response) => {
-        setHasManifest(response.ok);
-      })
-      .catch(() => {
-        setHasManifest(false);
-      });
-
-    if (!androidMobile && !localhost) {
+    if (!androidMobile) {
       return;
     }
 
@@ -87,7 +58,6 @@ export function AndroidInstallPrompt() {
     const handleAppInstalled = () => {
       setDeferredPrompt(null);
       setIsStandalone(true);
-      setFeedback("L'application est installée.");
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -99,48 +69,33 @@ export function AndroidInstallPrompt() {
     };
   }, []);
 
-  if ((!isAndroid && !isLocalhost) || isStandalone) {
+  if (!isAndroid || isStandalone) {
     return null;
   }
 
-  const installStatus = deferredPrompt
-    ? "Prêt à installer"
-    : hasServiceWorker
-      ? "En attente du signal d'installation"
-      : "Service worker non détecté";
+  const isCompact = variant === "compact";
 
   return (
-    <div className="pwa-diagnostic">
-      <p className="form-hint">
-        {isLocalhost
-          ? "Mode debug local: tu peux tester l'install PWA sur ce PC."
-          : "Sur Android, Chrome peut proposer l'installation de l'app."}
+    <div className={isCompact ? "landing-install-prompt" : "mt-5 grid gap-2"}>
+      <p className={isCompact ? "landing-install-hint" : "form-hint"}>
+        Sur Android, installe l'app en un tap.
       </p>
       <button
-        className="btn btn-secondary auth-submit"
-        disabled={isInstalling}
+        className={
+          isCompact ? "btn btn-secondary landing-install-button" : "btn btn-secondary auth-submit"
+        }
+        disabled={!deferredPrompt || isInstalling}
         type="button"
         onClick={async () => {
-          const prompt = deferredPrompt;
-
-          if (!prompt) {
-            setFeedback(
-              "Chrome n'a pas encore rendu l'installation disponible. Reste quelques secondes sur la page, puis recharge.",
-            );
+          if (!deferredPrompt) {
             return;
           }
 
           setIsInstalling(true);
-          setFeedback(null);
 
           try {
-            await prompt.prompt();
-            const choice = await prompt.userChoice;
-            setFeedback(
-              choice.outcome === "accepted"
-                ? "Installation lancée."
-                : "Installation annulée.",
-            );
+            await deferredPrompt.prompt();
+            await deferredPrompt.userChoice;
           } finally {
             setDeferredPrompt(null);
             setIsInstalling(false);
@@ -149,43 +104,6 @@ export function AndroidInstallPrompt() {
       >
         {isInstalling ? "Ouverture..." : "Installer l'app"}
       </button>
-      <div className="pwa-diagnostic-grid" aria-live="polite">
-        <div>
-          <span>Plateforme</span>
-          <strong>{isAndroid ? "Android" : isLocalhost ? "Localhost" : "Autre"}</strong>
-        </div>
-        <div>
-          <span>Secure</span>
-          <strong>{isSecureContext ? "Oui" : "Non"}</strong>
-        </div>
-        <div>
-          <span>Service worker</span>
-          <strong>{hasServiceWorker ? "Actif" : "Pas vu"}</strong>
-        </div>
-        <div>
-          <span>Manifest</span>
-          <strong>{hasManifest ? "Visible" : "Pas vu"}</strong>
-        </div>
-        <div>
-          <span>API install</span>
-          <strong>{supportsInstallPrompt ? "Oui" : "Non"}</strong>
-        </div>
-        <div>
-          <span>Prompt install</span>
-          <strong>{deferredPrompt ? "Disponible" : "Pas encore"}</strong>
-        </div>
-        <div>
-          <span>Statut</span>
-          <strong>{installStatus}</strong>
-        </div>
-      </div>
-      {!deferredPrompt ? (
-        <p className="form-hint">
-          Si Chrome n'a pas encore jugé la page installable, laisse la page ouverte
-          un moment puis réessaie.
-        </p>
-      ) : null}
-      {feedback ? <p className="form-hint">{feedback}</p> : null}
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 
-import { PwaRegistration } from "@/components/PwaRegistration";
 import "./globals.css";
 
 const themeScript = `
@@ -40,7 +39,6 @@ export default function RootLayout({
     <html lang="fr" suppressHydrationWarning>
       <body>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-        <PwaRegistration />
         {children}
       </body>
     </html>
