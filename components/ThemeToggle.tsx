@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { MoonStar, SunMedium } from "lucide-react";
 
 const THEME_STORAGE_KEY = "pronos-theme";
 
@@ -45,6 +46,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
     <button
       aria-label={`Passer en mode ${nextTheme === "dark" ? "sombre" : "clair"}`}
       className={`theme-toggle${className ? ` ${className}` : ""}`}
+      title={`Passer en mode ${nextTheme === "dark" ? "sombre" : "clair"}`}
       onClick={() => {
         const updatedTheme = nextTheme;
         setTheme(updatedTheme);
@@ -53,10 +55,17 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
       type="button"
     >
       <span className="theme-toggle-track" aria-hidden="true">
-        <span className="theme-toggle-thumb" data-theme={mounted ? theme : "light"} />
-      </span>
-      <span className="theme-toggle-label">
-        {mounted ? (theme === "dark" ? "Sombre" : "Clair") : "Thème"}
+        <span className="theme-toggle-thumb" data-theme={mounted ? theme : "light"}>
+          {mounted ? (
+            theme === "dark" ? (
+              <SunMedium className="theme-toggle-icon" aria-hidden="true" />
+            ) : (
+              <MoonStar className="theme-toggle-icon" aria-hidden="true" />
+            )
+          ) : (
+            <SunMedium className="theme-toggle-icon" aria-hidden="true" />
+          )}
+        </span>
       </span>
     </button>
   );

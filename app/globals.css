@@ -834,7 +834,7 @@
   }
 
   .theme-toggle {
-    @apply inline-flex min-h-[42px] items-center gap-2 rounded-lg border border-line px-3 text-sm font-black text-foreground;
+    @apply inline-flex h-[42px] w-[56px] items-center justify-center rounded-lg border border-line p-0 text-foreground;
     background:
       linear-gradient(180deg, color-mix(in srgb, var(--surface) 88%, white), var(--surface));
     box-shadow: 0 10px 24px color-mix(in srgb, var(--foreground) 8%, transparent);
@@ -851,28 +851,30 @@
   }
 
   .theme-toggle-track {
-    @apply relative inline-flex h-6 w-11 rounded-full;
-    background: color-mix(in srgb, var(--foreground) 16%, var(--surface));
+    @apply relative inline-flex h-9 w-12 items-center rounded-full;
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--surface) 90%, white), color-mix(in srgb, var(--surface-alt) 80%, white));
   }
 
   .theme-toggle-thumb {
-    @apply absolute top-0.5 left-0.5 h-5 w-5 rounded-full;
+    @apply absolute top-1 left-1 grid h-7 w-7 place-items-center rounded-full;
     background:
       linear-gradient(135deg, var(--card), color-mix(in srgb, var(--coral) 55%, white));
-    box-shadow: 0 4px 10px color-mix(in srgb, var(--foreground) 24%, transparent);
+    box-shadow: 0 5px 12px color-mix(in srgb, var(--foreground) 20%, transparent);
     transition:
       transform 180ms ease,
       background-color 180ms ease;
   }
 
   .theme-toggle-thumb[data-theme="dark"] {
-    transform: translateX(20px);
+    transform: translateX(18px);
     background:
       linear-gradient(135deg, var(--sky), color-mix(in srgb, var(--navy) 60%, white));
   }
 
-  .theme-toggle-label {
-    @apply leading-none;
+  .theme-toggle-icon {
+    @apply h-4 w-4;
+    color: var(--foreground);
   }
 
   .card,

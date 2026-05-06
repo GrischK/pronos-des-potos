@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -5,6 +6,7 @@ import { AndroidInstallPrompt } from "@/components/auth/AndroidInstallPrompt";
 import { PageHeader } from "@/components/PageHeader";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { getSessionUserId } from "@/src/auth/session";
+import pronosLogo from "../logo.png";
 
 const foundations = [
   {
@@ -39,7 +41,17 @@ export default async function Home() {
       <section className="hero-section">
         <div className="landing-topbar">
           <Link className="landing-brand" href="/">
-            <span className="brand-mark">P</span>
+            <span className="brand-mark">
+              <Image
+                alt=""
+                aria-hidden="true"
+                className="brand-logo"
+                height={48}
+                priority
+                src={pronosLogo}
+                width={48}
+              />
+            </span>
             <span>
               <span className="brand-name">Pronos des potos</span>
               <span className="brand-tagline">Tournois entre amis</span>
