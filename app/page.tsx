@@ -56,6 +56,25 @@ export default async function Home() {
             description="Crée ou rejoins une compétition, balance tes scores avant le coup d'envoi et laisse le classement trancher qui avait vraiment le nez creux."
           />
 
+          <aside className="mobile-hero-visual" aria-hidden="true">
+            <div className="mobile-pitch">
+              <span className="mobile-pitch-line" />
+              <span className="mobile-pitch-circle" />
+              <div className="mobile-match-card mobile-match-card-home">
+                <span>FRA</span>
+                <strong>2</strong>
+              </div>
+              <div className="mobile-match-card mobile-match-card-away">
+                <span>BEL</span>
+                <strong>1</strong>
+              </div>
+              <div className="mobile-score-badge">
+                <span>+3</span>
+                <strong>pts</strong>
+              </div>
+            </div>
+          </aside>
+
           <aside className="score-panel" aria-label="Règles de score">
             <div className="score-panel-header">
               <span>Le favori</span>

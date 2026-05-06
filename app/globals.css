@@ -400,6 +400,93 @@
     box-shadow: 0 18px 42px color-mix(in srgb, var(--foreground) 9%, transparent);
   }
 
+  .mobile-hero-visual {
+    @apply hidden;
+  }
+
+  .mobile-pitch {
+    @apply relative min-h-[212px] overflow-hidden rounded-lg;
+    border: 1px solid color-mix(in srgb, var(--pitch) 34%, var(--line));
+    background:
+      linear-gradient(90deg, color-mix(in srgb, var(--pitch) 18%, transparent) 1px, transparent 1px),
+      linear-gradient(color-mix(in srgb, var(--pitch) 14%, transparent) 1px, transparent 1px),
+      linear-gradient(135deg, color-mix(in srgb, var(--pitch) 86%, black), color-mix(in srgb, var(--mint) 70%, var(--pitch)));
+    background-size:
+      38px 38px,
+      38px 38px,
+      auto;
+    box-shadow: 0 18px 34px color-mix(in srgb, var(--foreground) 12%, transparent);
+  }
+
+  .mobile-pitch::before,
+  .mobile-pitch::after {
+    @apply absolute pointer-events-none;
+    border: 2px solid color-mix(in srgb, white 56%, transparent);
+    content: "";
+  }
+
+  .mobile-pitch::before {
+    inset: 16px;
+    border-radius: 0.6rem;
+  }
+
+  .mobile-pitch::after {
+    @apply left-1/2 top-1/2 h-24 w-24 rounded-full;
+    transform: translate(-50%, -50%);
+  }
+
+  .mobile-pitch-line {
+    @apply absolute left-1/2 top-4 bottom-4 w-0.5;
+    background: color-mix(in srgb, white 52%, transparent);
+    transform: translateX(-50%);
+  }
+
+  .mobile-pitch-circle {
+    @apply absolute left-1/2 top-1/2 h-3 w-3 rounded-full bg-white;
+    transform: translate(-50%, -50%);
+  }
+
+  .mobile-match-card {
+    @apply absolute grid h-[76px] w-[92px] place-items-center rounded-lg border bg-surface text-foreground;
+    border-color: color-mix(in srgb, white 60%, transparent);
+    box-shadow: 0 14px 28px color-mix(in srgb, black 18%, transparent);
+  }
+
+  .mobile-match-card span {
+    @apply text-xs font-black leading-none text-muted;
+  }
+
+  .mobile-match-card strong {
+    @apply text-[2.35rem] font-black leading-none;
+  }
+
+  .mobile-match-card-home {
+    left: 30px;
+    top: 36px;
+    transform: rotate(-5deg);
+  }
+
+  .mobile-match-card-away {
+    bottom: 34px;
+    right: 30px;
+    transform: rotate(5deg);
+  }
+
+  .mobile-score-badge {
+    @apply absolute left-1/2 top-1/2 inline-flex h-[74px] w-[74px] flex-col items-center justify-center rounded-full border-4 border-white text-white;
+    background: var(--coral);
+    box-shadow: 0 16px 30px color-mix(in srgb, black 20%, transparent);
+    transform: translate(-50%, -50%) rotate(-7deg);
+  }
+
+  .mobile-score-badge span {
+    @apply text-2xl font-black leading-none;
+  }
+
+  .mobile-score-badge strong {
+    @apply text-xs font-black uppercase leading-none;
+  }
+
   .score-panel-header {
     @apply grid items-center gap-2.5 border-b border-line pb-4 text-[0.92rem] font-extrabold text-muted;
     grid-template-columns: 1fr auto 1fr;
@@ -2370,6 +2457,101 @@
 }
 
 @media (max-width: 720px) {
+  .landing-page {
+    width: min(100%, calc(100% - 28px));
+  }
+
+  .landing-topbar {
+    @apply gap-3;
+  }
+
+  .landing-page .eyebrow,
+  .landing-page .lead,
+  .landing-page .score-panel,
+  .landing-page .page-section {
+    @apply hidden;
+  }
+
+  .hero-section {
+    @apply min-h-screen content-start gap-5;
+    padding: 18px 0 34px;
+  }
+
+  .hero-layout {
+    @apply gap-5;
+  }
+
+  .landing-page .page-header h1 {
+    @apply text-[2.65rem] leading-[0.94];
+  }
+
+  .mobile-hero-visual {
+    @apply block;
+  }
+
+  .landing-page .actions {
+    @apply relative grid grid-cols-2 gap-3 rounded-lg p-2;
+    isolation: isolate;
+    margin-top: -10px;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--foreground) 92%, black), color-mix(in srgb, var(--navy) 72%, black));
+    box-shadow: 0 18px 34px color-mix(in srgb, var(--foreground) 18%, transparent);
+  }
+
+  .landing-page .actions::before {
+    @apply absolute inset-x-4 top-0 h-1 rounded-b-sm;
+    background: linear-gradient(90deg, var(--pitch), var(--card), var(--coral));
+    content: "";
+    z-index: -1;
+  }
+
+  .landing-page .btn {
+    @apply min-h-[52px] px-3 text-[0.95rem];
+  }
+
+  .landing-page .actions .btn:first-child {
+    border-color: color-mix(in srgb, white 18%, transparent);
+    background:
+      linear-gradient(135deg, var(--pitch), var(--pitch-strong) 62%),
+      var(--pitch-strong);
+    box-shadow:
+      inset 0 -3px 0 color-mix(in srgb, black 16%, transparent),
+      0 12px 24px color-mix(in srgb, var(--pitch) 28%, transparent);
+    color: white;
+    transform: rotate(-1deg);
+  }
+
+  .landing-page .actions .btn:first-child:hover {
+    color: white;
+    transform: translateY(-1px) rotate(-1deg);
+  }
+
+  .landing-page .actions .btn:last-child {
+    border-color: color-mix(in srgb, white 22%, transparent);
+    background:
+      linear-gradient(135deg, color-mix(in srgb, white 96%, var(--card)), color-mix(in srgb, var(--surface-alt) 82%, white));
+    box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--foreground) 8%, transparent);
+    color: var(--foreground);
+    transform: rotate(1deg);
+  }
+
+  .landing-page .actions .btn:last-child:hover {
+    color: var(--coral);
+    transform: translateY(-1px) rotate(1deg);
+  }
+
+  .landing-install-prompt {
+    @apply mt-0;
+  }
+
+  .landing-install-hint {
+    @apply hidden;
+  }
+
+  .landing-install-button {
+    @apply w-full min-h-11;
+  }
+
   .site-header {
     @apply min-h-16 w-full px-4;
   }
