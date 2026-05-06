@@ -10,6 +10,12 @@ export function AuthHero({ title, text }: AuthHeroProps) {
       <h1>{title}</h1>
       <p>{text}</p>
 
+      <div className="auth-locker-visual" aria-hidden="true">
+        <span className="auth-locker-shirt">10</span>
+        <span className="auth-locker-key">PDP</span>
+        <span className="auth-locker-line" />
+      </div>
+
       <div className="auth-scoreboard">
         <div>
           <span>Les potos</span>

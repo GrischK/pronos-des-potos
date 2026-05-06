@@ -16,7 +16,7 @@ export default async function SignupPage() {
   return (
     <main className="auth-page">
       <AuthHero
-        title="Entre dans la compétition."
+        title="Entre dans la compétition"
         text="Crée ton compte, rejoins les potos et garde une trace de chaque tournoi."
       />
 

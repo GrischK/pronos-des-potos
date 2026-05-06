@@ -1979,6 +1979,10 @@
     @apply mt-7 grid grid-cols-2 gap-3;
   }
 
+  .auth-locker-visual {
+    @apply hidden;
+  }
+
   .auth-scoreboard div {
     @apply rounded-lg p-4;
     border: 1px solid color-mix(in srgb, white 16%, transparent);
@@ -2552,6 +2556,183 @@
     @apply w-full min-h-11;
   }
 
+  .auth-page {
+    @apply gap-3;
+    width: min(100%, calc(100% - 28px));
+    min-height: 100vh;
+    padding: 18px 0 34px;
+  }
+
+  .auth-hero {
+    @apply relative min-h-[268px] content-start overflow-hidden p-5;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--foreground) 94%, black), color-mix(in srgb, var(--navy) 78%, black));
+    isolation: isolate;
+  }
+
+  .auth-hero::before {
+    @apply absolute inset-x-5 top-0 h-1 rounded-b-sm;
+    background: linear-gradient(90deg, var(--pitch), var(--card), var(--coral));
+    content: "";
+  }
+
+  .auth-hero .eyebrow {
+    @apply mb-3;
+    position: relative;
+    z-index: 2;
+  }
+
+  .auth-hero h1 {
+    @apply max-w-[220px] text-[2.45rem] leading-[0.94];
+    position: relative;
+    z-index: 2;
+  }
+
+  .auth-hero > p:not(.eyebrow),
+  .auth-badges {
+    @apply hidden;
+  }
+
+  .auth-locker-visual {
+    @apply absolute bottom-5 right-4 block h-[142px] w-[132px] rounded-lg;
+    border: 1px solid color-mix(in srgb, white 18%, transparent);
+    background:
+      linear-gradient(145deg, color-mix(in srgb, white 13%, transparent), color-mix(in srgb, black 8%, transparent)),
+      color-mix(in srgb, white 8%, transparent);
+    box-shadow: 0 14px 28px color-mix(in srgb, black 18%, transparent);
+    transform: rotate(3deg);
+    z-index: 1;
+  }
+
+  .auth-locker-visual::before {
+    display: none;
+  }
+
+  .auth-locker-shirt {
+    @apply absolute left-5 top-10 grid h-[68px] w-[62px] place-items-center rounded-lg text-3xl font-black text-white;
+    background:
+      linear-gradient(135deg, var(--pitch), var(--pitch-strong)),
+      var(--pitch);
+    clip-path: polygon(18% 0, 36% 10%, 64% 10%, 82% 0, 100% 22%, 84% 40%, 84% 100%, 16% 100%, 16% 40%, 0 22%);
+    text-shadow: 0 2px 0 color-mix(in srgb, black 24%, transparent);
+  }
+
+  .auth-locker-key {
+    @apply absolute bottom-4 right-4 rounded-md px-2 py-1 text-xs font-black text-foreground;
+    background: var(--card);
+    box-shadow: 0 8px 18px color-mix(in srgb, black 20%, transparent);
+  }
+
+  .auth-locker-line {
+    @apply hidden;
+  }
+
+  .auth-scoreboard {
+    @apply mt-5 max-w-[174px] grid-cols-2 gap-2;
+    position: relative;
+    z-index: 2;
+  }
+
+  .auth-scoreboard div {
+    @apply p-2.5;
+  }
+
+  .auth-scoreboard span {
+    @apply text-[0.72rem] leading-tight;
+  }
+
+  .auth-scoreboard strong {
+    @apply mt-1 text-[2rem];
+  }
+
+  .auth-card {
+    @apply p-4;
+    margin-top: -18px;
+    position: relative;
+    z-index: 1;
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--card) 9%, white), white 28%),
+      var(--surface);
+  }
+
+  .auth-card .eyebrow,
+  .auth-card > p:not(.auth-switch) {
+    @apply hidden;
+  }
+
+  .auth-card h2 {
+    @apply text-xl leading-tight;
+  }
+
+  .auth-form {
+    @apply mt-4 gap-3;
+  }
+
+  .field {
+    @apply gap-1.5;
+  }
+
+  .field input,
+  .field select {
+    @apply min-h-12;
+  }
+
+  .auth-submit {
+    @apply min-h-[52px];
+  }
+
+  .auth-switch {
+    @apply mt-4 text-sm;
+  }
+
+  :root[data-theme="dark"] .auth-hero {
+    border-color: color-mix(in srgb, var(--pitch) 20%, var(--line));
+    background:
+      linear-gradient(135deg, #101820, color-mix(in srgb, var(--surface-alt) 74%, black));
+  }
+
+  :root[data-theme="dark"] .auth-card {
+    border-color: color-mix(in srgb, var(--pitch) 18%, var(--line));
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--surface-alt) 92%, transparent),
+        var(--surface)
+      ),
+      var(--surface);
+    box-shadow: 0 18px 34px color-mix(in srgb, black 34%, transparent);
+  }
+
+  :root[data-theme="dark"] .auth-locker-visual {
+    border-color: color-mix(in srgb, white 10%, transparent);
+    background:
+      linear-gradient(145deg, color-mix(in srgb, white 9%, transparent), color-mix(in srgb, black 18%, transparent)),
+      color-mix(in srgb, var(--surface-alt) 68%, transparent);
+    box-shadow: 0 16px 30px color-mix(in srgb, black 28%, transparent);
+  }
+
+  :root[data-theme="dark"] .auth-locker-shirt {
+    color: #0f1318;
+    text-shadow: none;
+  }
+
+  :root[data-theme="dark"] .auth-locker-key {
+    color: #151817;
+  }
+
+  :root[data-theme="dark"] .auth-scoreboard div {
+    border-color: color-mix(in srgb, white 12%, transparent);
+    background: color-mix(in srgb, white 8%, transparent);
+  }
+
+  :root[data-theme="dark"] .auth-submit {
+    color: #0f1318;
+  }
+
+  :root[data-theme="dark"] .auth-switch a {
+    color: #bdf0d2;
+  }
+
   .site-header {
     @apply min-h-16 w-full px-4;
   }
@@ -2586,18 +2767,6 @@
 
   .empty-state {
     @apply flex-col items-start;
-  }
-
-  .auth-page {
-    @apply pt-7;
-  }
-
-  .auth-hero {
-    @apply min-h-[430px];
-  }
-
-  .auth-hero h1 {
-    @apply text-[2.8rem];
   }
 
   .admin-layout {

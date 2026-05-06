@@ -16,7 +16,7 @@ export default async function LoginPage() {
   return (
     <main className="auth-page">
       <AuthHero
-        title="Retour au classement."
+        title="Retour au classement"
         text="Connecte-toi, vérifie tes pronos et prépare la prochaine journée avant les autres."
       />
 
