@@ -183,8 +183,9 @@ export default async function CompetitionsPage() {
     <main className="page-shell">
       <AutoRefresh intervalMs={30000} />
       <PageHeader
+         className="competitions-page-header"
         eyebrow="Compétitions"
-        title="À toi de jouer."
+        title="Choisis ta compét'"
         description="Retrouve tes tournois, pose tes prochains pronos et surveille les classements quand les scores tombent."
       />
 

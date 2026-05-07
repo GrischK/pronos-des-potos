@@ -2495,6 +2495,131 @@
     @apply block;
   }
 
+  .competitions-page-header .lead {
+    @apply hidden;
+  }
+
+  .competitions-page-header h1 {
+    @apply max-w-[240px] text-[2.35rem] leading-[0.95];
+  }
+
+  .competition-card {
+    @apply gap-4;
+  }
+
+  .competition-card-title .competition-emblem {
+    @apply h-20 w-20;
+  }
+
+  .competition-card-badges {
+    @apply gap-1.5;
+  }
+
+  .competition-kind-badge {
+    @apply px-2 py-1 text-xs;
+  }
+
+  .competition-card-summary {
+    @apply gap-1.5;
+  }
+
+  .competition-card-summary span {
+    @apply px-2.5 py-2 text-[0.7rem];
+  }
+
+  .competition-card-summary strong {
+    @apply text-xl;
+  }
+
+  .competition-card-next,
+  .competition-card-live {
+    @apply gap-1.5 p-2.5;
+  }
+
+  .competition-card-next span,
+  .competition-card-live > span:first-child,
+  .competition-card-next small,
+  .competition-card-live small {
+    @apply hidden;
+  }
+
+  .competition-card-next strong,
+  .competition-card-live strong {
+    @apply text-sm leading-tight;
+  }
+
+  .competition-card-matchup {
+    @apply gap-1.5;
+  }
+
+  .competition-card-team {
+    @apply gap-1.5 text-sm;
+  }
+
+  .competition-card-match-separator {
+    @apply text-xs;
+  }
+
+  .competition-card-live-scoreline {
+    @apply gap-1.5;
+  }
+
+  .competition-card-stats {
+    @apply gap-1.5;
+  }
+
+  .competition-card-stats span {
+    @apply px-2 py-2 text-[0.68rem];
+  }
+
+  .competition-card-stats span {
+    @apply text-transparent;
+  }
+
+  .competition-card-stats span strong {
+    @apply text-[1.15rem] text-foreground;
+  }
+
+  .competition-card-stats span::after {
+    @apply block text-[0.68rem] font-bold text-muted;
+  }
+
+  .competition-card-stats span:nth-child(1)::after {
+    content: "Matchs";
+  }
+
+  .competition-card-stats span:nth-child(2)::after {
+    content: "Pronos";
+  }
+
+  .competition-card-stats span:nth-child(3)::after {
+    content: "Leader";
+  }
+
+  .next-prediction-panel {
+    @apply gap-3 p-4;
+  }
+
+  .next-prediction-panel h2 {
+    @apply mt-2 text-[1.65rem] leading-[1];
+  }
+
+  .next-prediction-panel p:not(.badge) {
+    @apply hidden;
+  }
+
+  .next-prediction-action {
+    @apply gap-2;
+  }
+
+  .next-prediction-action strong {
+    @apply text-xs;
+  }
+
+  .next-prediction-action .btn {
+    @apply w-full;
+  }
+
   .landing-page .actions {
     @apply relative grid grid-cols-2 gap-3 rounded-lg p-2;
     isolation: isolate;
