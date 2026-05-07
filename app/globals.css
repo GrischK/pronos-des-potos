@@ -1108,12 +1108,16 @@
   }
 
   .competition-card-stats span {
-    @apply grid min-w-0 gap-1 rounded-lg bg-white px-3 py-2 text-xs font-bold leading-tight text-muted;
+    @apply grid min-w-0 content-start justify-items-start gap-1 rounded-lg px-3 py-2 text-left text-xs font-bold leading-tight text-muted;
     border: 1px solid color-mix(in srgb, var(--pitch) 10%, var(--line));
   }
 
   .competition-card-stats strong {
-    @apply min-w-0 truncate text-base font-black leading-none text-foreground;
+    @apply min-w-0 text-base font-black leading-none text-foreground;
+  }
+
+  .competition-card-stat--leader strong {
+    @apply text-sm leading-tight;
   }
 
   .next-prediction-panel {
@@ -2190,76 +2194,85 @@
   }
 
   :root[data-theme="dark"] .competition-card {
-    border-top-color: color-mix(in srgb, var(--pitch) 88%, white);
+    border-color: color-mix(in srgb, white 18%, var(--line));
+    border-top-color: color-mix(in srgb, var(--pitch) 96%, white);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, white 10%, transparent),
+      0 24px 56px color-mix(in srgb, black 48%, transparent);
     background:
       radial-gradient(
         circle at 92% 18%,
-        color-mix(in srgb, var(--sky) 16%, transparent) 0 16%,
-        transparent 34%
+        color-mix(in srgb, var(--sky) 24%, transparent) 0 18%,
+        transparent 38%
       ),
       linear-gradient(
         135deg,
-        color-mix(in srgb, var(--pitch) 16%, var(--surface-alt)),
-        var(--surface) 56%
+        color-mix(in srgb, var(--pitch) 22%, var(--surface-alt)),
+        color-mix(in srgb, var(--surface-alt) 76%, black) 52%,
+        color-mix(in srgb, var(--surface) 90%, black)
       ),
       var(--surface);
   }
 
   :root[data-theme="dark"] .competition-card--world-cup {
-    border-top-color: color-mix(in srgb, var(--pitch) 88%, white);
+    border-top-color: color-mix(in srgb, var(--pitch) 96%, white);
     background:
       linear-gradient(
         90deg,
-        color-mix(in srgb, var(--pitch) 18%, transparent) 1px,
+        color-mix(in srgb, var(--pitch) 28%, transparent) 1px,
         transparent 1px 18px
       ),
       linear-gradient(
         0deg,
-        color-mix(in srgb, var(--sky) 16%, transparent) 1px,
+        color-mix(in srgb, var(--sky) 22%, transparent) 1px,
         transparent 1px 18px
       ),
       linear-gradient(
         135deg,
-        color-mix(in srgb, var(--mint) 18%, var(--surface-alt)),
-        var(--surface) 60%
+        color-mix(in srgb, var(--mint) 24%, var(--surface-alt)),
+        color-mix(in srgb, var(--surface-alt) 76%, black) 54%,
+        color-mix(in srgb, var(--surface) 90%, black)
       ),
       var(--surface);
   }
 
   :root[data-theme="dark"] .competition-card--euro {
-    border-top-color: color-mix(in srgb, var(--sky) 88%, white);
+    border-top-color: color-mix(in srgb, var(--sky) 96%, white);
     background:
-      radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--card) 32%, transparent) 0 2px, transparent 3px),
-      radial-gradient(circle at 90% 30%, color-mix(in srgb, var(--card) 24%, transparent) 0 1.5px, transparent 3px),
-      radial-gradient(circle at 74% 34%, color-mix(in srgb, var(--card) 26%, transparent) 0 1.5px, transparent 3px),
+      radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--card) 52%, transparent) 0 2px, transparent 3px),
+      radial-gradient(circle at 90% 30%, color-mix(in srgb, var(--card) 38%, transparent) 0 1.5px, transparent 3px),
+      radial-gradient(circle at 74% 34%, color-mix(in srgb, var(--card) 40%, transparent) 0 1.5px, transparent 3px),
       linear-gradient(
         135deg,
-        color-mix(in srgb, var(--sky) 22%, var(--surface-alt)),
-        var(--surface) 62%
+        color-mix(in srgb, var(--sky) 32%, var(--surface-alt)),
+        color-mix(in srgb, var(--surface-alt) 76%, black) 54%,
+        color-mix(in srgb, var(--surface) 90%, black)
       ),
       var(--surface);
   }
 
   :root[data-theme="dark"] .competition-card--champions-league {
-    border-top-color: color-mix(in srgb, var(--navy) 90%, white);
+    border-top-color: color-mix(in srgb, var(--navy) 96%, white);
     background:
-      radial-gradient(circle at 80% 18%, color-mix(in srgb, var(--sky) 34%, transparent) 0 2px, transparent 3px),
-      radial-gradient(circle at 91% 28%, color-mix(in srgb, var(--sky) 22%, transparent) 0 1.5px, transparent 3px),
+      radial-gradient(circle at 80% 18%, color-mix(in srgb, var(--sky) 50%, transparent) 0 2px, transparent 3px),
+      radial-gradient(circle at 91% 28%, color-mix(in srgb, var(--sky) 34%, transparent) 0 1.5px, transparent 3px),
       linear-gradient(
         135deg,
-        color-mix(in srgb, var(--navy) 24%, var(--surface-alt)),
-        var(--surface) 62%
+        color-mix(in srgb, var(--navy) 34%, var(--surface-alt)),
+        color-mix(in srgb, var(--surface-alt) 76%, black) 54%,
+        color-mix(in srgb, var(--surface) 90%, black)
       ),
       var(--surface);
   }
 
   :root[data-theme="dark"] .competition-card--other {
-    border-top-color: color-mix(in srgb, var(--card) 90%, white);
+    border-top-color: color-mix(in srgb, var(--card) 96%, white);
     background:
       linear-gradient(
         135deg,
-        color-mix(in srgb, var(--card) 18%, var(--surface-alt)),
-        var(--surface) 60%
+        color-mix(in srgb, var(--card) 26%, var(--surface-alt)),
+        color-mix(in srgb, var(--surface-alt) 76%, black) 54%,
+        color-mix(in srgb, var(--surface) 90%, black)
       ),
       var(--surface);
   }
@@ -2331,6 +2344,28 @@
   :root[data-theme="dark"] .avatar-crop-preview,
   :root[data-theme="dark"] .modal-close-button {
     background: var(--surface-alt);
+  }
+
+  :root[data-theme="dark"] .competition-card-summary span,
+  :root[data-theme="dark"] .competition-card-stats span {
+    border-color: color-mix(in srgb, white 10%, var(--line));
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--surface-alt) 68%, white),
+        color-mix(in srgb, var(--surface-alt) 88%, black)
+      );
+  }
+
+  :root[data-theme="dark"] .competition-card-next,
+  :root[data-theme="dark"] .competition-card-live {
+    border-color: color-mix(in srgb, white 12%, var(--line));
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--surface-alt) 72%, white),
+        color-mix(in srgb, var(--surface) 90%, black)
+      );
   }
 
   :root[data-theme="dark"] .form-error {
@@ -2537,15 +2572,18 @@
   }
 
   .competition-card-next span,
-  .competition-card-live > span:first-child,
-  .competition-card-next small,
-  .competition-card-live small {
-    @apply hidden;
+  .competition-card-live > span:first-child {
+    @apply text-[0.72rem] font-black uppercase tracking-normal text-muted;
   }
 
   .competition-card-next strong,
   .competition-card-live strong {
     @apply text-sm leading-tight;
+  }
+
+  .competition-card-next small,
+  .competition-card-live small {
+    @apply block text-[0.72rem] leading-tight text-muted;
   }
 
   .competition-card-matchup {
@@ -2572,28 +2610,8 @@
     @apply px-2 py-2 text-[0.68rem];
   }
 
-  .competition-card-stats span {
-    @apply text-transparent;
-  }
-
   .competition-card-stats span strong {
     @apply text-[1.15rem] text-foreground;
-  }
-
-  .competition-card-stats span::after {
-    @apply block text-[0.68rem] font-bold text-muted;
-  }
-
-  .competition-card-stats span:nth-child(1)::after {
-    content: "Matchs";
-  }
-
-  .competition-card-stats span:nth-child(2)::after {
-    content: "Pronos";
-  }
-
-  .competition-card-stats span:nth-child(3)::after {
-    content: "Leader";
   }
 
   .next-prediction-panel {

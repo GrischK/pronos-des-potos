@@ -278,21 +278,21 @@ export default async function CompetitionsPage() {
                 </div>
 
                 <div className="competition-card-stats">
-                  <span>
+                  <span className="competition-card-stat">
                     <strong>{competition.remainingMatchCount}</strong>
                     Matchs restants
                   </span>
-                  <span>
+                  <span className="competition-card-stat">
                     <strong>{competition.missingPredictionCount}</strong>
-                    À poser
+                    Pronos à poser
                   </span>
-                  <span>
+                  <span className="competition-card-stat competition-card-stat--leader">
                     <strong>
                       {competition.leader
-                        ? `${competition.leader.points} pts`
+                        ? `${competition.leader.name} · ${competition.leader.points} pts`
                         : "-"}
                     </strong>
-                    {competition.leader?.name ?? "Leader"}
+                    Leader
                   </span>
                 </div>
               </Link>
