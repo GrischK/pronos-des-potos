@@ -43,12 +43,16 @@ export function PwaLaunchScreen({
     setIsVisible(true);
 
     const bootScreen = document.getElementById("pwa-boot-screen");
-    if (bootScreen) {
+    const shouldFadeBootScreen =
+      forceDisplay || document.documentElement.dataset.pwaBoot === "ios";
+
+    if (bootScreen && shouldFadeBootScreen) {
       window.setTimeout(() => {
         bootScreen.style.opacity = "0";
         bootScreen.style.transition = "opacity 180ms ease";
         window.setTimeout(() => {
           bootScreen.style.display = "none";
+          delete document.documentElement.dataset.pwaBoot;
         }, 200);
       }, 40);
     }

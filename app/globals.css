@@ -221,6 +221,21 @@
     display: flex;
   }
 
+  :root[data-pwa-display="standalone"][data-pwa-boot="ios"] body {
+    background:
+      radial-gradient(
+        circle at 50% 36%,
+        color-mix(in srgb, var(--mint) 18%, transparent) 0,
+        transparent 34%
+      ),
+      linear-gradient(
+        145deg,
+        color-mix(in srgb, var(--pitch) 12%, var(--background)) 0%,
+        color-mix(in srgb, var(--background) 90%, white) 42%,
+        color-mix(in srgb, var(--card) 10%, var(--background)) 100%
+      );
+  }
+
   .pwa-launch-screen.is-visible {
     opacity: 1;
   }

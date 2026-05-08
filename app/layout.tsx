@@ -5,7 +5,7 @@ import { PwaLaunchScreen } from "@/components/PwaLaunchScreen";
 import "./globals.css";
 
 const criticalStyle = `
-html, body {
+html {
   background: #f6f7f1;
 }
 `;
@@ -23,7 +23,6 @@ const themeScript = `
 (() => {
   const storageKey = "pronos-theme";
   const root = document.documentElement;
-  root.style.backgroundColor = "#f6f7f1";
 
   const getTheme = () => {
     const savedTheme = window.localStorage.getItem(storageKey);
@@ -39,6 +38,7 @@ const themeScript = `
   const theme = getTheme();
   root.dataset.theme = theme;
   root.style.colorScheme = theme;
+  root.style.backgroundColor = theme === "dark" ? "#0f1318" : "#f6f7f1";
 
   const isStandalone =
     window.matchMedia("(display-mode: standalone)").matches ||
@@ -46,12 +46,19 @@ const themeScript = `
     (typeof navigator !== "undefined" &&
       "standalone" in navigator &&
       navigator.standalone === true);
+  const isIos =
+    /iP(ad|hone|od)/.test(window.navigator.userAgent) ||
+    (window.navigator.platform === "MacIntel" &&
+      window.navigator.maxTouchPoints > 1);
 
   if (isStandalone) {
     root.dataset.pwaDisplay = "standalone";
-    const bootScreen = document.getElementById("pwa-boot-screen");
-    if (bootScreen) {
-      bootScreen.style.display = "flex";
+    if (isIos) {
+      root.dataset.pwaBoot = "ios";
+      const bootScreen = document.getElementById("pwa-boot-screen");
+      if (bootScreen) {
+        bootScreen.style.display = "flex";
+      }
     }
   }
 })();
