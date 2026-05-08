@@ -213,7 +213,7 @@ export default async function CompetitionsPage() {
                   {competition.emblemUrl ? (
                     <img
                       alt=""
-                      className="competition-emblem"
+                      className="competition-emblem competition-card-emblem"
                       loading="lazy"
                       src={competition.emblemUrl}
                     />
