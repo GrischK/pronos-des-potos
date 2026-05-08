@@ -220,6 +220,9 @@ export default async function CompetitionsPage() {
                   <h2>{competition.name}</h2>
                 </div>
                 <div className="competition-card-badges">
+                  <p className="badge competition-kind-badge">
+                    {competitionKindLabels[competition.kind]}
+                  </p>
                   <p className={statusBadgeClasses[competition.status]}>
                     {statusLabels[competition.status]}
                   </p>

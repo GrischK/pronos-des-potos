@@ -953,83 +953,244 @@
   }
 
   .competition-card {
-    border-top: 4px solid var(--pitch);
+    @apply relative overflow-hidden p-0;
+    border: 1px solid color-mix(in srgb, var(--pitch) 18%, var(--line));
     background:
-      radial-gradient(
-        circle at 92% 18%,
-        color-mix(in srgb, var(--sky) 18%, transparent) 0 18%,
-        transparent 38%
-      ),
-      linear-gradient(135deg, color-mix(in srgb, var(--pitch) 10%, white), white 48%),
+      linear-gradient(180deg, color-mix(in srgb, var(--card) 8%, white), white 34%),
       var(--surface);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, white 76%, transparent),
+      0 18px 42px color-mix(in srgb, var(--foreground) 10%, transparent);
+    isolation: isolate;
+  }
+
+  .competition-card::before {
+    @apply absolute pointer-events-none inset-x-0 top-0;
+    height: 10px;
+    background: linear-gradient(90deg, var(--pitch), var(--mint), var(--card), var(--coral), var(--navy));
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--coral) 20%, transparent);
+    content: "";
+    filter: saturate(1.35);
+    z-index: 2;
+  }
+
+  .competition-card::after {
+    @apply absolute pointer-events-none grid place-items-center text-2xl font-black;
+    top: 28px;
+    right: 20px;
+    width: 48px;
+    height: 40px;
+    border: 1px solid color-mix(in srgb, white 24%, transparent);
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--pitch) 92%, black) 0 50%,
+        color-mix(in srgb, var(--coral) 90%, black) 50% 100%
+      );
+    box-shadow:
+      inset 0 -2px 0 color-mix(in srgb, black 28%, transparent),
+      0 12px 24px color-mix(in srgb, black 18%, transparent);
+    clip-path: polygon(0 0, 100% 0, 100% 36%, 88% 50%, 100% 64%, 100% 100%, 0 100%, 0 64%, 12% 50%, 0 36%);
+    color: white;
+    content: "✓";
+    letter-spacing: -0.02em;
+    line-height: 1;
+    text-shadow: 0 2px 0 color-mix(in srgb, black 24%, transparent);
+    transform: rotate(2deg);
+    z-index: 2;
+  }
+
+  .competition-card > * {
+    @apply relative;
+    z-index: 1;
   }
 
   .competition-card--world-cup {
-    border-top-color: var(--pitch);
+    border-color: color-mix(in srgb, var(--pitch) 22%, var(--line));
     background:
-      linear-gradient(
-        90deg,
-        color-mix(in srgb, var(--pitch) 14%, transparent) 1px,
-        transparent 1px 18px
-      ),
-      linear-gradient(
-        0deg,
-        color-mix(in srgb, var(--sky) 16%, transparent) 1px,
-        transparent 1px 18px
-      ),
-      linear-gradient(135deg, color-mix(in srgb, var(--mint) 18%, white), white 52%),
+      linear-gradient(180deg, color-mix(in srgb, var(--mint) 12%, white), white 36%),
       var(--surface);
   }
 
-  .competition-card--euro {
-    border-top-color: var(--sky);
+  .competition-card--world-cup::before {
+    background: linear-gradient(90deg, var(--pitch), var(--mint), var(--sky), var(--card));
+  }
+
+  .competition-card--world-cup::after {
     background:
-      radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--card) 58%, white) 0 2px, transparent 3px),
-      radial-gradient(circle at 90% 30%, color-mix(in srgb, var(--card) 44%, white) 0 1.5px, transparent 3px),
-      radial-gradient(circle at 74% 34%, color-mix(in srgb, var(--card) 48%, white) 0 1.5px, transparent 3px),
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--pitch) 92%, black) 0 50%,
+        color-mix(in srgb, var(--mint) 86%, black) 50% 100%
+      );
+  }
+
+  .competition-card--euro {
+    border-color: color-mix(in srgb, var(--sky) 28%, var(--line));
+    background:
       linear-gradient(135deg, color-mix(in srgb, var(--sky) 24%, white), white 54%),
       var(--surface);
   }
 
-  .competition-card--champions-league {
-    border-top-color: var(--navy);
+  .competition-card--euro::before {
+    background: linear-gradient(90deg, var(--sky), var(--card), var(--coral), var(--navy));
+  }
+
+  .competition-card--euro::after {
     background:
-      radial-gradient(circle at 80% 18%, color-mix(in srgb, var(--sky) 64%, white) 0 2px, transparent 3px),
-      radial-gradient(circle at 91% 28%, color-mix(in srgb, var(--sky) 46%, white) 0 1.5px, transparent 3px),
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--sky) 88%, black) 0 50%,
+        color-mix(in srgb, var(--card) 86%, black) 50% 100%
+      );
+    color: white;
+  }
+
+  .competition-card--champions-league {
+    border-color: color-mix(in srgb, var(--navy) 22%, var(--line));
+    background:
       linear-gradient(135deg, color-mix(in srgb, var(--navy) 15%, white), white 56%),
       var(--surface);
   }
 
+  .competition-card--champions-league::before {
+    background: linear-gradient(90deg, var(--navy), var(--sky), var(--card), var(--mint));
+  }
+
+  .competition-card--champions-league::after {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--navy) 92%, black) 0 50%,
+        color-mix(in srgb, var(--sky) 82%, black) 50% 100%
+      );
+  }
+
   .competition-card--other {
-    border-top-color: var(--card);
+    border-color: color-mix(in srgb, var(--card) 34%, var(--line));
     background:
       linear-gradient(135deg, color-mix(in srgb, var(--card) 14%, white), white 50%),
       var(--surface);
   }
 
+  .competition-card--other::before {
+    background: linear-gradient(90deg, var(--card), var(--mint), var(--pitch), var(--coral));
+  }
+
+  .competition-card--other::after {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--card) 88%, black) 0 50%,
+        color-mix(in srgb, var(--mint) 82%, black) 50% 100%
+      );
+    color: white;
+  }
+
   .competition-card-badges {
-    @apply flex flex-wrap gap-2;
+    @apply flex flex-wrap gap-2 px-5;
   }
 
   .competition-kind-badge {
-    @apply bg-white;
-    border: 1px solid color-mix(in srgb, var(--foreground) 8%, var(--line));
+    @apply bg-white font-black;
+    border: 1px solid color-mix(in srgb, var(--pitch) 14%, var(--line));
+    color: color-mix(in srgb, var(--pitch-strong) 72%, var(--foreground));
   }
 
   .competition-card-title {
-    @apply grid min-w-0 justify-items-start gap-2.5;
+    @apply relative grid min-w-0 items-center gap-3 overflow-hidden px-5 pt-8 pb-4 text-white;
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--foreground) 94%, black),
+        color-mix(in srgb, var(--navy) 78%, black)
+      ),
+      var(--navy);
+    grid-template-columns: auto minmax(0, 1fr);
+    padding-right: 94px;
+  }
+
+  .competition-card-title::before {
+    @apply absolute inset-x-5 top-0 h-1 rounded-b-sm;
+    background: linear-gradient(90deg, var(--pitch), var(--mint), var(--card), var(--coral), var(--navy));
+    content: "";
+    z-index: 1;
+  }
+
+  .competition-card--world-cup .competition-card-title {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--pitch) 86%, black),
+        color-mix(in srgb, var(--navy) 82%, black)
+      ),
+      var(--navy);
+  }
+
+  .competition-card--world-cup .competition-card-title::before {
+    background: linear-gradient(90deg, var(--pitch), var(--mint), var(--sky), var(--card));
+  }
+
+  .competition-card--euro .competition-card-title {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--sky) 64%, var(--navy)),
+        color-mix(in srgb, var(--navy) 86%, black)
+      ),
+      var(--navy);
+  }
+
+  .competition-card--euro .competition-card-title::before {
+    background: linear-gradient(90deg, var(--sky), var(--card), var(--coral), var(--navy));
+  }
+
+  .competition-card--champions-league .competition-card-title {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--navy) 90%, black),
+        color-mix(in srgb, var(--sky) 38%, var(--foreground))
+      ),
+      var(--navy);
+  }
+
+  .competition-card--champions-league .competition-card-title::before {
+    background: linear-gradient(90deg, var(--navy), var(--sky), var(--card), var(--mint));
+  }
+
+  .competition-card--other .competition-card-title {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--card) 46%, var(--foreground)),
+        color-mix(in srgb, var(--pitch-strong) 72%, black)
+      ),
+      var(--pitch-strong);
+  }
+
+  .competition-card--other .competition-card-title::before {
+    background: linear-gradient(90deg, var(--card), var(--mint), var(--pitch), var(--coral));
   }
 
   .competition-card-title h2 {
-    @apply mb-0 min-w-0;
+    @apply relative mb-0 min-w-0;
+    color: white;
+    z-index: 1;
   }
 
   .competition-card-title .competition-emblem {
-    @apply h-28 w-28 border-0 bg-transparent p-0;
+    @apply relative h-20 w-20 rounded-lg border bg-white p-2;
+    border-color: color-mix(in srgb, white 26%, transparent);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, white 70%, transparent),
+      0 12px 24px color-mix(in srgb, black 22%, transparent);
+    object-fit: contain;
+    z-index: 1;
   }
 
   .competition-card-summary {
-    @apply grid gap-2;
+    @apply grid gap-2 px-5;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -1043,7 +1204,7 @@
   }
 
   .competition-card-next {
-    @apply grid gap-1 rounded-lg border border-line bg-surface-alt p-3;
+    @apply mx-5 grid gap-1 rounded-lg border border-line bg-surface-alt p-3;
   }
 
   .competition-card-next span {
@@ -1059,7 +1220,7 @@
   }
 
   .competition-card-live {
-    @apply grid gap-2 rounded-lg border border-line bg-surface-alt p-3;
+    @apply mx-5 grid gap-2 rounded-lg border border-line bg-surface-alt p-3;
     background:
       linear-gradient(135deg, color-mix(in srgb, var(--coral) 8%, white), white 72%),
       var(--surface-alt);
@@ -1103,7 +1264,7 @@
   }
 
   .competition-card-stats {
-    @apply grid gap-2;
+    @apply grid gap-2 px-5 pb-5;
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
@@ -2402,16 +2563,6 @@
     border-top-color: color-mix(in srgb, var(--pitch) 96%, white);
     background:
       linear-gradient(
-        90deg,
-        color-mix(in srgb, var(--pitch) 28%, transparent) 1px,
-        transparent 1px 18px
-      ),
-      linear-gradient(
-        0deg,
-        color-mix(in srgb, var(--sky) 22%, transparent) 1px,
-        transparent 1px 18px
-      ),
-      linear-gradient(
         135deg,
         color-mix(in srgb, var(--mint) 24%, var(--surface-alt)),
         color-mix(in srgb, var(--surface-alt) 76%, black) 54%,
@@ -2423,9 +2574,6 @@
   :root[data-theme="dark"] .competition-card--euro {
     border-top-color: color-mix(in srgb, var(--sky) 96%, white);
     background:
-      radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--card) 52%, transparent) 0 2px, transparent 3px),
-      radial-gradient(circle at 90% 30%, color-mix(in srgb, var(--card) 38%, transparent) 0 1.5px, transparent 3px),
-      radial-gradient(circle at 74% 34%, color-mix(in srgb, var(--card) 40%, transparent) 0 1.5px, transparent 3px),
       linear-gradient(
         135deg,
         color-mix(in srgb, var(--sky) 32%, var(--surface-alt)),
@@ -2438,8 +2586,6 @@
   :root[data-theme="dark"] .competition-card--champions-league {
     border-top-color: color-mix(in srgb, var(--navy) 96%, white);
     background:
-      radial-gradient(circle at 80% 18%, color-mix(in srgb, var(--sky) 50%, transparent) 0 2px, transparent 3px),
-      radial-gradient(circle at 91% 28%, color-mix(in srgb, var(--sky) 34%, transparent) 0 1.5px, transparent 3px),
       linear-gradient(
         135deg,
         color-mix(in srgb, var(--navy) 34%, var(--surface-alt)),
@@ -2459,6 +2605,79 @@
         color-mix(in srgb, var(--surface) 90%, black)
       ),
       var(--surface);
+  }
+
+  :root[data-theme="dark"] .competition-card::before {
+    background: linear-gradient(90deg, var(--pitch), var(--mint), var(--card), var(--coral), var(--navy));
+    box-shadow: 0 5px 18px color-mix(in srgb, var(--coral) 28%, transparent);
+  }
+
+  :root[data-theme="dark"] .competition-card::after {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--pitch) 88%, white) 0 50%,
+        color-mix(in srgb, var(--coral) 86%, white) 50% 100%
+      );
+    border-color: color-mix(in srgb, white 20%, transparent);
+    color: #0f1318;
+  }
+
+  :root[data-theme="dark"] .competition-card--world-cup::after {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--pitch) 88%, white) 0 50%,
+        color-mix(in srgb, var(--mint) 82%, white) 50% 100%
+      );
+  }
+
+  :root[data-theme="dark"] .competition-card--world-cup::before {
+    background: linear-gradient(90deg, var(--pitch), var(--mint), var(--sky), var(--card));
+  }
+
+  :root[data-theme="dark"] .competition-card--euro::after {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--sky) 88%, white) 0 50%,
+        color-mix(in srgb, var(--card) 84%, white) 50% 100%
+      );
+  }
+
+  :root[data-theme="dark"] .competition-card--euro::before {
+    background: linear-gradient(90deg, var(--sky), var(--card), var(--coral), var(--navy));
+  }
+
+  :root[data-theme="dark"] .competition-card--champions-league::after {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--navy) 86%, white) 0 50%,
+        color-mix(in srgb, var(--sky) 82%, white) 50% 100%
+      );
+  }
+
+  :root[data-theme="dark"] .competition-card--champions-league::before {
+    background: linear-gradient(90deg, var(--navy), var(--sky), var(--card), var(--mint));
+  }
+
+  :root[data-theme="dark"] .competition-card--other::after {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--card) 86%, white) 0 50%,
+        color-mix(in srgb, var(--mint) 82%, white) 50% 100%
+      );
+  }
+
+  :root[data-theme="dark"] .competition-card--other::before {
+    background: linear-gradient(90deg, var(--card), var(--mint), var(--pitch), var(--coral));
+  }
+
+  :root[data-theme="dark"] .competition-card-title .competition-emblem {
+    border-color: color-mix(in srgb, white 10%, var(--line));
+    background: color-mix(in srgb, var(--surface-alt) 84%, white);
   }
 
   :root[data-theme="dark"] .action-card:nth-child(1) {
