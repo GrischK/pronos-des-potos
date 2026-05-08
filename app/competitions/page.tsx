@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Shirt } from "lucide-react";
 
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { EmptyState } from "@/components/EmptyState";
@@ -218,6 +219,14 @@ export default async function CompetitionsPage() {
                     />
                   ) : null}
                   <h2>{competition.name}</h2>
+                  <span className="competition-card-ticket" aria-hidden="true">
+                    <Shirt
+                      aria-hidden="true"
+                      fill="currentColor"
+                      size={30}
+                      stroke="none"
+                    />
+                  </span>
                 </div>
                 <div className="competition-card-badges">
                   <p className="badge competition-kind-badge">

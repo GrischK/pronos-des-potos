@@ -954,6 +954,12 @@
 
   .competition-card {
     @apply relative overflow-hidden p-0;
+    --competition-ticket-bg: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--pitch) 92%, black) 0 50%,
+      color-mix(in srgb, var(--coral) 90%, black) 50% 100%
+    );
+    --competition-ticket-icon: white;
     border: 1px solid color-mix(in srgb, var(--pitch) 18%, var(--line));
     background:
       linear-gradient(180deg, color-mix(in srgb, var(--card) 8%, white), white 34%),
@@ -974,38 +980,17 @@
     z-index: 2;
   }
 
-  .competition-card::after {
-    @apply absolute pointer-events-none grid place-items-center text-2xl font-black;
-    top: 28px;
-    right: 20px;
-    width: 48px;
-    height: 40px;
-    border: 1px solid color-mix(in srgb, white 24%, transparent);
-    background:
-      linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--pitch) 92%, black) 0 50%,
-        color-mix(in srgb, var(--coral) 90%, black) 50% 100%
-      );
-    box-shadow:
-      inset 0 -2px 0 color-mix(in srgb, black 28%, transparent),
-      0 12px 24px color-mix(in srgb, black 18%, transparent);
-    clip-path: polygon(0 0, 100% 0, 100% 36%, 88% 50%, 100% 64%, 100% 100%, 0 100%, 0 64%, 12% 50%, 0 36%);
-    color: white;
-    content: "✓";
-    letter-spacing: -0.02em;
-    line-height: 1;
-    text-shadow: 0 2px 0 color-mix(in srgb, black 24%, transparent);
-    transform: rotate(2deg);
-    z-index: 2;
-  }
-
   .competition-card > * {
     @apply relative;
     z-index: 1;
   }
 
   .competition-card--world-cup {
+    --competition-ticket-bg: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--pitch) 92%, black) 0 50%,
+      color-mix(in srgb, var(--mint) 86%, black) 50% 100%
+    );
     border-color: color-mix(in srgb, var(--pitch) 22%, var(--line));
     background:
       linear-gradient(180deg, color-mix(in srgb, var(--mint) 12%, white), white 36%),
@@ -1016,16 +1001,12 @@
     background: linear-gradient(90deg, var(--pitch), var(--mint), var(--sky), var(--card));
   }
 
-  .competition-card--world-cup::after {
-    background:
-      linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--pitch) 92%, black) 0 50%,
-        color-mix(in srgb, var(--mint) 86%, black) 50% 100%
-      );
-  }
-
   .competition-card--euro {
+    --competition-ticket-bg: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--sky) 88%, black) 0 50%,
+      color-mix(in srgb, var(--card) 86%, black) 50% 100%
+    );
     border-color: color-mix(in srgb, var(--sky) 28%, var(--line));
     background:
       linear-gradient(135deg, color-mix(in srgb, var(--sky) 24%, white), white 54%),
@@ -1036,17 +1017,12 @@
     background: linear-gradient(90deg, var(--sky), var(--card), var(--coral), var(--navy));
   }
 
-  .competition-card--euro::after {
-    background:
-      linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--sky) 88%, black) 0 50%,
-        color-mix(in srgb, var(--card) 86%, black) 50% 100%
-      );
-    color: white;
-  }
-
   .competition-card--champions-league {
+    --competition-ticket-bg: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--navy) 92%, black) 0 50%,
+      color-mix(in srgb, var(--sky) 82%, black) 50% 100%
+    );
     border-color: color-mix(in srgb, var(--navy) 22%, var(--line));
     background:
       linear-gradient(135deg, color-mix(in srgb, var(--navy) 15%, white), white 56%),
@@ -1057,16 +1033,12 @@
     background: linear-gradient(90deg, var(--navy), var(--sky), var(--card), var(--mint));
   }
 
-  .competition-card--champions-league::after {
-    background:
-      linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--navy) 92%, black) 0 50%,
-        color-mix(in srgb, var(--sky) 82%, black) 50% 100%
-      );
-  }
-
   .competition-card--other {
+    --competition-ticket-bg: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--card) 88%, black) 0 50%,
+      color-mix(in srgb, var(--mint) 82%, black) 50% 100%
+    );
     border-color: color-mix(in srgb, var(--card) 34%, var(--line));
     background:
       linear-gradient(135deg, color-mix(in srgb, var(--card) 14%, white), white 50%),
@@ -1075,16 +1047,6 @@
 
   .competition-card--other::before {
     background: linear-gradient(90deg, var(--card), var(--mint), var(--pitch), var(--coral));
-  }
-
-  .competition-card--other::after {
-    background:
-      linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--card) 88%, black) 0 50%,
-        color-mix(in srgb, var(--mint) 82%, black) 50% 100%
-      );
-    color: white;
   }
 
   .competition-card-badges {
@@ -1177,6 +1139,28 @@
     @apply relative mb-0 min-w-0;
     color: white;
     z-index: 1;
+  }
+
+  .competition-card-ticket {
+    @apply absolute grid place-items-center;
+    top: 28px;
+    right: 20px;
+    width: 48px;
+    height: 40px;
+    border: 1px solid color-mix(in srgb, white 24%, transparent);
+    background: var(--competition-ticket-bg);
+    box-shadow:
+      inset 0 -2px 0 color-mix(in srgb, black 28%, transparent),
+      0 12px 24px color-mix(in srgb, black 18%, transparent);
+    clip-path: polygon(0 0, 100% 0, 100% 36%, 88% 50%, 100% 64%, 100% 100%, 0 100%, 0 64%, 12% 50%, 0 36%);
+    color: var(--competition-ticket-icon);
+    transform: rotate(2deg);
+    z-index: 3;
+  }
+
+  .competition-card-ticket svg {
+    @apply block;
+    fill: currentColor;
   }
 
   .competition-card-title .competition-emblem {
@@ -2613,62 +2597,60 @@
   }
 
   :root[data-theme="dark"] .competition-card::after {
-    background:
-      linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--pitch) 88%, white) 0 50%,
-        color-mix(in srgb, var(--coral) 86%, white) 50% 100%
-      );
     border-color: color-mix(in srgb, white 20%, transparent);
-    color: #0f1318;
   }
 
-  :root[data-theme="dark"] .competition-card--world-cup::after {
-    background:
-      linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--pitch) 88%, white) 0 50%,
-        color-mix(in srgb, var(--mint) 82%, white) 50% 100%
-      );
+  :root[data-theme="dark"] .competition-card {
+    --competition-ticket-bg: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--pitch) 88%, white) 0 50%,
+      color-mix(in srgb, var(--coral) 86%, white) 50% 100%
+    );
+    --competition-ticket-icon: #0f1318;
+  }
+
+  :root[data-theme="dark"] .competition-card--world-cup {
+    --competition-ticket-bg: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--pitch) 88%, white) 0 50%,
+      color-mix(in srgb, var(--mint) 82%, white) 50% 100%
+    );
   }
 
   :root[data-theme="dark"] .competition-card--world-cup::before {
     background: linear-gradient(90deg, var(--pitch), var(--mint), var(--sky), var(--card));
   }
 
-  :root[data-theme="dark"] .competition-card--euro::after {
-    background:
-      linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--sky) 88%, white) 0 50%,
-        color-mix(in srgb, var(--card) 84%, white) 50% 100%
-      );
+  :root[data-theme="dark"] .competition-card--euro {
+    --competition-ticket-bg: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--sky) 88%, white) 0 50%,
+      color-mix(in srgb, var(--card) 84%, white) 50% 100%
+    );
   }
 
   :root[data-theme="dark"] .competition-card--euro::before {
     background: linear-gradient(90deg, var(--sky), var(--card), var(--coral), var(--navy));
   }
 
-  :root[data-theme="dark"] .competition-card--champions-league::after {
-    background:
-      linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--navy) 86%, white) 0 50%,
-        color-mix(in srgb, var(--sky) 82%, white) 50% 100%
-      );
+  :root[data-theme="dark"] .competition-card--champions-league {
+    --competition-ticket-bg: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--navy) 86%, white) 0 50%,
+      color-mix(in srgb, var(--sky) 82%, white) 50% 100%
+    );
   }
 
   :root[data-theme="dark"] .competition-card--champions-league::before {
     background: linear-gradient(90deg, var(--navy), var(--sky), var(--card), var(--mint));
   }
 
-  :root[data-theme="dark"] .competition-card--other::after {
-    background:
-      linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--card) 86%, white) 0 50%,
-        color-mix(in srgb, var(--mint) 82%, white) 50% 100%
-      );
+  :root[data-theme="dark"] .competition-card--other {
+    --competition-ticket-bg: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--card) 86%, white) 0 50%,
+      color-mix(in srgb, var(--mint) 82%, white) 50% 100%
+    );
   }
 
   :root[data-theme="dark"] .competition-card--other::before {
