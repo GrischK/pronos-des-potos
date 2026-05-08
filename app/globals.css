@@ -210,9 +210,15 @@
         color-mix(in srgb, var(--background) 90%, white) 42%,
         color-mix(in srgb, var(--card) 10%, var(--background)) 100%
       );
+    display: none;
     opacity: 0;
     pointer-events: none;
     transition: opacity 220ms ease;
+  }
+
+  :root[data-pwa-display="standalone"] .pwa-launch-screen,
+  .pwa-preview-page .pwa-launch-screen {
+    display: flex;
   }
 
   .pwa-launch-screen.is-visible {

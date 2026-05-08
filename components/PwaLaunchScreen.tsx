@@ -29,24 +29,21 @@ export function PwaLaunchScreen({
   forceDisplay = false,
   persist = false,
 }: PwaLaunchScreenProps) {
-  const [isMounted, setIsMounted] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isMounted, setIsMounted] = useState(true);
+  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
     if (!forceDisplay && !isStandaloneDisplayMode()) {
+      setIsMounted(false);
+      setIsVisible(false);
       return;
     }
 
     setIsMounted(true);
-
-    const showTimer = window.setTimeout(() => {
-      setIsVisible(true);
-    }, 24);
+    setIsVisible(true);
 
     if (persist) {
-      return () => {
-        window.clearTimeout(showTimer);
-      };
+      return;
     }
 
     const hideTimer = window.setTimeout(() => {
@@ -58,11 +55,10 @@ export function PwaLaunchScreen({
     }, LAUNCH_SCREEN_MIN_DURATION_MS + 260);
 
     return () => {
-      window.clearTimeout(showTimer);
       window.clearTimeout(hideTimer);
       window.clearTimeout(unmountTimer);
     };
-  }, []);
+  }, [forceDisplay, persist]);
 
   if (!isMounted) {
     return null;

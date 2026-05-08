@@ -23,6 +23,17 @@ const themeScript = `
   const theme = getTheme();
   root.dataset.theme = theme;
   root.style.colorScheme = theme;
+
+  const isStandalone =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.matchMedia("(display-mode: fullscreen)").matches ||
+    (typeof navigator !== "undefined" &&
+      "standalone" in navigator &&
+      navigator.standalone === true);
+
+  if (isStandalone) {
+    root.dataset.pwaDisplay = "standalone";
+  }
 })();
 `;
 
