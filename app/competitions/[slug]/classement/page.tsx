@@ -39,6 +39,7 @@ export default async function ClassementPage({
         eyebrow={getCompetitionKindLabel(competition.kind)}
         emblemUrl={competition.emblemUrl}
         title={`Classement - ${competition.name}`}
+        mobileTitle="Classement"
         description="Le live s’emballe à chaque but. Le classement officiel tranche."
       />
 

@@ -30,6 +30,7 @@ export default async function PronosticsPage({ params }: PronosticsPageProps) {
         eyebrow={getCompetitionKindLabel(competition.kind)}
         emblemUrl={competition.emblemUrl}
         title={`Mes pronos - ${competition.name}`}
+        mobileTitle="Mes pronos"
         description={
           competition.isOpen
             ? "Saisis ou modifie tes scores avant le coup d'envoi de chaque match."

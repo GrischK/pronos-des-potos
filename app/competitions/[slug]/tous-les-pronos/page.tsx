@@ -32,6 +32,7 @@ export default async function TousLesPronosPage({
         eyebrow={getCompetitionKindLabel(competition.kind)}
         emblemUrl={competition.emblemUrl}
         title={`Tous les pronos - ${competition.name}`}
+        mobileTitle="Tous les pronos"
         description="Compare les scores des potos une fois les matchs verrouillés."
       />
 

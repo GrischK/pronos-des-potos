@@ -30,6 +30,7 @@ export default async function CalendrierPage({ params }: CalendrierPageProps) {
         eyebrow={getCompetitionKindLabel(competition.kind)}
         emblemUrl={competition.emblemUrl}
         title={`Calendrier - ${competition.name}`}
+        mobileTitle="Calendrier"
         description="Matchs, groupes et phases de la compétition."
       />
 

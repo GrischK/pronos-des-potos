@@ -341,12 +341,28 @@
     @apply m-0 max-w-[880px] text-[2.75rem] font-[850] leading-[0.98] tracking-normal;
   }
 
+  .page-title-desktop,
+  .page-title-mobile {
+    @apply block;
+  }
+
+  .page-title-mobile {
+    @apply hidden;
+  }
+
   .competition-emblem {
     @apply h-10 w-10 rounded-lg border border-line bg-white object-contain p-1.5;
   }
 
   .page-title-emblem {
     @apply h-16 w-16 border-0 bg-transparent p-0;
+  }
+
+  .page-title-emblem-wrap {
+    @apply relative grid h-16 w-16 shrink-0 place-items-center;
+    isolation: isolate;
+    transform: rotate(-4deg) translateY(2px);
+    transform-origin: center;
   }
 
   .lead {
@@ -1175,6 +1191,22 @@
 
   .competition-card-emblem {
     transform-origin: center;
+  }
+
+  .competition-card-title .competition-card-emblem {
+    border-color: color-mix(in srgb, white 18%, transparent);
+    background:
+      linear-gradient(
+        160deg,
+        color-mix(in srgb, white 92%, transparent),
+        color-mix(in srgb, white 76%, var(--color-navy)) 52%,
+        color-mix(in srgb, black 8%, white)
+      );
+    box-shadow:
+      inset 0 -2px 0 color-mix(in srgb, black 14%, transparent),
+      inset 0 0 0 1px color-mix(in srgb, white 62%, transparent),
+      0 14px 26px color-mix(in srgb, black 24%, transparent);
+    transform: rotate(-4deg) translateY(2px);
   }
 
   .competition-card-summary {
@@ -2967,6 +2999,57 @@
     padding: 0.9rem;
   }
 
+  :root[data-theme="dark"] .competition-card-title .competition-card-emblem {
+    border-radius: 0.5rem;
+    border-color: color-mix(in srgb, white 10%, var(--line));
+    background:
+      linear-gradient(
+        165deg,
+        color-mix(in srgb, white 82%, var(--sky)),
+        color-mix(in srgb, white 72%, var(--surface-alt)) 38%,
+        color-mix(in srgb, white 58%, var(--surface-alt)) 72%,
+        color-mix(in srgb, white 42%, var(--surface)) 100%
+      );
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, white 48%, transparent),
+      inset 0 -2px 0 color-mix(in srgb, black 16%, transparent),
+      inset 0 0 0 1px color-mix(in srgb, white 18%, transparent),
+      0 14px 26px color-mix(in srgb, black 30%, transparent);
+    padding: 0.5rem;
+  }
+
+  :root[data-theme="dark"] .page-title-emblem-wrap {
+    border-radius: 1rem;
+  }
+
+  :root[data-theme="dark"] .page-title-emblem-wrap::before {
+    position: absolute;
+    inset: -0.2rem;
+    border: 1px solid color-mix(in srgb, white 10%, var(--line));
+    border-radius: 1rem;
+    background:
+      linear-gradient(
+        165deg,
+        color-mix(in srgb, white 82%, var(--sky)),
+        color-mix(in srgb, white 72%, var(--surface-alt)) 38%,
+        color-mix(in srgb, white 58%, var(--surface-alt)) 72%,
+        color-mix(in srgb, white 42%, var(--surface)) 100%
+      );
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, white 48%, transparent),
+      inset 0 -2px 0 color-mix(in srgb, black 16%, transparent),
+      inset 0 0 0 1px color-mix(in srgb, white 18%, transparent),
+      0 14px 26px color-mix(in srgb, black 30%, transparent);
+    content: "";
+    z-index: -1;
+  }
+
+  :root[data-theme="dark"] .page-title-emblem {
+    filter:
+      drop-shadow(0 8px 16px color-mix(in srgb, black 22%, transparent))
+      drop-shadow(0 0 10px color-mix(in srgb, white 10%, transparent));
+  }
+
   :root[data-theme="dark"] .competition-card-live {
     border-color: color-mix(in srgb, var(--coral) 22%, var(--line));
     background:
@@ -3045,47 +3128,20 @@
     @apply max-w-[240px] text-[2.35rem] leading-[0.95];
   }
 
+  .page-title-desktop {
+    @apply hidden;
+  }
+
+  .page-title-mobile {
+    @apply block;
+  }
+
   .competition-card {
     @apply gap-4;
   }
 
   .competition-card-title .competition-emblem {
     @apply h-20 w-20;
-  }
-
-  .competition-card-title .competition-card-emblem {
-    border-color: color-mix(in srgb, white 18%, transparent);
-    background:
-      linear-gradient(
-        160deg,
-        color-mix(in srgb, white 92%, transparent),
-        color-mix(in srgb, white 76%, var(--color-navy)) 52%,
-        color-mix(in srgb, black 8%, white)
-      );
-    box-shadow:
-      inset 0 -2px 0 color-mix(in srgb, black 14%, transparent),
-      inset 0 0 0 1px color-mix(in srgb, white 62%, transparent),
-      0 14px 26px color-mix(in srgb, black 24%, transparent);
-    transform: rotate(-4deg) translateY(2px);
-  }
-
-  :root[data-theme="dark"] .competition-card-title .competition-card-emblem {
-    border-color: color-mix(in srgb, white 10%, var(--line));
-    border-radius: 0.5rem;
-    background:
-      linear-gradient(
-        165deg,
-        color-mix(in srgb, white 82%, var(--sky)),
-        color-mix(in srgb, white 72%, var(--surface-alt)) 38%,
-        color-mix(in srgb, white 58%, var(--surface-alt)) 72%,
-        color-mix(in srgb, white 42%, var(--surface))
-      );
-    box-shadow:
-      inset 0 1px 0 color-mix(in srgb, white 48%, transparent),
-      inset 0 -2px 0 color-mix(in srgb, black 16%, transparent),
-      inset 0 0 0 1px color-mix(in srgb, white 18%, transparent),
-      0 14px 26px color-mix(in srgb, black 30%, transparent);
-    padding: 0.5rem;
   }
 
   .competition-card-badges {
