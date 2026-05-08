@@ -33,6 +33,7 @@ export default async function TousLesPronosPage({
         emblemUrl={competition.emblemUrl}
         title={`Tous les pronos - ${competition.name}`}
         mobileTitle="Tous les pronos"
+        className="competition-subpage-header"
         description="Compare les scores des potos une fois les matchs verrouillés."
       />
 

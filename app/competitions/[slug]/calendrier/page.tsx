@@ -31,6 +31,7 @@ export default async function CalendrierPage({ params }: CalendrierPageProps) {
         emblemUrl={competition.emblemUrl}
         title={`Calendrier - ${competition.name}`}
         mobileTitle="Calendrier"
+        className="competition-subpage-header"
         description="Matchs, groupes et phases de la compétition."
       />
 

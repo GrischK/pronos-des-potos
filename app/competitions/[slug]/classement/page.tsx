@@ -40,6 +40,7 @@ export default async function ClassementPage({
         emblemUrl={competition.emblemUrl}
         title={`Classement - ${competition.name}`}
         mobileTitle="Classement"
+        className="competition-subpage-header"
         description="Le live s’emballe à chaque but. Le classement officiel tranche."
       />
 

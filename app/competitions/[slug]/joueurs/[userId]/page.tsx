@@ -128,6 +128,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         eyebrow={getCompetitionKindLabel(profile.competition.kind)}
         emblemUrl={profile.competition.emblemUrl}
         title={profile.player.name}
+        className="competition-subpage-header"
         description={`Fiche joueur pour ${profile.competition.name}.`}
       />
 

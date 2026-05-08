@@ -3120,6 +3120,7 @@
   }
 
   .competition-detail-header .lead,
+  .competition-subpage-header .lead,
   .host-countries {
     @apply hidden;
   }

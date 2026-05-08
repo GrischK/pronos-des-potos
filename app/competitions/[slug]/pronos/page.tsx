@@ -31,6 +31,7 @@ export default async function PronosticsPage({ params }: PronosticsPageProps) {
         emblemUrl={competition.emblemUrl}
         title={`Mes pronos - ${competition.name}`}
         mobileTitle="Mes pronos"
+        className="competition-subpage-header"
         description={
           competition.isOpen
             ? "Saisis ou modifie tes scores avant le coup d'envoi de chaque match."
