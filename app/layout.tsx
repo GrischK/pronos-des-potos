@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { PwaLaunchScreen } from "@/components/PwaLaunchScreen";
+
 import "./globals.css";
 
 const themeScript = `
@@ -39,6 +41,7 @@ export default function RootLayout({
     <html lang="fr" suppressHydrationWarning>
       <body>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <PwaLaunchScreen />
         {children}
       </body>
     </html>
