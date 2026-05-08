@@ -3367,11 +3367,19 @@
   }
 
   .auth-locker-shirt {
-    @apply absolute left-5 top-10 grid h-[68px] w-[62px] place-items-center rounded-lg text-3xl font-black text-white;
-    background:
-      linear-gradient(135deg, var(--pitch), var(--pitch-strong)),
-      var(--pitch);
-    clip-path: polygon(18% 0, 36% 10%, 64% 10%, 82% 0, 100% 22%, 84% 40%, 84% 100%, 16% 100%, 16% 40%, 0 22%);
+    @apply absolute left-4 top-7 block h-[82px] w-[76px];
+  }
+
+  .auth-locker-shirt-icon {
+    @apply h-full w-full;
+    color: var(--pitch);
+    fill: var(--pitch);
+    filter: drop-shadow(0 10px 16px color-mix(in srgb, black 18%, transparent));
+    stroke-width: 1.8;
+  }
+
+  .auth-locker-shirt-number {
+    @apply absolute inset-0 grid place-items-center text-[1.9rem] font-black text-white;
     text-shadow: 0 2px 0 color-mix(in srgb, black 24%, transparent);
   }
 
@@ -3470,6 +3478,16 @@
   }
 
   :root[data-theme="dark"] .auth-locker-shirt {
+    color: inherit;
+  }
+
+  :root[data-theme="dark"] .auth-locker-shirt-icon {
+    color: var(--pitch);
+    fill: var(--pitch);
+    filter: drop-shadow(0 12px 18px color-mix(in srgb, black 28%, transparent));
+  }
+
+  :root[data-theme="dark"] .auth-locker-shirt-number {
     color: #0f1318;
     text-shadow: none;
   }

@@ -1,3 +1,5 @@
+import { Shirt } from "lucide-react";
+
 type AuthHeroProps = {
   title: string;
   text: string;
@@ -11,7 +13,10 @@ export function AuthHero({ title, text }: AuthHeroProps) {
       <p>{text}</p>
 
       <div className="auth-locker-visual" aria-hidden="true">
-        <span className="auth-locker-shirt">10</span>
+        <span className="auth-locker-shirt">
+          <Shirt className="auth-locker-shirt-icon" />
+          <span className="auth-locker-shirt-number">10</span>
+        </span>
         <span className="auth-locker-key">PDP</span>
         <span className="auth-locker-line" />
       </div>
