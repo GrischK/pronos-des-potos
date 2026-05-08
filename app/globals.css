@@ -1157,6 +1157,162 @@
     border-left: 5px solid var(--navy);
   }
 
+  .competition-actions-grid {
+    @apply grid gap-3;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .competition-action {
+    @apply relative grid min-h-[92px] items-center gap-3 overflow-hidden rounded-lg border border-line bg-surface px-4 py-3 text-left;
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, white 70%, transparent),
+      0 14px 30px color-mix(in srgb, var(--foreground) 6%, transparent);
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+
+  .competition-action::before {
+    @apply absolute inset-y-0 left-0 w-1;
+    background: var(--pitch);
+    content: "";
+  }
+
+  .competition-action:hover {
+    border-color: color-mix(in srgb, var(--pitch) 38%, var(--line));
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, white 78%, transparent),
+      0 18px 38px color-mix(in srgb, var(--foreground) 10%, transparent);
+    transform: translateY(-2px);
+  }
+
+  .competition-action-primary {
+    border-color: color-mix(in srgb, var(--pitch) 52%, var(--line));
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--pitch) 16%, var(--surface)),
+        color-mix(in srgb, var(--mint) 14%, var(--surface)) 58%,
+        var(--surface)
+      );
+  }
+
+  .competition-action:nth-child(2) {
+    border-color: color-mix(in srgb, var(--coral) 30%, var(--line));
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--coral) 14%, var(--surface)),
+        color-mix(in srgb, var(--card) 12%, var(--surface)) 58%,
+        var(--surface)
+      );
+  }
+
+  .competition-action:nth-child(3) {
+    border-color: color-mix(in srgb, var(--navy) 28%, var(--line));
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--navy) 12%, var(--surface)),
+        color-mix(in srgb, var(--sky) 12%, var(--surface)) 58%,
+        var(--surface)
+      );
+  }
+
+  .competition-action:nth-child(4) {
+    border-color: color-mix(in srgb, var(--card) 34%, var(--line));
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--card) 18%, var(--surface)),
+        color-mix(in srgb, var(--mint) 12%, var(--surface)) 58%,
+        var(--surface)
+      );
+  }
+
+  .competition-action:nth-child(2)::before {
+    background: var(--coral);
+  }
+
+  .competition-action:nth-child(3)::before {
+    background: var(--navy);
+  }
+
+  .competition-action:nth-child(4)::before {
+    background: var(--card);
+  }
+
+  .competition-action-icon {
+    @apply grid h-10 w-10 place-items-center rounded-lg;
+    background:
+      linear-gradient(
+        135deg,
+        var(--pitch) 0 50%,
+        var(--coral) 50% 100%
+      );
+    color: white;
+  }
+
+  .competition-action-primary .competition-action-icon {
+    background:
+      linear-gradient(
+        135deg,
+        var(--pitch) 0 50%,
+        var(--coral) 50% 100%
+      );
+    color: white;
+  }
+
+  .competition-action:nth-child(2) .competition-action-icon {
+    background:
+      linear-gradient(
+        135deg,
+        var(--coral) 0 50%,
+        var(--card) 50% 100%
+      );
+    color: white;
+  }
+
+  .competition-action:nth-child(3) .competition-action-icon {
+    background:
+      linear-gradient(
+        135deg,
+        var(--navy) 0 50%,
+        var(--sky) 50% 100%
+      );
+    color: white;
+  }
+
+  .competition-action:nth-child(4) .competition-action-icon {
+    background:
+      linear-gradient(
+        135deg,
+        var(--card) 0 50%,
+        var(--mint) 50% 100%
+      );
+    color: white;
+  }
+
+  .competition-action strong {
+    @apply block text-base font-black leading-tight text-foreground;
+  }
+
+  .competition-action small {
+    @apply mt-1 block text-sm font-bold leading-tight text-muted;
+  }
+
+  .competition-action-arrow {
+    color: var(--muted);
+    transition: transform 160ms ease, color 160ms ease;
+  }
+
+  .competition-action:hover .competition-action-arrow {
+    color: var(--foreground);
+    transform: translateX(2px);
+  }
+
   .competition-highlights {
     @apply grid gap-4;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1876,6 +2032,14 @@
       grid-template-columns: 1fr;
     }
 
+    .competition-actions-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .competition-action {
+      @apply min-h-[72px];
+    }
+
     .prediction-grid {
       grid-template-columns: 1fr;
     }
@@ -2339,6 +2503,119 @@
       0 14px 34px color-mix(in srgb, black 22%, transparent);
   }
 
+  :root[data-theme="dark"] .competition-action {
+    border-color: color-mix(in srgb, white 12%, var(--line));
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--pitch) 16%, var(--surface-alt)),
+        color-mix(in srgb, var(--mint) 10%, var(--surface-alt)) 58%,
+        color-mix(in srgb, var(--surface) 92%, black)
+      );
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, white 6%, transparent),
+      0 16px 34px color-mix(in srgb, black 36%, transparent);
+  }
+
+  :root[data-theme="dark"] .competition-action:hover {
+    border-color: color-mix(in srgb, var(--pitch) 34%, var(--line));
+    background: color-mix(in srgb, var(--pitch) 10%, var(--surface-alt));
+  }
+
+  :root[data-theme="dark"] .competition-action-primary {
+    border-color: color-mix(in srgb, var(--pitch) 54%, var(--line));
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--pitch) 20%, var(--surface-alt)),
+        color-mix(in srgb, var(--mint) 12%, var(--surface-alt)) 58%,
+        color-mix(in srgb, var(--surface) 92%, black)
+      );
+  }
+
+  :root[data-theme="dark"] .competition-action:nth-child(2) {
+    border-color: color-mix(in srgb, var(--coral) 40%, var(--line));
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--coral) 18%, var(--surface-alt)),
+        color-mix(in srgb, var(--card) 10%, var(--surface-alt)) 58%,
+        color-mix(in srgb, var(--surface) 92%, black)
+      );
+  }
+
+  :root[data-theme="dark"] .competition-action:nth-child(3) {
+    border-color: color-mix(in srgb, var(--navy) 44%, var(--line));
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--navy) 28%, var(--surface-alt)),
+        color-mix(in srgb, var(--sky) 10%, var(--surface-alt)) 58%,
+        color-mix(in srgb, var(--surface) 92%, black)
+      );
+  }
+
+  :root[data-theme="dark"] .competition-action:nth-child(4) {
+    border-color: color-mix(in srgb, var(--card) 42%, var(--line));
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--card) 16%, var(--surface-alt)),
+        color-mix(in srgb, var(--mint) 10%, var(--surface-alt)) 58%,
+        color-mix(in srgb, var(--surface) 92%, black)
+      );
+  }
+
+  :root[data-theme="dark"] .competition-action-icon {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--pitch) 84%, white) 0 50%,
+        color-mix(in srgb, var(--coral) 84%, white) 50% 100%
+      );
+    color: #0f1318;
+  }
+
+  :root[data-theme="dark"] .competition-action-primary .competition-action-icon {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--pitch) 84%, white) 0 50%,
+        color-mix(in srgb, var(--coral) 84%, white) 50% 100%
+      );
+    color: #0f1318;
+  }
+
+  :root[data-theme="dark"] .competition-action:nth-child(2) .competition-action-icon {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--coral) 86%, white) 0 50%,
+        color-mix(in srgb, var(--card) 82%, white) 50% 100%
+      );
+    color: #0f1318;
+  }
+
+  :root[data-theme="dark"] .competition-action:nth-child(3) .competition-action-icon {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--navy) 86%, white) 0 50%,
+        color-mix(in srgb, var(--sky) 82%, white) 50% 100%
+      );
+    color: #0f1318;
+  }
+
+  :root[data-theme="dark"] .competition-action:nth-child(4) .competition-action-icon {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--card) 86%, white) 0 50%,
+        color-mix(in srgb, var(--mint) 78%, white) 50% 100%
+      );
+    color: #0f1318;
+  }
+
   :root[data-theme="dark"] .feature-card:nth-child(2),
   :root[data-theme="dark"] .feature-card:nth-child(3) {
     background:
@@ -2551,6 +2828,11 @@
   }
 
   .competitions-page-header .lead {
+    @apply hidden;
+  }
+
+  .competition-detail-header .lead,
+  .host-countries {
     @apply hidden;
   }
 

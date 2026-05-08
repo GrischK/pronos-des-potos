@@ -1,8 +1,14 @@
 import Link from "next/link";
+import {
+  CalendarDays,
+  ChevronRight,
+  PencilLine,
+  Trophy,
+  UsersRound,
+} from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { AutoRefresh } from "@/components/AutoRefresh";
-import { CompetitionGroups } from "@/components/competitions/CompetitionGroups";
 import { CompetitionHighlights } from "@/components/competitions/CompetitionHighlights";
 import { PageHeader } from "@/components/PageHeader";
 import {
@@ -41,6 +47,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
         eyebrow={getCompetitionKindLabel(competition.kind)}
         emblemUrl={competition.emblemUrl}
         title={competition.name}
+        className="competition-detail-header"
         description="Retrouve les pronos, les scores et le classement de cette compétition."
       />
       {hostCountries.length > 0 ? (
@@ -65,45 +72,84 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
       ) : null}
 
       <section className="page-section">
-        <div className="content-grid">
+        <div className="competition-actions-grid">
           <Link
-            className="card action-card"
+            className="competition-action competition-action-primary"
             href={`/competitions/${competition.slug}/pronos`}
           >
-            <h2>Mes pronos</h2>
-            <p>Saisir ou modifier les scores avant verrouillage.</p>
+            <span className="competition-action-icon">
+              <PencilLine aria-hidden="true" size={20} strokeWidth={2.8} />
+            </span>
+            <span>
+              <strong>Pronostiquer</strong>
+              <small>Saisir ou modifier mes scores</small>
+            </span>
+            <ChevronRight
+              aria-hidden="true"
+              className="competition-action-arrow"
+              size={20}
+              strokeWidth={3}
+            />
           </Link>
           <Link
-            className="card action-card"
+            className="competition-action"
             href={`/competitions/${competition.slug}/classement`}
           >
-            <h2>Classement</h2>
-            <p>Voir les points et le vainqueur de la compétition.</p>
+            <span className="competition-action-icon">
+              <Trophy aria-hidden="true" size={20} strokeWidth={2.8} />
+            </span>
+            <span>
+              <strong>Classement</strong>
+              <small>Voir les points</small>
+            </span>
+            <ChevronRight
+              aria-hidden="true"
+              className="competition-action-arrow"
+              size={20}
+              strokeWidth={3}
+            />
           </Link>
           <Link
-            className="card action-card"
+            className="competition-action"
             href={`/competitions/${competition.slug}/tous-les-pronos`}
           >
-            <h2>Tous les pronos</h2>
-            <p>Comparer les choix des potos une fois les matchs verrouillés.</p>
+            <span className="competition-action-icon">
+              <UsersRound aria-hidden="true" size={20} strokeWidth={2.8} />
+            </span>
+            <span>
+              <strong>Pronos des potos</strong>
+              <small>Comparer les scores</small>
+            </span>
+            <ChevronRight
+              aria-hidden="true"
+              className="competition-action-arrow"
+              size={20}
+              strokeWidth={3}
+            />
+          </Link>
+          <Link
+            className="competition-action"
+            href={`/competitions/${competition.slug}/calendrier`}
+          >
+            <span className="competition-action-icon">
+              <CalendarDays aria-hidden="true" size={20} strokeWidth={2.8} />
+            </span>
+            <span>
+              <strong>Calendrier des matchs</strong>
+              <small>Voir les matchs et horaires</small>
+            </span>
+            <ChevronRight
+              aria-hidden="true"
+              className="competition-action-arrow"
+              size={20}
+              strokeWidth={3}
+            />
           </Link>
         </div>
       </section>
 
       <section className="page-section">
         <CompetitionHighlights highlights={highlights} slug={competition.slug} />
-      </section>
-
-      <section className="page-section">
-        {competition.groups.length === 0 && competition.phases.length === 0 ? (
-          <p>Aucun match importé pour cette compétition.</p>
-        ) : (
-          <CompetitionGroups
-            competitionKind={competition.kind}
-            groups={competition.groups}
-            phases={competition.phases}
-          />
-        )}
       </section>
     </main>
   );
