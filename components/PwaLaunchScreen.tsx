@@ -42,6 +42,17 @@ export function PwaLaunchScreen({
     setIsMounted(true);
     setIsVisible(true);
 
+    const bootScreen = document.getElementById("pwa-boot-screen");
+    if (bootScreen) {
+      window.setTimeout(() => {
+        bootScreen.style.opacity = "0";
+        bootScreen.style.transition = "opacity 180ms ease";
+        window.setTimeout(() => {
+          bootScreen.style.display = "none";
+        }, 200);
+      }, 40);
+    }
+
     if (persist) {
       return;
     }
