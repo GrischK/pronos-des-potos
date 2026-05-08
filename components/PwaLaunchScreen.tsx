@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { AnimatedPronosLogo } from "@/components/AnimatedPronosLogo";
 
-const LAUNCH_SCREEN_MIN_DURATION_MS = 1050;
+const LAUNCH_SCREEN_MIN_DURATION_MS = 1450;
 
 type PwaLaunchScreenProps = {
   forceDisplay?: boolean;

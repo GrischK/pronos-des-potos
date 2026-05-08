@@ -72,8 +72,8 @@ export function AnimatedPronosLogo({
           prefersReducedMotion
             ? undefined
             : {
-                duration: 1.04,
-                times: [0, 0.45, 0.58, 0.8, 1],
+                duration: 0.98,
+                times: [0, 0.42, 0.54, 0.76, 1],
                 ease: ["easeOut", "easeOut", "easeOut", "easeInOut"],
               }
         }

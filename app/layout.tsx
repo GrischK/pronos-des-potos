@@ -16,7 +16,6 @@ const pwaBootScreenMarkup = `
   <div style="position:relative;width:min(54vw,224px);">
     <img src="/pwa/logo-animable.svg" alt="" draggable="false" style="display:block;width:100%;height:auto;filter:drop-shadow(0 18px 30px rgba(21,24,23,.12)) drop-shadow(0 4px 10px rgba(47,125,79,.10));" />
   </div>
-  <div style="position:relative;font:800 .86rem/1 Arial, Helvetica, sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#315743;">Pronos des potos</div>
 </div>
 `;
 
