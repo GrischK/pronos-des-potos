@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Shirt } from "lucide-react";
+import { ArrowRight, Shirt } from "lucide-react";
 
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { EmptyState } from "@/components/EmptyState";
@@ -218,7 +218,12 @@ export default async function CompetitionsPage() {
                       src={competition.emblemUrl}
                     />
                   ) : null}
-                  <h2>{competition.name}</h2>
+                  <div className="competition-card-heading">
+                    <h2>{competition.name}</h2>
+                    <span className="competition-card-title-cta" aria-hidden="true">
+                      <ArrowRight size={18} strokeWidth={2.6} />
+                    </span>
+                  </div>
                   <span className="competition-card-ticket" aria-hidden="true">
                     <Shirt
                       aria-hidden="true"
