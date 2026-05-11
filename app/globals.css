@@ -17,12 +17,12 @@
 }
 
 :root[data-theme="dark"] {
-  --background: #0f1318;
+  --background: #0b0f13;
   --foreground: #edf2f7;
-  --muted: #9aa8b8;
-  --line: #2a3440;
-  --surface: #141b23;
-  --surface-alt: #1b2430;
+  --muted: #aab6c3;
+  --line: #3a4652;
+  --surface: #17202a;
+  --surface-alt: #23303b;
   --pitch: #57a874;
   --pitch-strong: #7dc793;
   --coral: #ff8364;
@@ -2594,8 +2594,9 @@
   :root[data-theme="dark"] .public-prediction-row,
   :root[data-theme="dark"] .prediction-row,
   :root[data-theme="dark"] .auth-card {
-    border-color: color-mix(in srgb, var(--pitch) 18%, var(--line));
-    box-shadow: 0 18px 40px color-mix(in srgb, black 32%, transparent);
+    border-color: color-mix(in srgb, white 9%, var(--line));
+    background: var(--surface);
+    box-shadow: 0 18px 42px color-mix(in srgb, black 36%, transparent);
   }
 
   :root[data-theme="dark"] .site-header {
@@ -2627,7 +2628,7 @@
   }
 
   :root[data-theme="dark"] .nav-link-mobile {
-    border-color: color-mix(in srgb, var(--pitch) 14%, var(--line));
+    border-color: color-mix(in srgb, white 9%, var(--line));
     background: var(--surface-alt);
     box-shadow:
       inset 0 1px 0 color-mix(in srgb, white 6%, transparent),
@@ -2635,8 +2636,8 @@
   }
 
   :root[data-theme="dark"] .nav-link-mobile:hover {
-    border-color: color-mix(in srgb, var(--pitch) 28%, var(--line));
-    background: color-mix(in srgb, var(--pitch) 10%, var(--surface-alt));
+    border-color: color-mix(in srgb, var(--card) 32%, var(--line));
+    background: color-mix(in srgb, var(--card) 8%, var(--surface-alt));
   }
 
   :root[data-theme="dark"] .nav-link-logout {
@@ -2646,7 +2647,7 @@
   }
 
   :root[data-theme="dark"] .nav-link:hover {
-    background: color-mix(in srgb, var(--pitch) 18%, var(--surface));
+    background: color-mix(in srgb, var(--card) 9%, var(--surface));
     color: var(--foreground);
   }
 
@@ -2679,77 +2680,63 @@
   }
 
   :root[data-theme="dark"] .competition-card {
-    border-color: color-mix(in srgb, white 18%, var(--line));
-    border-top-color: color-mix(in srgb, var(--pitch) 96%, white);
+    border-color: color-mix(in srgb, white 10%, var(--line));
+    border-top-color: color-mix(in srgb, var(--card) 62%, var(--line));
     box-shadow:
       inset 0 1px 0 color-mix(in srgb, white 10%, transparent),
       0 24px 56px color-mix(in srgb, black 48%, transparent);
     background:
-      radial-gradient(
-        circle at 92% 18%,
-        color-mix(in srgb, var(--sky) 24%, transparent) 0 18%,
-        transparent 38%
-      ),
-      linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--pitch) 22%, var(--surface-alt)),
-        color-mix(in srgb, var(--surface-alt) 76%, black) 52%,
-        color-mix(in srgb, var(--surface) 90%, black)
-      ),
+      linear-gradient(180deg, color-mix(in srgb, var(--card) 8%, var(--surface-alt)), var(--surface) 36%),
       var(--surface);
   }
 
   :root[data-theme="dark"] .competition-card--world-cup {
-    border-top-color: color-mix(in srgb, var(--pitch) 96%, white);
+    border-top-color: color-mix(in srgb, var(--pitch) 52%, var(--line));
     background:
       linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--mint) 24%, var(--surface-alt)),
-        color-mix(in srgb, var(--surface-alt) 76%, black) 54%,
-        color-mix(in srgb, var(--surface) 90%, black)
+        180deg,
+        color-mix(in srgb, var(--pitch) 10%, var(--surface-alt)),
+        var(--surface) 38%
       ),
       var(--surface);
   }
 
   :root[data-theme="dark"] .competition-card--euro {
-    border-top-color: color-mix(in srgb, var(--sky) 96%, white);
+    border-top-color: color-mix(in srgb, var(--sky) 56%, var(--line));
     background:
       linear-gradient(
         135deg,
-        color-mix(in srgb, var(--sky) 32%, var(--surface-alt)),
-        color-mix(in srgb, var(--surface-alt) 76%, black) 54%,
-        color-mix(in srgb, var(--surface) 90%, black)
+        color-mix(in srgb, var(--sky) 14%, var(--surface-alt)),
+        var(--surface) 56%
       ),
       var(--surface);
   }
 
   :root[data-theme="dark"] .competition-card--champions-league {
-    border-top-color: color-mix(in srgb, var(--navy) 96%, white);
+    border-top-color: color-mix(in srgb, var(--navy) 56%, var(--line));
     background:
       linear-gradient(
         135deg,
-        color-mix(in srgb, var(--navy) 34%, var(--surface-alt)),
-        color-mix(in srgb, var(--surface-alt) 76%, black) 54%,
-        color-mix(in srgb, var(--surface) 90%, black)
+        color-mix(in srgb, var(--navy) 14%, var(--surface-alt)),
+        var(--surface) 56%
       ),
       var(--surface);
   }
 
   :root[data-theme="dark"] .competition-card--other {
-    border-top-color: color-mix(in srgb, var(--card) 96%, white);
+    border-top-color: color-mix(in srgb, var(--card) 62%, var(--line));
     background:
       linear-gradient(
         135deg,
-        color-mix(in srgb, var(--card) 26%, var(--surface-alt)),
-        color-mix(in srgb, var(--surface-alt) 76%, black) 54%,
-        color-mix(in srgb, var(--surface) 90%, black)
+        color-mix(in srgb, var(--card) 12%, var(--surface-alt)),
+        var(--surface) 52%
       ),
       var(--surface);
   }
 
   :root[data-theme="dark"] .competition-card::before {
     background: linear-gradient(90deg, var(--pitch), var(--mint), var(--card), var(--coral), var(--navy));
-    box-shadow: 0 5px 18px color-mix(in srgb, var(--coral) 28%, transparent);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--coral) 14%, transparent);
   }
 
   :root[data-theme="dark"] .competition-card::after {
@@ -2759,8 +2746,8 @@
   :root[data-theme="dark"] .competition-card {
     --competition-ticket-bg: linear-gradient(
       135deg,
-      color-mix(in srgb, var(--pitch) 88%, white) 0 50%,
-      color-mix(in srgb, var(--coral) 86%, white) 50% 100%
+      color-mix(in srgb, var(--pitch) 78%, white) 0 50%,
+      color-mix(in srgb, var(--coral) 82%, white) 50% 100%
     );
     --competition-ticket-icon: #0f1318;
   }
@@ -2768,8 +2755,8 @@
   :root[data-theme="dark"] .competition-card--world-cup {
     --competition-ticket-bg: linear-gradient(
       135deg,
-      color-mix(in srgb, var(--pitch) 88%, white) 0 50%,
-      color-mix(in srgb, var(--mint) 82%, white) 50% 100%
+      color-mix(in srgb, var(--pitch) 78%, white) 0 50%,
+      color-mix(in srgb, var(--mint) 76%, white) 50% 100%
     );
   }
 
@@ -2804,8 +2791,8 @@
   :root[data-theme="dark"] .competition-card--other {
     --competition-ticket-bg: linear-gradient(
       135deg,
-      color-mix(in srgb, var(--card) 86%, white) 0 50%,
-      color-mix(in srgb, var(--mint) 82%, white) 50% 100%
+      color-mix(in srgb, var(--card) 78%, white) 0 50%,
+      color-mix(in srgb, var(--mint) 74%, white) 50% 100%
     );
   }
 
@@ -3002,23 +2989,23 @@
 
   :root[data-theme="dark"] .competition-card-summary span,
   :root[data-theme="dark"] .competition-card-stats span {
-    border-color: color-mix(in srgb, white 10%, var(--line));
+    border-color: color-mix(in srgb, white 12%, var(--line));
     background:
       linear-gradient(
         180deg,
-        color-mix(in srgb, var(--surface-alt) 68%, white),
-        color-mix(in srgb, var(--surface-alt) 88%, black)
+        color-mix(in srgb, var(--surface-alt) 78%, white),
+        color-mix(in srgb, var(--surface-alt) 92%, black)
       );
   }
 
   :root[data-theme="dark"] .competition-card-next,
   :root[data-theme="dark"] .competition-card-live {
-    border-color: color-mix(in srgb, white 12%, var(--line));
+    border-color: color-mix(in srgb, white 14%, var(--line));
     background:
       linear-gradient(
         180deg,
-        color-mix(in srgb, var(--surface-alt) 72%, white),
-        color-mix(in srgb, var(--surface) 90%, black)
+        color-mix(in srgb, var(--surface-alt) 82%, white),
+        color-mix(in srgb, var(--surface) 94%, black)
       );
   }
 
@@ -3035,12 +3022,14 @@
   }
 
   :root[data-theme="dark"] .badge-live {
-    background: color-mix(in srgb, var(--mint) 22%, var(--surface-alt));
-    color: #bdf0d2;
+    border: 1px solid color-mix(in srgb, var(--mint) 24%, var(--line));
+    background: color-mix(in srgb, var(--mint) 18%, var(--surface-alt));
+    color: #c9f5d8;
   }
 
   :root[data-theme="dark"] .badge-warning {
-    background: color-mix(in srgb, var(--card) 20%, var(--surface-alt));
+    border: 1px solid color-mix(in srgb, var(--card) 24%, var(--line));
+    background: color-mix(in srgb, var(--card) 18%, var(--surface-alt));
     color: #ffe1a1;
   }
 
@@ -3061,9 +3050,36 @@
   }
 
   :root[data-theme="dark"] .schedule-view-switch button[aria-pressed="true"] {
-    background: color-mix(in srgb, var(--pitch) 22%, var(--surface));
-    color: var(--foreground);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pitch) 30%, transparent);
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--foreground) 94%, white),
+        color-mix(in srgb, var(--foreground) 84%, var(--card))
+      );
+    color: var(--background);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, white 24%, transparent),
+      0 8px 18px color-mix(in srgb, black 22%, transparent);
+  }
+
+  :root[data-theme="dark"] .group-nav-button[aria-pressed="true"],
+  :root[data-theme="dark"] .day-nav-button[aria-pressed="true"] {
+    border-color: color-mix(in srgb, var(--card) 34%, var(--line));
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--foreground) 94%, white),
+        color-mix(in srgb, var(--foreground) 84%, var(--card))
+      );
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, white 24%, transparent),
+      0 8px 18px color-mix(in srgb, black 22%, transparent);
+  }
+
+  :root[data-theme="dark"] .day-nav-button[aria-pressed="true"] span,
+  :root[data-theme="dark"] .day-nav-button[aria-pressed="true"] small,
+  :root[data-theme="dark"] .group-nav-button[aria-pressed="true"] {
+    color: var(--background);
   }
 
   :root[data-theme="dark"] .match-score {
