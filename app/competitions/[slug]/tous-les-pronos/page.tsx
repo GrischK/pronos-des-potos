@@ -40,7 +40,7 @@ export default async function TousLesPronosPage({
       <section className="page-section">
         <div className="actions">
           <Link
-            className="btn btn-primary"
+            className="btn btn-primary competition-back-button"
             href={`/competitions/${slug}`}
           >
             Retour à la compétition
