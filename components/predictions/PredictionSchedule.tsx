@@ -300,6 +300,8 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
   const groupNavRef = useRef<HTMLElement>(null);
   const dayButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const groupButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [dayNavCanScrollLeft, setDayNavCanScrollLeft] = useState(false);
+  const [dayNavCanScrollRight, setDayNavCanScrollRight] = useState(false);
   const groupSections = useMemo(
     () =>
       groups
@@ -430,6 +432,22 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
       block: "nearest",
       inline: "center",
     });
+
+    const nav = dayNavRef.current;
+
+    if (!nav) {
+      return;
+    }
+
+    const frame = requestAnimationFrame(() => {
+      const maxScrollLeft = nav.scrollWidth - nav.clientWidth;
+      setDayNavCanScrollLeft(nav.scrollLeft > 0);
+      setDayNavCanScrollRight(nav.scrollLeft < maxScrollLeft - 1);
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
   }, [activeDayId, view]);
 
   useEffect(() => {
@@ -443,6 +461,50 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
       inline: "nearest",
     });
   }, [activeGroupId, view]);
+
+  useEffect(() => {
+    if (view !== "chronology") {
+      setDayNavCanScrollLeft(false);
+      setDayNavCanScrollRight(false);
+      return;
+    }
+
+    const nav = dayNavRef.current;
+
+    if (!nav) {
+      return;
+    }
+
+    const updateScrollState = () => {
+      const maxScrollLeft = nav.scrollWidth - nav.clientWidth;
+      setDayNavCanScrollLeft(nav.scrollLeft > 0);
+      setDayNavCanScrollRight(maxScrollLeft > 1 && nav.scrollLeft < maxScrollLeft - 1);
+    };
+
+    updateScrollState();
+    nav.addEventListener("scroll", updateScrollState, { passive: true });
+
+    const resizeObserver = new ResizeObserver(updateScrollState);
+    resizeObserver.observe(nav);
+
+    return () => {
+      nav.removeEventListener("scroll", updateScrollState);
+      resizeObserver.disconnect();
+    };
+  }, [view, chronologicalSections.length]);
+
+  const scrollDayNav = (direction: -1 | 1) => {
+    const nav = dayNavRef.current;
+
+    if (!nav) {
+      return;
+    }
+
+    nav.scrollBy({
+      left: direction * Math.max(220, nav.clientWidth * 0.7),
+      behavior: "smooth",
+    });
+  };
 
   if (!activeStage && !activeDay) {
     return null;
@@ -469,23 +531,43 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
 
       {view === "chronology" && activeDay ? (
         <div className="day-browser">
-          <nav aria-label="Journées" className="day-nav" ref={dayNavRef}>
-            {chronologicalSections.map((section) => (
-              <button
-                aria-pressed={section.id === activeDay.id}
-                className="day-nav-button"
-                key={section.id}
-                ref={(element) => {
-                  dayButtonRefs.current[section.id] = element;
-                }}
-                onClick={() => setActiveDayId(section.id)}
-                type="button"
-              >
-                <span>{section.label}</span>
-                <small>{section.matches.length} matchs</small>
-              </button>
-            ))}
-          </nav>
+          <div className="day-nav-shell">
+            <button
+              aria-label="Journées précédentes"
+              className="day-nav-chevrons day-nav-chevrons-left"
+              disabled={!dayNavCanScrollLeft}
+              onClick={() => scrollDayNav(-1)}
+              type="button"
+            >
+              <ChevronLeft aria-hidden="true" size={18} strokeWidth={3} />
+            </button>
+            <nav aria-label="Journées" className="day-nav" ref={dayNavRef}>
+              {chronologicalSections.map((section) => (
+                <button
+                  aria-pressed={section.id === activeDay.id}
+                  className="day-nav-button"
+                  key={section.id}
+                  ref={(element) => {
+                    dayButtonRefs.current[section.id] = element;
+                  }}
+                  onClick={() => setActiveDayId(section.id)}
+                  type="button"
+                >
+                  <span>{section.label}</span>
+                  <small>{section.matches.length} matchs</small>
+                </button>
+              ))}
+            </nav>
+            <button
+              aria-label="Journées suivantes"
+              className="day-nav-chevrons day-nav-chevrons-right"
+              disabled={!dayNavCanScrollRight}
+              onClick={() => scrollDayNav(1)}
+              type="button"
+            >
+              <ChevronRight aria-hidden="true" size={18} strokeWidth={3} />
+            </button>
+          </div>
 
           <div className="group-panel">
             <div className="section-heading">
