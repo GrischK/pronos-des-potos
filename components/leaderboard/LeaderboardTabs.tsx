@@ -349,6 +349,22 @@ export function LeaderboardTabs({
       </section>
 
       <section className="page-section">
+        <div className="section-heading">
+          <div>
+            <p className={isLive ? "badge badge-warning" : "badge badge-live"}>
+              {isLive ? "Live provisoire" : "Officiel"}
+            </p>
+          </div>
+          <p>
+            {isLive
+              ? "Basé sur les matchs terminés et les scores live en cours."
+              : "Basé uniquement sur les matchs terminés."}
+          </p>
+        </div>
+        <LeaderboardTable slug={leaderboard.slug} snapshot={snapshot} />
+      </section>
+
+      <section className="page-section">
         <div className="leaderboard-summary">
           <div>
             <span>{isLive ? "Leader live" : "Leader"}</span>
@@ -374,27 +390,11 @@ export function LeaderboardTabs({
         </div>
       </section>
 
-      {isLive ? <LiveMatchesPanel matches={leaderboard.liveMatches} /> : null}
-
       <section className="page-section">
-        <div className="section-heading">
-          <div>
-            <p className={isLive ? "badge badge-warning" : "badge badge-live"}>
-              {isLive ? "Live provisoire" : "Officiel"}
-            </p>
-            {/*<h2>{isLive ? "Classement live" : "Classement officiel"}</h2>*/}
-          </div>
-          <p>
-            {isLive
-              ? "Basé sur les matchs terminés et les scores live en cours."
-              : "Basé uniquement sur les matchs terminés."}
-          </p>
-        </div>
-
         <LeaderboardRulesCard isLive={isLive} />
-
-        <LeaderboardTable slug={leaderboard.slug} snapshot={snapshot} />
       </section>
+
+      {isLive ? <LiveMatchesPanel matches={leaderboard.liveMatches} /> : null}
     </>
   );
 }
