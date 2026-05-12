@@ -37,7 +37,10 @@ export default async function CalendrierPage({ params }: CalendrierPageProps) {
 
       <section className="page-section">
         <div className="actions">
-          <Link className="btn btn-secondary" href={`/competitions/${slug}`}>
+          <Link
+            className="btn btn-primary"
+            href={`/competitions/${slug}`}
+          >
             Retour à la compétition
           </Link>
         </div>

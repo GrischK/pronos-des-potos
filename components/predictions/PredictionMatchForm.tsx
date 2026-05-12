@@ -200,7 +200,7 @@ export function PredictionMatchForm({ match, slug }: PredictionMatchFormProps) {
         <div className="prediction-actions">
           <button
             aria-label={showSavedState ? "Prono enregistré" : "Enregistrer le prono"}
-            className={`btn ${showSavedState ? "btn-saved" : "btn-secondary"}`}
+            className={`btn ${showSavedState ? "btn-saved" : "btn-primary"}`}
             disabled={!match.canPredict || pending || !hasCompleteScore || !isDirty}
             type="submit"
           >
