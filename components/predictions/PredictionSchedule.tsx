@@ -693,7 +693,12 @@ export function PredictionSchedule({
         matches={matches}
         phaseHeading="Mes scores"
         renderMatch={(match) => (
-          <PredictionMatchForm key={match.id} match={match} slug={slug} />
+          <PredictionMatchForm
+            anchorId={`match-${match.id}`}
+            key={match.id}
+            match={match}
+            slug={slug}
+          />
         )}
       />
     </>

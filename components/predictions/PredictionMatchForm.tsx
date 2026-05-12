@@ -13,6 +13,7 @@ import type { PredictionMatch } from "@/src/server/predictions";
 type PredictionMatchFormProps = {
   match: PredictionMatch;
   slug: string;
+  anchorId?: string;
 };
 
 const initialState: PredictionActionState = {};
@@ -78,7 +79,7 @@ function getPredictionValue(value: number | null | undefined) {
   return value === null || value === undefined ? "" : String(value);
 }
 
-export function PredictionMatchForm({ match, slug }: PredictionMatchFormProps) {
+export function PredictionMatchForm({ match, slug, anchorId }: PredictionMatchFormProps) {
   const [state, formAction, pending] = useActionState(
     savePredictionAction,
     initialState,
@@ -119,7 +120,7 @@ export function PredictionMatchForm({ match, slug }: PredictionMatchFormProps) {
   const showSavedState = hasSavedState && !isDirty;
 
   return (
-    <form action={formAction} className="prediction-row">
+    <form action={formAction} className="prediction-row" id={anchorId}>
       <input name="matchId" type="hidden" value={match.id} />
       <input name="slug" type="hidden" value={slug} />
 

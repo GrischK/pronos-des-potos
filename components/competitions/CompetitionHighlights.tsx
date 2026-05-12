@@ -1,10 +1,8 @@
 import Link from "next/link";
 
-import type {
-  CompetitionHighlightMatch,
-  CompetitionHighlightsData,
-} from "@/src/server/competition-highlights";
+import type { CompetitionHighlightMatch, CompetitionHighlightsData, } from "@/src/server/competition-highlights";
 import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
+import { ArrowRight } from "lucide-react";
 
 type CompetitionHighlightsProps = {
   highlights: CompetitionHighlightsData;
@@ -131,35 +129,18 @@ function MatchCard({ match }: { match: CompetitionHighlightMatch }) {
   );
 }
 
-function ClickableTodayMatchCard({
-  match,
-  slug,
-}: {
-  match: CompetitionHighlightMatch;
-  slug: string;
-}) {
-  return (
-    <Link
-      aria-label={`Voir le classement live pour ${getTeamName(match, "home")} contre ${getTeamName(match, "away")}`}
-      className="highlight-match-card highlight-match-card-link"
-      href={`/competitions/${slug}/classement?mode=live`}
-    >
-      <MatchCard match={match} />
-      <span className="highlight-match-card-cta">Voir le classement live</span>
-    </Link>
-  );
-}
-
 function HighlightSection({
-  emptyText,
-  matches,
-  slug,
-  title,
-}: {
+                            emptyText,
+                            hrefBuilder,
+                            matches,
+                            title,
+                            ctaLabel,
+                          }: {
   emptyText: string;
+  hrefBuilder?: (match: CompetitionHighlightMatch) => string;
   matches: CompetitionHighlightMatch[];
-  slug?: string;
   title: string;
+  ctaLabel?: string;
 }) {
   return (
     <section className="highlight-panel">
@@ -174,8 +155,21 @@ function HighlightSection({
       ) : (
         <div className="highlight-match-list">
           {matches.map((match) => (
-            slug ? (
-              <ClickableTodayMatchCard key={match.id} match={match} slug={slug} />
+            hrefBuilder ? (
+              <Link
+                aria-label={`${ctaLabel ?? "Ouvrir"} ${getTeamName(match, "home")} contre ${getTeamName(match, "away")}`}
+                className="highlight-match-card highlight-match-card-link"
+                href={hrefBuilder(match)}
+                key={match.id}
+              >
+                <MatchCard match={match} />
+                <div className="flex gap-2 py-2">
+                  <span className="highlight-match-card-cta">{ctaLabel}</span>
+                  <span className="competition-card-title-cta" aria-hidden="true">
+                    <ArrowRight size={18} strokeWidth={2.6} />
+                  </span>
+                </div>
+              </Link>
             ) : (
               <article className="highlight-match-card" key={match.id}>
                 <MatchCard match={match} />
@@ -189,19 +183,22 @@ function HighlightSection({
 }
 
 export function CompetitionHighlights({
-  highlights,
-  slug,
-}: CompetitionHighlightsProps) {
+                                        highlights,
+                                        slug,
+                                      }: CompetitionHighlightsProps) {
   return (
     <div className="competition-highlights">
       <HighlightSection
         emptyText="Aucun match aujourd'hui."
+        ctaLabel="Voir le classement live"
+        hrefBuilder={slug ? () => `/competitions/${slug}/classement?mode=live` : undefined}
         matches={highlights.todayMatches}
-        slug={slug}
         title="Matchs du jour"
       />
       <HighlightSection
         emptyText="Aucun prochain match programmé."
+        ctaLabel="Aller au prono"
+        hrefBuilder={slug ? (match) => `/competitions/${slug}/pronos#match-${match.id}` : undefined}
         matches={highlights.nextMatches}
         title={highlights.nextTitle ?? "Prochains matchs"}
       />

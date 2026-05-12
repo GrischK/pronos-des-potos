@@ -1650,11 +1650,6 @@
     color: var(--pitch-strong);
   }
 
-  .highlight-match-card-cta::after {
-    content: "→";
-    margin-left: 0.45rem;
-  }
-
   .highlight-prono-line {
     @apply flex items-center justify-between gap-3 rounded-lg bg-surface-alt px-3 py-2;
   }
@@ -2214,7 +2209,7 @@
   }
 
   .match-teams {
-    @apply grid items-center gap-3;
+    @apply grid items-center gap-3 py-2;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   }
 
@@ -2260,6 +2255,10 @@
 
   .prediction-row {
     @apply grid gap-3 rounded-lg border border-line bg-surface p-4;
+  }
+
+  .prediction-row[id] {
+    scroll-margin-top: 112px;
   }
 
   .prediction-grid {
@@ -2355,6 +2354,10 @@
 
     .prediction-inputs {
       @apply w-fit;
+    }
+
+    .prediction-row[id] {
+      scroll-margin-top: 96px;
     }
 
     .prediction-score-block {
