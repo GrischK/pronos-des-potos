@@ -1696,7 +1696,7 @@
   }
 
   .pending-predictions-panel {
-    @apply mb-5 rounded-lg border border-line bg-surface p-3;
+    @apply mb-12 rounded-lg border border-line bg-surface p-3;
     background:
       linear-gradient(135deg, color-mix(in srgb, var(--card) 14%, white), white 48%),
       var(--surface);
@@ -1801,7 +1801,7 @@
   }
 
   .schedule-view-switch {
-    @apply flex w-fit flex-wrap gap-2 rounded-lg border border-line bg-surface p-1;
+    @apply flex w-fit flex-wrap gap-2 rounded-lg border border-line bg-surface p-1 mb-6;
   }
 
   .schedule-view-switch button {
