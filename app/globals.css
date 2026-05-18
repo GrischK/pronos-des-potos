@@ -2261,7 +2261,7 @@
   }
 
   .player-profile-header h2 {
-    @apply mt-2 mb-1 truncate text-3xl font-black leading-none tracking-normal;
+    @apply mt-2 mb-1 truncate text-3xl font-black leading-tight tracking-normal;
   }
 
   .player-profile-header p:not(.badge) {

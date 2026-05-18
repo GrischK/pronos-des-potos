@@ -166,7 +166,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
       <section className="page-section">
         <div className="actions">
           <Link
-            className="btn btn-secondary"
+            className="btn btn-primary competition-back-button"
             href={`/competitions/${profile.competition.slug}/classement`}
           >
             Retour au classement
@@ -183,7 +183,6 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
           <div>
             <p className="badge badge-live">Participant</p>
             <h2>{profile.player.name}</h2>
-            <p>{profile.player.email}</p>
           </div>
         </div>
 

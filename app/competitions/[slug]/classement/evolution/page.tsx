@@ -14,8 +14,8 @@ type ClassementEvolutionPageProps = {
 };
 
 export default async function ClassementEvolutionPage({
-  params,
-}: ClassementEvolutionPageProps) {
+                                                        params,
+                                                      }: ClassementEvolutionPageProps) {
   const { slug } = await params;
   const [competition, currentUserId] = await Promise.all([
     getLeaderboardProgressData(slug),
@@ -31,8 +31,8 @@ export default async function ClassementEvolutionPage({
       <PageHeader
         eyebrow={getCompetitionKindLabel(competition.kind)}
         emblemUrl={competition.emblemUrl}
-        title={`Évolution - ${competition.name}`}
-        mobileTitle="Évolution"
+        title={`Graphique du classement - ${competition.name}`}
+        mobileTitle="Graphique du classement"
         className="competition-subpage-header"
         description="La course au classement, journée après journée."
       />
@@ -44,9 +44,6 @@ export default async function ClassementEvolutionPage({
             href={`/competitions/${slug}/classement`}
           >
             Retour au classement
-          </Link>
-          <Link className="btn btn-secondary" href={`/competitions/${slug}`}>
-            Retour à la compétition
           </Link>
         </div>
       </section>

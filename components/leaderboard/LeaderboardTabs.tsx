@@ -367,6 +367,15 @@ export function LeaderboardTabs({
         <LeaderboardTable slug={leaderboard.slug} snapshot={snapshot} />
       </section>
 
+      <div className="actions mb-4">
+        <Link
+          className="btn btn-primary competition-back-button"
+          href={`/competitions/${leaderboard.slug}/classement/evolution`}
+        >
+          Graphique du classement
+        </Link>
+      </div>
+
       <section className="page-section">
         <div className="leaderboard-summary">
           <div>

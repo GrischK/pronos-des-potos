@@ -163,10 +163,9 @@ export function LeaderboardProgressChart({
       <div className="section-heading">
         <div>
           <p className="badge badge-live">Évolution officielle</p>
-          <h2>Classement journée par journée</h2>
         </div>
         <p>
-          Toutes les courbes restent visibles. Touche un joueur pour le mettre en avant.
+          Choisis un participant pour le mettre en avant.
         </p>
       </div>
 
@@ -187,7 +186,6 @@ export function LeaderboardProgressChart({
                 </span>
                 <div>
                   <strong>{selectedPlayer.name}</strong>
-                  <span>Toutes les courbes sont affichées, celle-ci est surlignée.</span>
                 </div>
               </div>
 

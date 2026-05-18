@@ -46,9 +46,6 @@ export default async function ClassementPage({
 
       <section className="page-section">
         <div className="actions">
-          <Link className="btn btn-secondary" href={`/competitions/${slug}/classement/evolution`}>
-            Voir l'évolution
-          </Link>
           <Link
             className="btn btn-primary competition-back-button"
             href={`/competitions/${slug}`}
