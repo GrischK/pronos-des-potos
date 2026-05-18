@@ -1,0 +1,371 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import type { LeaderboardProgressData } from "@/src/server/leaderboard";
+
+type LeaderboardProgressChartProps = {
+  currentUserId: string | null;
+  data: LeaderboardProgressData;
+};
+
+const chartPalette = [
+  "#153e75",
+  "#2f7d4f",
+  "#f05d3f",
+  "#c18c2f",
+  "#0e7490",
+  "#7c3aed",
+  "#be123c",
+  "#2563eb",
+  "#0f766e",
+  "#c2410c",
+  "#4f46e5",
+  "#15803d",
+  "#b45309",
+  "#9333ea",
+  "#1d4ed8",
+];
+
+function getPlayerColor(index: number) {
+  return chartPalette[index % chartPalette.length];
+}
+
+function getInitial(name: string) {
+  return name.trim().slice(0, 1).toUpperCase();
+}
+
+function buildLinePath(points: { x: number; y: number }[]) {
+  return points
+    .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`)
+    .join(" ");
+}
+
+function getInterpolatedY(
+  points: { x: number; y: number }[],
+  targetX: number,
+) {
+  if (points.length === 0) {
+    return null;
+  }
+
+  if (points.length === 1 || targetX <= points[0].x) {
+    return points[0].y;
+  }
+
+  const lastPoint = points[points.length - 1];
+
+  if (targetX >= lastPoint.x) {
+    return lastPoint.y;
+  }
+
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const current = points[index];
+    const next = points[index + 1];
+
+    if (targetX >= current.x && targetX <= next.x) {
+      const distance = next.x - current.x;
+
+      if (distance === 0) {
+        return current.y;
+      }
+
+      const progress = (targetX - current.x) / distance;
+
+      return current.y + (next.y - current.y) * progress;
+    }
+  }
+
+  return lastPoint.y;
+}
+
+export function LeaderboardProgressChart({
+  currentUserId,
+  data,
+}: LeaderboardProgressChartProps) {
+  const playersWithHistory = useMemo(
+    () => data.players.filter((player) => player.history.length > 0),
+    [data.players],
+  );
+  const defaultPlayerId =
+    playersWithHistory.find((player) => player.userId === currentUserId)?.userId ??
+    playersWithHistory[0]?.userId ??
+    null;
+  const [selectedUserId, setSelectedUserId] = useState(defaultPlayerId);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const [viewportWidth, setViewportWidth] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const selectedPlayer =
+    playersWithHistory.find((player) => player.userId === selectedUserId) ??
+    playersWithHistory[0] ??
+    null;
+  const selectedPlayerIndex = selectedPlayer
+    ? playersWithHistory.findIndex((player) => player.userId === selectedPlayer.userId)
+    : -1;
+  const chartWidth = Math.max(520, data.sections.length * 84);
+  const chartHeight = Math.max(420, data.participantCount * 28);
+  const padding = {
+    top: 24,
+    right: 108,
+    bottom: 42,
+    left: 34,
+  };
+  const innerWidth = Math.max(1, chartWidth - padding.left - padding.right);
+  const innerHeight = Math.max(1, chartHeight - padding.top - padding.bottom);
+  const maxRank = Math.max(1, data.participantCount);
+  const xStep = data.sections.length > 1 ? innerWidth / (data.sections.length - 1) : 0;
+  const yStep = maxRank > 1 ? innerHeight / (maxRank - 1) : 0;
+  const selectedPlayerPoints = selectedPlayer
+    ? selectedPlayer.history.map((point, pointIndex) => ({
+        x: padding.left + pointIndex * xStep,
+        y: padding.top + (point.rank - 1) * yStep,
+      }))
+    : [];
+  const trackedViewportX = padding.left + scrollLeft + Math.min(72, Math.max(36, viewportWidth * 0.22));
+  const selectedPlayerOverlayY = getInterpolatedY(selectedPlayerPoints, trackedViewportX);
+  const selectedPlayerColor = getPlayerColor(selectedPlayerIndex);
+
+  useEffect(() => {
+    const element = scrollRef.current;
+
+    if (!element) {
+      return;
+    }
+
+    const syncMetrics = () => {
+      setScrollLeft(element.scrollLeft);
+      setViewportWidth(element.clientWidth);
+    };
+
+    syncMetrics();
+
+    const resizeObserver = new ResizeObserver(() => {
+      syncMetrics();
+    });
+
+    resizeObserver.observe(element);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  if (data.sections.length === 0 || playersWithHistory.length === 0) {
+    return (
+      <p className="readonly-notice">
+        L&apos;évolution apparaîtra dès que des matchs terminés alimenteront le classement.
+      </p>
+    );
+  }
+
+  return (
+    <section className="page-section">
+      <div className="section-heading">
+        <div>
+          <p className="badge badge-live">Évolution officielle</p>
+          <h2>Classement journée par journée</h2>
+        </div>
+        <p>
+          Toutes les courbes restent visibles. Touche un joueur pour le mettre en avant.
+        </p>
+      </div>
+
+      <div className="leaderboard-progress-layout">
+        <div className="leaderboard-progress-summary">
+          {selectedPlayer ? (
+            <>
+              <div className="leaderboard-progress-active">
+                <span
+                  className="leaderboard-progress-avatar"
+                  style={{ backgroundColor: getPlayerColor(selectedPlayerIndex) }}
+                >
+                  {selectedPlayer.image ? (
+                    <img alt="" loading="lazy" src={selectedPlayer.image} />
+                  ) : (
+                    getInitial(selectedPlayer.name)
+                  )}
+                </span>
+                <div>
+                  <strong>{selectedPlayer.name}</strong>
+                  <span>Toutes les courbes sont affichées, celle-ci est surlignée.</span>
+                </div>
+              </div>
+
+              <div className="leaderboard-progress-metrics">
+                <div>
+                  <span>Rang actuel</span>
+                  <strong>
+                    {selectedPlayer.currentRank ? `#${selectedPlayer.currentRank}` : "-"}
+                  </strong>
+                </div>
+                <div>
+                  <span>Meilleur rang</span>
+                  <strong>
+                    {selectedPlayer.bestRank ? `#${selectedPlayer.bestRank}` : "-"}
+                  </strong>
+                </div>
+                <div>
+                  <span>Points</span>
+                  <strong>{selectedPlayer.currentPoints}</strong>
+                </div>
+              </div>
+            </>
+          ) : null}
+
+          <div className="leaderboard-progress-picker" aria-label="Joueurs du graphe">
+            {playersWithHistory.map((player, index) => {
+              const isSelected = player.userId === selectedPlayer?.userId;
+
+              return (
+                <button
+                  aria-pressed={isSelected}
+                  className="leaderboard-progress-chip"
+                  data-selected={isSelected ? "true" : "false"}
+                  key={player.userId}
+                  onClick={() => setSelectedUserId(player.userId)}
+                  type="button"
+                >
+                  <span
+                    className="leaderboard-progress-chip-dot"
+                    style={{ backgroundColor: getPlayerColor(index) }}
+                  />
+                  <span className="leaderboard-progress-chip-rank">
+                    {player.currentRank ? `#${player.currentRank}` : "-"}
+                  </span>
+                  <span className="leaderboard-progress-chip-name">{player.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="leaderboard-progress-chart-shell">
+          {selectedPlayer && selectedPlayerOverlayY !== null ? (
+            <div
+              className="leaderboard-progress-overlay-label"
+              style={{
+                borderColor: selectedPlayerColor,
+                top: Math.max(10, selectedPlayerOverlayY - 30),
+              }}
+            >
+              <span
+                className="leaderboard-progress-overlay-dot"
+                style={{ backgroundColor: selectedPlayerColor }}
+              />
+              <strong>{selectedPlayer.name}</strong>
+            </div>
+          ) : null}
+
+          <div
+            className="leaderboard-progress-chart-scroll"
+            onScroll={(event) => {
+              setScrollLeft(event.currentTarget.scrollLeft);
+            }}
+            ref={scrollRef}
+          >
+            <svg
+              aria-label="Évolution du classement"
+              className="leaderboard-progress-chart"
+              height={chartHeight}
+              role="img"
+              viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+              width={chartWidth}
+            >
+              {Array.from({ length: maxRank }, (_, index) => {
+                const rank = index + 1;
+                const y = padding.top + index * yStep;
+
+                return (
+                  <g key={rank}>
+                    <line
+                      className="leaderboard-progress-gridline"
+                      x1={padding.left}
+                      x2={chartWidth - padding.right}
+                      y1={y}
+                      y2={y}
+                    />
+                    <text
+                      className="leaderboard-progress-axis-label"
+                      textAnchor="end"
+                      x={padding.left - 10}
+                      y={y + 4}
+                    >
+                      {rank}
+                    </text>
+                  </g>
+                );
+              })}
+
+              {data.sections.map((section, index) => {
+                const x = padding.left + index * xStep;
+
+                return (
+                  <g key={section.id}>
+                    <line
+                      className="leaderboard-progress-gridline is-vertical"
+                      x1={x}
+                      x2={x}
+                      y1={padding.top}
+                      y2={chartHeight - padding.bottom}
+                    />
+                    <text
+                      className="leaderboard-progress-axis-label"
+                      textAnchor="middle"
+                      x={x}
+                      y={chartHeight - 12}
+                    >
+                      {section.label}
+                    </text>
+                  </g>
+                );
+              })}
+
+              {playersWithHistory.map((player, index) => {
+                const points = player.history.map((point, pointIndex) => ({
+                  x: padding.left + pointIndex * xStep,
+                  y: padding.top + (point.rank - 1) * yStep,
+                }));
+                const isSelected = player.userId === selectedPlayer?.userId;
+                const color = getPlayerColor(index);
+                const lastPoint = points[points.length - 1];
+
+                return (
+                  <g key={player.userId}>
+                    <path
+                      className="leaderboard-progress-line-hitbox"
+                      d={buildLinePath(points)}
+                      onClick={() => setSelectedUserId(player.userId)}
+                      stroke="transparent"
+                      strokeWidth={16}
+                    />
+                    <path
+                      className="leaderboard-progress-line"
+                      d={buildLinePath(points)}
+                      onClick={() => setSelectedUserId(player.userId)}
+                      stroke={color}
+                      strokeWidth={isSelected ? 4 : 1.6}
+                      style={{ opacity: isSelected ? 1 : 0.22 }}
+                    />
+                    {lastPoint ? (
+                      <>
+                        <circle
+                          className="leaderboard-progress-endpoint"
+                          cx={lastPoint.x}
+                          cy={lastPoint.y}
+                          fill={color}
+                          onClick={() => setSelectedUserId(player.userId)}
+                          r={isSelected ? 5.5 : 3}
+                          style={{ opacity: isSelected ? 1 : 0.34 }}
+                        />
+                      </>
+                    ) : null}
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

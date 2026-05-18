@@ -2035,6 +2035,148 @@
     @apply overflow-x-auto rounded-lg border border-line bg-surface;
   }
 
+  .leaderboard-progress-layout {
+    @apply grid gap-4;
+  }
+
+  .leaderboard-progress-summary {
+    @apply grid gap-4 rounded-lg border border-line bg-surface p-4;
+  }
+
+  .leaderboard-progress-active {
+    @apply flex items-center gap-3;
+  }
+
+  .leaderboard-progress-active > div {
+    @apply grid gap-1;
+  }
+
+  .leaderboard-progress-active strong {
+    @apply text-lg font-black text-foreground;
+  }
+
+  .leaderboard-progress-active span:last-child {
+    @apply text-sm font-bold text-muted;
+  }
+
+  .leaderboard-progress-avatar {
+    @apply grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-lg text-sm font-black text-white;
+  }
+
+  .leaderboard-progress-avatar img {
+    @apply h-full w-full object-cover;
+  }
+
+  .leaderboard-progress-metrics {
+    @apply grid gap-3;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+
+  .leaderboard-progress-metrics div {
+    @apply grid gap-1 rounded-lg border border-line bg-surface-alt p-3;
+  }
+
+  .leaderboard-progress-metrics span {
+    @apply text-xs font-black uppercase tracking-normal text-muted;
+  }
+
+  .leaderboard-progress-metrics strong {
+    @apply text-2xl font-black leading-none text-foreground;
+  }
+
+  .leaderboard-progress-picker {
+    @apply flex gap-2 overflow-x-auto pb-1;
+    scroll-padding-inline: 0.25rem;
+  }
+
+  .leaderboard-progress-chip {
+    @apply inline-flex min-w-fit items-center gap-2 rounded-lg border border-line bg-surface-alt px-3 py-2 text-left;
+    transition:
+      border-color 160ms ease,
+      background-color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .leaderboard-progress-chip:hover {
+    border-color: color-mix(in srgb, var(--pitch) 28%, var(--line));
+    background: color-mix(in srgb, var(--pitch) 8%, white);
+    transform: translateY(-1px);
+  }
+
+  .leaderboard-progress-chip[data-selected="true"] {
+    border-color: color-mix(in srgb, var(--foreground) 24%, var(--line));
+    background: color-mix(in srgb, var(--foreground) 8%, white);
+  }
+
+  .leaderboard-progress-chip-dot {
+    @apply h-3 w-3 shrink-0 rounded-full;
+  }
+
+  .leaderboard-progress-chip-rank {
+    @apply text-sm font-black text-foreground;
+  }
+
+  .leaderboard-progress-chip-name {
+    @apply max-w-[140px] truncate text-sm font-bold text-muted;
+  }
+
+  .leaderboard-progress-chart-shell {
+    @apply relative overflow-hidden rounded-lg border border-line bg-surface;
+  }
+
+  .leaderboard-progress-chart-scroll {
+    @apply overflow-x-auto p-3;
+  }
+
+  .leaderboard-progress-chart {
+    @apply block;
+    min-width: 520px;
+  }
+
+  .leaderboard-progress-gridline {
+    stroke: color-mix(in srgb, var(--foreground) 10%, transparent);
+    stroke-width: 1;
+  }
+
+  .leaderboard-progress-gridline.is-vertical {
+    stroke: color-mix(in srgb, var(--foreground) 6%, transparent);
+  }
+
+  .leaderboard-progress-axis-label {
+    fill: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .leaderboard-progress-line {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    cursor: pointer;
+  }
+
+  .leaderboard-progress-line-hitbox {
+    fill: none;
+    cursor: pointer;
+  }
+
+  .leaderboard-progress-endpoint {
+    cursor: pointer;
+  }
+
+  .leaderboard-progress-overlay-label {
+    @apply pointer-events-none absolute left-3 z-10 inline-flex items-center gap-2 rounded-lg border bg-surface px-2.5 py-1.5;
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--foreground) 10%, transparent);
+  }
+
+  .leaderboard-progress-overlay-dot {
+    @apply h-2.5 w-2.5 shrink-0 rounded-full;
+  }
+
+  .leaderboard-progress-overlay-label strong {
+    @apply text-xs font-black text-foreground;
+  }
+
   .leaderboard-table {
     @apply w-full border-collapse text-left text-sm;
   }
@@ -2386,6 +2528,50 @@
 
     .competition-highlights {
       grid-template-columns: 1fr;
+    }
+
+    .leaderboard-progress-summary {
+      gap: 0.9rem;
+      padding: 0.9rem;
+    }
+
+    .leaderboard-progress-active {
+      align-items: flex-start;
+    }
+
+    .leaderboard-progress-active strong {
+      font-size: 1.65rem;
+      line-height: 1;
+    }
+
+    .leaderboard-progress-active span:last-child {
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+
+    .leaderboard-progress-metrics {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    .leaderboard-progress-metrics div {
+      padding: 0.85rem 0.9rem;
+    }
+
+    .leaderboard-progress-metrics strong {
+      font-size: 2rem;
+    }
+
+    .leaderboard-progress-chip {
+      padding-inline: 0.9rem;
+    }
+
+    .leaderboard-progress-chip-name {
+      max-width: 88px;
+    }
+
+    .leaderboard-progress-chart-scroll {
+      padding: 0.75rem;
     }
 
     .competition-actions-grid {
@@ -3153,6 +3339,35 @@
 
   :root[data-theme="dark"] .leaderboard-rule span {
     color: var(--muted);
+  }
+
+  :root[data-theme="dark"] .leaderboard-progress-summary,
+  :root[data-theme="dark"] .leaderboard-progress-chart-shell {
+    background: var(--surface);
+    box-shadow: none;
+  }
+
+  :root[data-theme="dark"] .leaderboard-progress-metrics div,
+  :root[data-theme="dark"] .leaderboard-progress-chip {
+    background: var(--surface-alt);
+  }
+
+  :root[data-theme="dark"] .leaderboard-progress-chip[data-selected="true"] {
+    border-color: color-mix(in srgb, white 14%, var(--line));
+    background: color-mix(in srgb, var(--surface-alt) 82%, white);
+  }
+
+  :root[data-theme="dark"] .leaderboard-progress-chip:hover {
+    border-color: color-mix(in srgb, white 18%, var(--line));
+    background: color-mix(in srgb, var(--surface-alt) 92%, white);
+  }
+
+  :root[data-theme="dark"] .leaderboard-progress-gridline {
+    stroke: color-mix(in srgb, white 10%, transparent);
+  }
+
+  :root[data-theme="dark"] .leaderboard-progress-gridline.is-vertical {
+    stroke: color-mix(in srgb, white 7%, transparent);
   }
 
   :root[data-theme="dark"] .player-points-neutral .player-points-badge {
