@@ -5,6 +5,7 @@ import { AutoRefresh } from "@/components/AutoRefresh";
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 import { competitionKindLabels } from "@/src/domain/competition-kind";
+import { getLiveMatchStatusLabel, getMatchStatusLabel } from "@/src/domain/match-status";
 import {
   getCompetitionsOverview,
   getNextPredictionOpportunity,
@@ -133,15 +134,7 @@ function renderOwnPrediction(match: LiveMatchPreview | null) {
 }
 
 function renderLiveIndicator(liveMinute: number | null) {
-  if (liveMinute === 45) {
-    return "Mi-temps";
-  }
-
-  if (liveMinute !== null) {
-    return `${liveMinute}'`;
-  }
-
-  return "";
+  return getLiveMatchStatusLabel(liveMinute);
 }
 
 function MatchTeamsInline({ match }: { match: MatchPreview }) {
@@ -270,10 +263,8 @@ export default async function CompetitionsPage() {
                         )}
                       </span>
                       <span className="match-status match-live-status">
-                        <span>LIVE</span>
-                        <span className="live-minute">
-                          {renderLiveIndicator(competition.liveMatch.liveMinute)}
-                        </span>
+                        <span>{getMatchStatusLabel("LIVE")}</span>
+                        <span className="live-minute">{renderLiveIndicator(competition.liveMatch.liveMinute)}</span>
                       </span>
                     </div>
                     <small>{renderOwnPrediction(competition.liveMatch)}</small>

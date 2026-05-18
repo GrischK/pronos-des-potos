@@ -4,6 +4,7 @@ import type { CompetitionKind } from "@prisma/client";
 
 import { PredictionScheduleBrowser } from "@/components/predictions/PredictionSchedule";
 import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
+import { getLiveMatchStatusLabel, getMatchStatusLabel } from "@/src/domain/match-status";
 import type { PublicPredictionMatch } from "@/src/server/all-predictions";
 
 type AllPredictionsScheduleProps = {
@@ -58,15 +59,13 @@ function getResultLabel(status: string) {
 
 function renderStatus(status: string, liveMinute: number | null) {
   if (status !== "LIVE") {
-    return <span className="match-status">{status}</span>;
+    return <span className="match-status">{getMatchStatusLabel(status)}</span>;
   }
 
   return (
     <span className="match-status match-live-status">
-      <span>LIVE</span>
-      <span className="live-minute">
-        {liveMinute === 45 ? "Mi-temps" : liveMinute !== null ? `${liveMinute}'` : ""}
-      </span>
+      <span>{getMatchStatusLabel(status)}</span>
+      <span className="live-minute">{getLiveMatchStatusLabel(liveMinute)}</span>
     </span>
   );
 }

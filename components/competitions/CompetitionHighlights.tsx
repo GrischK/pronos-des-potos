@@ -1,8 +1,12 @@
 import Link from "next/link";
 
-import type { CompetitionHighlightMatch, CompetitionHighlightsData, } from "@/src/server/competition-highlights";
+import type {
+  CompetitionHighlightMatch,
+  CompetitionHighlightsData,
+} from "@/src/server/competition-highlights";
 import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
 import { ArrowRight } from "lucide-react";
+import { getLiveMatchStatusLabel, getMatchStatusLabel } from "@/src/domain/match-status";
 
 type CompetitionHighlightsProps = {
   highlights: CompetitionHighlightsData;
@@ -48,15 +52,13 @@ function renderScore(homeScore: number | null, awayScore: number | null) {
 
 function renderStatus(status: string, liveMinute: number | null) {
   if (status !== "LIVE") {
-    return <span className="match-status">{status}</span>;
+    return <span className="match-status">{getMatchStatusLabel(status)}</span>;
   }
 
   return (
     <span className="match-status match-live-status">
-      <span>LIVE</span>
-      <span className="live-minute">
-        {liveMinute === 45 ? "Mi-temps" : liveMinute !== null ? `${liveMinute}'` : ""}
-      </span>
+      <span>{getMatchStatusLabel(status)}</span>
+      <span className="live-minute">{getLiveMatchStatusLabel(liveMinute)}</span>
     </span>
   );
 }

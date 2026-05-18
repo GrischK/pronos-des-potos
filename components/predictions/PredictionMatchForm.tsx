@@ -34,24 +34,19 @@ function formatKickoffAt(value: string) {
   return dateFormatter.format(date);
 }
 
-function getLockReason(match: PredictionMatch) {
-  if (match.canPredict) {
-    return null;
+function getMatchMetaBadges(match: PredictionMatch) {
+  if (match.status === "LIVE") {
+    return [
+      { label: "Match verrouillé", className: "badge badge-danger" },
+      { label: "En cours", className: "badge badge-warning" },
+    ];
   }
 
-  if (!match.homeTeam || !match.awayTeam) {
-    return "Équipes à déterminer";
+  if (match.status === "FINISHED") {
+    return [{ label: "Terminé", className: "badge badge-live" }];
   }
 
-  if (match.status !== "SCHEDULED") {
-    return "Match verrouillé";
-  }
-
-  if (new Date(match.kickoffAt).getTime() <= Date.now()) {
-    return "Coup d'envoi passé";
-  }
-
-  return "Compétition fermée";
+  return [];
 }
 
 function getTeamName(match: PredictionMatch, side: "home" | "away") {
@@ -112,12 +107,12 @@ export function PredictionMatchForm({ match, slug, anchorId }: PredictionMatchFo
     setHasSavedState(true);
   }, [awayScore, homeScore, state.success]);
 
-  const lockReason = getLockReason(match);
   const hasResult = match.homeScore !== null && match.awayScore !== null;
   const showReadonlyEmptyState = !match.canPredict && !match.prediction;
   const isDirty = homeScore !== savedHomeScore || awayScore !== savedAwayScore;
   const hasCompleteScore = homeScore !== "" && awayScore !== "";
   const showSavedState = hasSavedState && !isDirty;
+  const matchMetaBadges = getMatchMetaBadges(match);
 
   return (
     <form action={formAction} className="prediction-row" id={anchorId}>
@@ -127,7 +122,11 @@ export function PredictionMatchForm({ match, slug, anchorId }: PredictionMatchFo
       <div className="match-meta">
         <span>{formatKickoffAt(match.kickoffAt)}</span>
         <span>{getCompetitionStageLabel(match.stage)}</span>
-        {lockReason ? <span>{lockReason}</span> : null}
+        {matchMetaBadges.map((badge) => (
+          <span className={badge.className} key={badge.label}>
+            {badge.label}
+          </span>
+        ))}
       </div>
 
       <div className="prediction-grid">

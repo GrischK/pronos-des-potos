@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
+import { getLiveMatchStatusLabel, getMatchStatusLabel } from "@/src/domain/match-status";
 import type { LeaderboardData, LeaderboardSnapshot } from "@/src/server/leaderboard";
 import { useDismissibleLayer } from "@/src/lib/use-dismissible-layer";
 
@@ -64,15 +65,13 @@ function renderScore(homeScore: number | null, awayScore: number | null) {
 
 function renderStatus(status: string, liveMinute: number | null) {
   if (status !== "LIVE") {
-    return status;
+    return getMatchStatusLabel(status);
   }
 
   return (
     <>
-      <span>LIVE</span>
-      <span className="live-minute">
-        {liveMinute === 45 ? "Mi-temps" : liveMinute !== null ? `${liveMinute}'` : ""}
-      </span>
+      <span>{getMatchStatusLabel(status)}</span>
+      <span className="live-minute">{getLiveMatchStatusLabel(liveMinute)}</span>
     </>
   );
 }

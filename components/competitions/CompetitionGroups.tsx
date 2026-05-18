@@ -8,6 +8,7 @@ import {
   getCompetitionStageLabel,
   isTwoLeggedCompetitionStage,
 } from "@/src/domain/competition-stage";
+import { getMatchStatusLabel } from "@/src/domain/match-status";
 import type {
   CompetitionGroup,
   CompetitionPhase,
@@ -168,7 +169,7 @@ function MatchList({ matches }: { matches: CompetitionScheduleMatch[] }) {
               </span>
             </div>
 
-            <span className="match-status">{match.status}</span>
+            <span className="match-status">{getMatchStatusLabel(match.status)}</span>
           </article>
         ))
       )}
