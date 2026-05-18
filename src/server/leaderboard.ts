@@ -8,6 +8,8 @@ export type LeaderboardRow = {
   userId: string;
   name: string;
   image: string | null;
+  rank: number;
+  tieCount: number;
   points: number;
   predictedMatches: number;
   exactUnique: number;
@@ -127,6 +129,8 @@ type CompetitionPlayer = {
   };
 };
 
+type LeaderboardStandingRow = Omit<LeaderboardRow, "rank" | "tieCount">;
+
 const sectionTitleFormatter = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
   month: "long",
@@ -143,7 +147,7 @@ function buildLeaderboardSnapshot(
   players: CompetitionPlayer[],
   matches: LeaderboardMatch[],
 ): LeaderboardSnapshot {
-  const rowsByUser = new Map<string, LeaderboardRow>();
+  const rowsByUser = new Map<string, LeaderboardStandingRow>();
 
   for (const player of players) {
     rowsByUser.set(player.user.id, {
@@ -171,7 +175,7 @@ function buildLeaderboardSnapshot(
     ).length;
 
     for (const prediction of match.predictions) {
-      const row =
+      const row: LeaderboardStandingRow =
         rowsByUser.get(prediction.userId) ??
         {
           userId: prediction.userId,
@@ -223,8 +227,32 @@ function buildLeaderboardSnapshot(
       a.name.localeCompare(b.name, "fr"),
   );
 
+  let currentRank = 0;
+  let currentGroupSize = 0;
+  let previousKey: string | null = null;
+
+  const rankedRows = rows.map((row) => {
+    const rankingKey = [
+      row.points,
+      row.exactUnique,
+      row.exactShared,
+      row.correctOutcome,
+      row.predictedMatches,
+    ].join("|");
+
+    if (rankingKey !== previousKey) {
+      currentRank = currentRank === 0 ? 1 : currentRank + currentGroupSize;
+      currentGroupSize = 1;
+      previousKey = rankingKey;
+    } else {
+      currentGroupSize += 1;
+    }
+
+    return { ...row, rank: currentRank, tieCount: currentGroupSize };
+  });
+
   return {
-    rows,
+    rows: rankedRows,
     matchCount: matches.length,
     liveMatchCount: matches.filter((match) => match.status === "LIVE").length,
   };
@@ -433,9 +461,8 @@ function buildLeaderboardProgressData(
       const history = snapshots
         .map(({ section, snapshot }) => {
           const row = snapshot.rows.find((item) => item.userId === player.user.id);
-          const rank = snapshot.rows.findIndex((item) => item.userId === player.user.id);
 
-          if (!row || rank < 0) {
+          if (!row) {
             return null;
           }
 
@@ -444,7 +471,7 @@ function buildLeaderboardProgressData(
             label: section.label,
             title: section.title,
             points: row.points,
-            rank: rank + 1,
+            rank: row.rank,
           };
         })
         .filter(

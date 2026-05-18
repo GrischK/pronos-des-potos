@@ -236,8 +236,8 @@ export async function getPlayerProfileData(
       (a, b) => new Date(b.kickoffAt).getTime() - new Date(a.kickoffAt).getTime(),
     );
 
-  const officialRank = leaderboard.official.rows.findIndex((row) => row.userId === userId);
-  const liveRank = leaderboard.live.rows.findIndex((row) => row.userId === userId);
+  const officialRank = leaderboard.official.rows.find((row) => row.userId === userId);
+  const liveRank = leaderboard.live.rows.find((row) => row.userId === userId);
 
   return {
     competition: {
@@ -253,8 +253,8 @@ export async function getPlayerProfileData(
       name: getUserDisplayName(player),
     },
     stats: {
-      officialRank: officialRank >= 0 ? officialRank + 1 : null,
-      liveRank: liveRank >= 0 ? liveRank + 1 : null,
+      officialRank: officialRank?.rank ?? null,
+      liveRank: liveRank?.rank ?? null,
       points,
       predictedMatches,
       exactUnique,

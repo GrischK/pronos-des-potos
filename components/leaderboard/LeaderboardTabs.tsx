@@ -20,6 +20,10 @@ function getInitial(name: string) {
   return name.trim().slice(0, 1).toUpperCase();
 }
 
+function formatRankLabel(rank: number) {
+  return String(rank);
+}
+
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   dateStyle: "medium",
   timeStyle: "short",
@@ -111,7 +115,7 @@ function LeaderboardTable({
       <table className="leaderboard-table">
         <thead>
           <tr>
-            <th>#</th>
+            <th>Rang</th>
             <th>Joueur</th>
             <th>Pts</th>
             <th>Pronos</th>
@@ -122,9 +126,9 @@ function LeaderboardTable({
           </tr>
         </thead>
         <tbody>
-          {snapshot.rows.map((row, index) => (
+          {snapshot.rows.map((row) => (
             <tr key={row.userId}>
-              <td>{index + 1}</td>
+              <td>{formatRankLabel(row.rank)}</td>
               <td>
                 <Link
                   className="leaderboard-player"
@@ -196,8 +200,8 @@ function LeaderboardRulesCard({ isLive }: { isLive: boolean }) {
             </p>
             <p>
               Le classement est trié par points, puis exact unique, score
-              exact, bon résultat, nombre de pronos joués et enfin ordre
-              alphabétique.
+              exact, bon résultat et nombre de pronos joués. À égalité
+              parfaite sur ces critères, les joueurs restent ex aequo.
             </p>
             <p>
               {isLive
