@@ -1,0 +1,203 @@
+"use client";
+
+import { ChevronDown } from "lucide-react";
+import { useActionState, useState } from "react";
+
+import {
+  saveBonusPredictionAction,
+  type PredictionActionState,
+} from "@/src/server/prediction-actions";
+import type { PredictionBonusData } from "@/src/server/predictions";
+
+type BonusPredictionFormProps = {
+  competitionId: string;
+  slug: string;
+  bonus: PredictionBonusData;
+};
+
+const initialState: PredictionActionState = {};
+
+type BonusField = "winnerTeamId" | "secondTeamId" | "thirdTeamId";
+
+const bonusFields: {
+  label: string;
+  name: BonusField;
+}[] = [
+  { label: "Vainqueur", name: "winnerTeamId" },
+  { label: "Second", name: "secondTeamId" },
+  { label: "Troisième", name: "thirdTeamId" },
+];
+
+function getInitial(name: string) {
+  return name.trim().slice(0, 1).toUpperCase();
+}
+
+function TeamLogo({ team }: { team: PredictionBonusData["teams"][number] }) {
+  if (team.flagUrl) {
+    return <img alt="" className="team-flag" loading="lazy" src={team.flagUrl} />;
+  }
+
+  return <span className="bonus-team-fallback">{getInitial(team.name)}</span>;
+}
+
+function BonusTeamPicker({
+  disabled,
+  field,
+  openField,
+  selectedIds,
+  setOpenField,
+  setValue,
+  teams,
+  value,
+}: {
+  disabled: boolean;
+  field: {
+    label: string;
+    name: BonusField;
+  };
+  openField: BonusField | null;
+  selectedIds: Set<string>;
+  setOpenField: (field: BonusField | null) => void;
+  setValue: (field: BonusField, value: string) => void;
+  teams: PredictionBonusData["teams"];
+  value: string;
+}) {
+  const selectedTeam = teams.find((team) => team.id === value) ?? null;
+  const isOpen = openField === field.name;
+
+  return (
+    <div className="bonus-team-picker">
+      <input name={field.name} type="hidden" value={value} />
+      <span className="bonus-team-picker-label">{field.label}</span>
+      <button
+        aria-expanded={isOpen}
+        className="bonus-team-picker-trigger"
+        disabled={disabled}
+        onClick={() => setOpenField(isOpen ? null : field.name)}
+        type="button"
+      >
+        <span className="bonus-team-picker-value">
+          {selectedTeam ? <TeamLogo team={selectedTeam} /> : null}
+          <span>{selectedTeam?.name ?? "Choisir une équipe"}</span>
+        </span>
+        <ChevronDown aria-hidden="true" size={18} strokeWidth={3} />
+      </button>
+
+      {isOpen ? (
+        <div className="bonus-team-picker-menu" role="listbox">
+          {teams.map((team) => {
+            const isSelectedElsewhere = selectedIds.has(team.id) && team.id !== value;
+
+            return (
+              <button
+                aria-selected={team.id === value}
+                className="bonus-team-picker-option"
+                disabled={isSelectedElsewhere}
+                key={team.id}
+                onClick={() => {
+                  setValue(field.name, team.id);
+                  setOpenField(null);
+                }}
+                role="option"
+                type="button"
+              >
+                <TeamLogo team={team} />
+                <span>{team.name}</span>
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+export function BonusPredictionForm({
+  competitionId,
+  slug,
+  bonus,
+}: BonusPredictionFormProps) {
+  const [state, formAction, pending] = useActionState(
+    saveBonusPredictionAction,
+    initialState,
+  );
+  const [openField, setOpenField] = useState<BonusField | null>(null);
+  const [values, setValues] = useState<Record<BonusField, string>>({
+    winnerTeamId: bonus.prediction?.winnerTeamId ?? "",
+    secondTeamId: bonus.prediction?.secondTeamId ?? "",
+    thirdTeamId: bonus.prediction?.thirdTeamId ?? "",
+  });
+  const isLocked = !bonus.canPredict;
+  const selectedIds = new Set(Object.values(values).filter(Boolean));
+  const isComplete = Object.values(values).every(Boolean);
+  const summaryLabel = isLocked
+    ? "Verrouillé"
+    : isComplete
+      ? "Podium enregistré"
+      : "À compléter";
+
+  if (!bonus.enabled) {
+    return null;
+  }
+
+  return (
+    <details className="pending-predictions-panel bonus-predictions-panel" open={!isLocked && !isComplete}>
+      <summary>
+        <span>
+          <span className="badge badge-warning">Bonus podium</span>
+          <strong>{summaryLabel}</strong>
+        </span>
+        <span
+          aria-hidden="true"
+          className="pending-predictions-summary-action"
+        >
+          <ChevronDown size={18} strokeWidth={3} />
+        </span>
+      </summary>
+
+      <form action={formAction} className="prediction-row">
+        <input name="competitionId" type="hidden" value={competitionId} />
+        <input name="slug" type="hidden" value={slug} />
+
+        <div className="bonus-podium-grid">
+          {bonusFields.map((field) => (
+            <BonusTeamPicker
+              disabled={isLocked || pending}
+              field={field}
+              key={field.name}
+              openField={openField}
+              selectedIds={selectedIds}
+              setOpenField={setOpenField}
+              setValue={(name, value) =>
+                setValues((current) => ({
+                  ...current,
+                  [name]: value,
+                }))
+              }
+              teams={bonus.teams}
+              value={values[field.name]}
+            />
+          ))}
+        </div>
+
+        <div className="prediction-actions">
+          <button
+            className="btn btn-primary"
+            disabled={isLocked || pending || !isComplete}
+            type="submit"
+          >
+            {pending ? "Enregistrement..." : "Enregistrer le podium"}
+          </button>
+          {state.error ? <span className="form-error">{state.error}</span> : null}
+          {state.success ? <span className="form-success">{state.success}</span> : null}
+        </div>
+
+        {isLocked ? (
+          <p className="readonly-notice">
+            Le bonus podium est verrouillé dès le début de la compétition.
+          </p>
+        ) : null}
+      </form>
+    </details>
+  );
+}

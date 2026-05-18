@@ -154,7 +154,13 @@ function LeaderboardTable({
   );
 }
 
-function LeaderboardRulesCard({ isLive }: { isLive: boolean }) {
+function LeaderboardRulesCard({
+  isLive,
+  bonusEnabled,
+}: {
+  isLive: boolean;
+  bonusEnabled: boolean;
+}) {
   const infoButtonRef = useRef<HTMLButtonElement>(null);
   const infoPopoverRef = useRef<HTMLDivElement>(null);
   const [isInfoOpen, setIsInfoOpen] = useState(false);
@@ -203,6 +209,12 @@ function LeaderboardRulesCard({ isLive }: { isLive: boolean }) {
               exact, bon résultat et nombre de pronos joués. À égalité
               parfaite sur ces critères, les joueurs restent ex aequo.
             </p>
+            {bonusEnabled ? (
+              <p>
+                Le bonus podium rapporte 5 pts par bonne place, et 20 pts si
+                le podium complet est exact.
+              </p>
+            ) : null}
             <p>
               {isLive
                 ? "Le live prend aussi en compte les matchs en cours."
@@ -403,7 +415,7 @@ export function LeaderboardTabs({
       </section>
 
       <section className="page-section">
-        <LeaderboardRulesCard isLive={isLive} />
+        <LeaderboardRulesCard isLive={isLive} bonusEnabled={leaderboard.bonusEnabled} />
       </section>
 
       {isLive ? <LiveMatchesPanel matches={leaderboard.liveMatches} /> : null}

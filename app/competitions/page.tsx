@@ -233,6 +233,9 @@ export default async function CompetitionsPage() {
                   <p className={statusBadgeClasses[competition.status]}>
                     {statusLabels[competition.status]}
                   </p>
+                  {competition.bonusEnabled ? (
+                    <p className="badge badge-warning">Bonus podium</p>
+                  ) : null}
                 </div>
                 <div className="competition-card-summary">
                   <span>

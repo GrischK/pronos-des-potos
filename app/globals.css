@@ -1687,7 +1687,7 @@
   }
 
   .schedule-browser {
-    @apply grid gap-5;
+    @apply grid min-w-0 gap-5;
   }
 
   .pending-predictions-panel {
@@ -1850,19 +1850,19 @@
   }
 
   .group-panel {
-    @apply grid min-w-0 gap-5;
+    @apply grid min-w-0 max-w-full gap-5;
   }
 
   .day-browser {
-    @apply grid gap-4;
+    @apply grid min-w-0 max-w-full gap-4;
   }
 
   .day-nav-shell {
-    @apply relative;
+    @apply relative min-w-0 max-w-full;
   }
 
   .day-nav {
-    @apply flex gap-2 overflow-x-auto pb-1;
+    @apply flex min-w-0 max-w-full gap-2 overflow-x-auto pb-1;
   }
 
   .day-nav-button {
@@ -2404,7 +2404,7 @@
   }
 
   .match-team {
-    @apply flex min-w-0 items-center gap-2 font-black;
+    @apply flex min-w-0 max-w-full items-center gap-2 font-black;
   }
 
   .match-team span {
@@ -2440,11 +2440,11 @@
   }
 
   .prediction-list {
-    @apply grid gap-3;
+    @apply grid min-w-0 max-w-full gap-3;
   }
 
   .prediction-row {
-    @apply grid gap-3 rounded-lg border border-line bg-surface p-4;
+    @apply grid min-w-0 max-w-full gap-3 rounded-lg border border-line bg-surface p-4;
   }
 
   .prediction-row[id] {
@@ -2452,8 +2452,80 @@
   }
 
   .prediction-grid {
-    @apply grid items-center gap-3;
+    @apply grid min-w-0 max-w-full items-center gap-3;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .bonus-podium-grid {
+    @apply grid gap-3;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .bonus-predictions-panel .prediction-row {
+    @apply mt-3;
+  }
+
+  .bonus-team-picker {
+    @apply relative grid gap-2;
+  }
+
+  .bonus-team-picker-label {
+    @apply text-sm font-black text-muted;
+  }
+
+  .bonus-team-picker-trigger {
+    @apply flex h-12 min-w-0 items-center justify-between gap-3 rounded-lg border border-line bg-white px-3 text-left font-black text-foreground outline-none;
+  }
+
+  .bonus-team-picker-trigger:disabled {
+    @apply cursor-not-allowed opacity-60;
+  }
+
+  .bonus-team-picker-trigger[aria-expanded="true"] {
+    border-color: color-mix(in srgb, var(--coral) 48%, var(--line));
+    box-shadow: 0 10px 22px color-mix(in srgb, var(--foreground) 8%, transparent);
+  }
+
+  .bonus-team-picker-trigger svg {
+    @apply shrink-0 text-muted;
+    transition: transform 180ms ease;
+  }
+
+  .bonus-team-picker-trigger[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+  }
+
+  .bonus-team-picker-value {
+    @apply flex min-w-0 items-center gap-2;
+  }
+
+  .bonus-team-picker-value span {
+    @apply min-w-0 truncate;
+  }
+
+  .bonus-team-picker-menu {
+    @apply absolute left-0 right-0 top-full z-20 mt-2 grid max-h-72 gap-1 overflow-y-auto rounded-lg border border-line bg-white p-2 shadow-xl;
+  }
+
+  .bonus-team-picker-option {
+    @apply flex min-w-0 items-center gap-2 rounded-lg px-2 py-2 text-left font-bold text-foreground;
+  }
+
+  .bonus-team-picker-option:hover:not(:disabled),
+  .bonus-team-picker-option[aria-selected="true"] {
+    background: color-mix(in srgb, var(--pitch) 14%, white);
+  }
+
+  .bonus-team-picker-option:disabled {
+    @apply cursor-not-allowed opacity-35;
+  }
+
+  .bonus-team-picker-option span:last-child {
+    @apply min-w-0 truncate;
+  }
+
+  .bonus-team-fallback {
+    @apply inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-line bg-surface-alt text-xs font-black text-muted;
   }
 
   .prediction-inputs {
@@ -2462,7 +2534,7 @@
   }
 
   .prediction-score-block {
-    @apply grid justify-items-center gap-2;
+    @apply grid min-w-0 justify-items-center gap-2;
   }
 
   .prediction-inputs input {
@@ -2583,6 +2655,10 @@
     }
 
     .prediction-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .bonus-podium-grid {
       grid-template-columns: 1fr;
     }
 

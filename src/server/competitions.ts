@@ -8,6 +8,7 @@ import {
   getCompetitionStageLabel,
 } from "@/src/domain/competition-stage";
 import { computePredictionPoints } from "@/src/domain/scoring";
+import { buildBonusPointsByUser } from "@/src/server/bonus";
 
 const WORLD_CUP_2026_GROUPS = [
   {
@@ -306,7 +307,31 @@ export async function getCompetitionsOverview() {
       slug: true,
       kind: true,
       status: true,
+      bonusEnabled: true,
+      bonusWinnerTeamId: true,
+      bonusSecondTeamId: true,
+      bonusThirdTeamId: true,
       emblemUrl: true,
+      players: {
+        select: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              image: true,
+              name: true,
+            },
+          },
+        },
+      },
+      bonusPredictions: {
+        select: {
+          userId: true,
+          winnerTeamId: true,
+          secondTeamId: true,
+          thirdTeamId: true,
+        },
+      },
       matches: {
         where: {
           OR: [
@@ -408,6 +433,16 @@ export async function getCompetitionsOverview() {
         }
       >();
 
+      for (const player of competition.players) {
+        leaderRows.set(player.user.id, {
+          name: player.user.name?.trim() || player.user.email,
+          points: 0,
+          exactUnique: 0,
+          exactShared: 0,
+          correctOutcome: 0,
+        });
+      }
+
       for (const match of competition.matches) {
         if (
           match.status !== "FINISHED" ||
@@ -459,6 +494,36 @@ export async function getCompetitionsOverview() {
         }
       }
 
+      const bonusPointsByUser = buildBonusPointsByUser(
+        competition.bonusPredictions,
+        competition.bonusEnabled &&
+          competition.bonusWinnerTeamId &&
+          competition.bonusSecondTeamId &&
+          competition.bonusThirdTeamId
+          ? {
+              winnerTeamId: competition.bonusWinnerTeamId,
+              secondTeamId: competition.bonusSecondTeamId,
+              thirdTeamId: competition.bonusThirdTeamId,
+            }
+          : null,
+        competition.bonusEnabled,
+      );
+
+      for (const [userId, bonusPoints] of bonusPointsByUser.entries()) {
+        const row =
+          leaderRows.get(userId) ??
+          {
+            name: userId,
+            points: 0,
+            exactUnique: 0,
+            exactShared: 0,
+            correctOutcome: 0,
+          };
+
+        row.points += bonusPoints;
+        leaderRows.set(userId, row);
+      }
+
       const leader = Array.from(leaderRows.values()).sort(
         (a, b) =>
           b.points - a.points ||
@@ -474,6 +539,7 @@ export async function getCompetitionsOverview() {
         slug: competition.slug,
         kind: competition.kind,
         status: competition.status,
+        bonusEnabled: competition.bonusEnabled,
         emblemUrl: competition.emblemUrl,
         matchCount: competition._count.matches,
         playerCount: competition._count.players,

@@ -50,6 +50,7 @@ model User {
 
   competitions CompetitionPlayer[]
   predictions  Prediction[]
+  bonusPredictions CompetitionBonusPrediction[]
 }
 
 model Competition {
@@ -58,6 +59,10 @@ model Competition {
   slug      String            @unique
   kind      CompetitionKind
   status    CompetitionStatus @default(DRAFT)
+  bonusEnabled Boolean @default(false)
+  bonusWinnerTeamId String?
+  bonusSecondTeamId String?
+  bonusThirdTeamId String?
   apiFootballLeagueId Int?
   apiFootballSeason   Int?
   apiFootballLastSyncAt DateTime?
@@ -74,6 +79,10 @@ model Competition {
   players CompetitionPlayer[]
   teams   Team[]
   matches Match[]
+  bonusPredictions CompetitionBonusPrediction[]
+  bonusWinnerTeam Team? @relation("CompetitionBonusWinner", fields: [bonusWinnerTeamId], references: [id])
+  bonusSecondTeam Team? @relation("CompetitionBonusSecond", fields: [bonusSecondTeamId], references: [id])
+  bonusThirdTeam Team? @relation("CompetitionBonusThird", fields: [bonusThirdTeamId], references: [id])
 
   @@index([status])
   @@index([startsAt])
@@ -109,6 +118,12 @@ model Team {
   competition Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
   homeMatches Match[]     @relation("HomeTeam")
   awayMatches Match[]     @relation("AwayTeam")
+  bonusWinnerCompetitions Competition[] @relation("CompetitionBonusWinner")
+  bonusSecondCompetitions Competition[] @relation("CompetitionBonusSecond")
+  bonusThirdCompetitions Competition[] @relation("CompetitionBonusThird")
+  bonusWinnerPredictions CompetitionBonusPrediction[] @relation("CompetitionBonusPredictionWinner")
+  bonusSecondPredictions CompetitionBonusPrediction[] @relation("CompetitionBonusPredictionSecond")
+  bonusThirdPredictions CompetitionBonusPrediction[] @relation("CompetitionBonusPredictionThird")
 
   @@unique([competitionId, name])
   @@unique([competitionId, apiFootballTeamId])
@@ -162,4 +177,24 @@ model Prediction {
   @@unique([userId, matchId])
   @@index([matchId])
   @@index([userId])
+}
+
+model CompetitionBonusPrediction {
+  id            String   @id @default(cuid())
+  userId        String
+  competitionId String
+  winnerTeamId   String
+  secondTeamId   String
+  thirdTeamId    String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  competition Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  winnerTeam  Team        @relation("CompetitionBonusPredictionWinner", fields: [winnerTeamId], references: [id])
+  secondTeam  Team        @relation("CompetitionBonusPredictionSecond", fields: [secondTeamId], references: [id])
+  thirdTeam   Team        @relation("CompetitionBonusPredictionThird", fields: [thirdTeamId], references: [id])
+
+  @@unique([userId, competitionId])
+  @@index([competitionId])
 }

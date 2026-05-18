@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AutoRefresh } from "@/components/AutoRefresh";
+import { BonusPredictionForm } from "@/components/predictions/BonusPredictionForm";
 import { PageHeader } from "@/components/PageHeader";
 import { PredictionSchedule } from "@/components/predictions/PredictionSchedule";
 import { getCompetitionKindLabel } from "@/src/domain/competition-kind";
@@ -56,6 +57,12 @@ export default async function PronosticsPage({ params }: PronosticsPageProps) {
             Compétition fermée : les pronos sont en lecture seule.
           </p>
         ) : null}
+
+        <BonusPredictionForm
+          bonus={competition.bonus}
+          competitionId={competition.id}
+          slug={competition.slug}
+        />
 
         <PredictionSchedule
           competitionKind={competition.kind}

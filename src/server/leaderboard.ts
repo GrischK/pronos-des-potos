@@ -3,6 +3,7 @@ import "server-only";
 import { getCompetitionStageLabel, isTwoLeggedCompetitionStage } from "@/src/domain/competition-stage";
 import { computePredictionPoints } from "@/src/domain/scoring";
 import { prisma } from "@/src/db/prisma";
+import { buildBonusPointsByUser } from "@/src/server/bonus";
 
 export type LeaderboardRow = {
   userId: string;
@@ -10,6 +11,7 @@ export type LeaderboardRow = {
   image: string | null;
   rank: number;
   tieCount: number;
+  bonusPoints: number;
   points: number;
   predictedMatches: number;
   exactUnique: number;
@@ -24,6 +26,7 @@ export type LeaderboardData = {
   slug: string;
   kind: string;
   emblemUrl: string | null;
+  bonusEnabled: boolean;
   participantCount: number;
   official: LeaderboardSnapshot;
   live: LeaderboardSnapshot;
@@ -36,6 +39,7 @@ export type LeaderboardProgressData = {
   slug: string;
   kind: string;
   emblemUrl: string | null;
+  bonusEnabled: boolean;
   participantCount: number;
   sections: {
     id: string;
@@ -146,6 +150,7 @@ const sectionLabelFormatter = new Intl.DateTimeFormat("fr-FR", {
 function buildLeaderboardSnapshot(
   players: CompetitionPlayer[],
   matches: LeaderboardMatch[],
+  bonusPointsByUser: Map<string, number> = new Map(),
 ): LeaderboardSnapshot {
   const rowsByUser = new Map<string, LeaderboardStandingRow>();
 
@@ -154,6 +159,7 @@ function buildLeaderboardSnapshot(
       userId: player.user.id,
       name: getUserDisplayName(player.user),
       image: player.user.image,
+      bonusPoints: 0,
       points: 0,
       predictedMatches: 0,
       exactUnique: 0,
@@ -181,6 +187,7 @@ function buildLeaderboardSnapshot(
           userId: prediction.userId,
           name: getUserDisplayName(prediction.user),
           image: prediction.user.image,
+          bonusPoints: 0,
           points: 0,
           predictedMatches: 0,
           exactUnique: 0,
@@ -215,6 +222,13 @@ function buildLeaderboardSnapshot(
 
       rowsByUser.set(row.userId, row);
     }
+  }
+
+  for (const row of rowsByUser.values()) {
+    const bonusPoints = bonusPointsByUser.get(row.userId) ?? 0;
+
+    row.bonusPoints += bonusPoints;
+    row.points += bonusPoints;
   }
 
   const rows = Array.from(rowsByUser.values()).sort(
@@ -313,9 +327,11 @@ function buildLeaderboardProgressData(
     slug: string;
     kind: string;
     emblemUrl: string | null;
+    bonusEnabled: boolean;
     players: CompetitionPlayer[];
     matches: LeaderboardMatch[];
   },
+  bonusPointsByUser: Map<string, number>,
 ): LeaderboardProgressData {
   const finishedMatches = [...competition.matches]
     .filter((match) => match.status === "FINISHED")
@@ -452,7 +468,11 @@ function buildLeaderboardProgressData(
 
     return {
       section,
-      snapshot: buildLeaderboardSnapshot(competition.players, matches),
+      snapshot: buildLeaderboardSnapshot(
+        competition.players,
+        matches,
+        bonusPointsByUser,
+      ),
     };
   });
 
@@ -519,6 +539,7 @@ function buildLeaderboardProgressData(
     slug: competition.slug,
     kind: competition.kind,
     emblemUrl: competition.emblemUrl,
+    bonusEnabled: competition.bonusEnabled,
     participantCount: competition.players.length,
     sections,
     players,
@@ -538,6 +559,10 @@ export async function getLeaderboardData(
       slug: true,
       kind: true,
       emblemUrl: true,
+      bonusEnabled: true,
+      bonusWinnerTeamId: true,
+      bonusSecondTeamId: true,
+      bonusThirdTeamId: true,
       players: {
         select: {
           user: {
@@ -548,6 +573,14 @@ export async function getLeaderboardData(
               name: true,
             },
           },
+        },
+      },
+      bonusPredictions: {
+        select: {
+          userId: true,
+          winnerTeamId: true,
+          secondTeamId: true,
+          thirdTeamId: true,
         },
       },
       matches: {
@@ -610,6 +643,21 @@ export async function getLeaderboardData(
     return null;
   }
 
+  const bonusPointsByUser = buildBonusPointsByUser(
+    competition.bonusPredictions,
+    competition.bonusEnabled &&
+      competition.bonusWinnerTeamId &&
+      competition.bonusSecondTeamId &&
+      competition.bonusThirdTeamId
+      ? {
+          winnerTeamId: competition.bonusWinnerTeamId,
+          secondTeamId: competition.bonusSecondTeamId,
+          thirdTeamId: competition.bonusThirdTeamId,
+        }
+      : null,
+    competition.bonusEnabled,
+  );
+
   const officialMatches = competition.matches.filter(
     (match) => match.status === "FINISHED",
   );
@@ -649,9 +697,18 @@ export async function getLeaderboardData(
     slug: competition.slug,
     kind: competition.kind,
     emblemUrl: competition.emblemUrl,
+    bonusEnabled: competition.bonusEnabled,
     participantCount: competition.players.length,
-    official: buildLeaderboardSnapshot(competition.players, officialMatches),
-    live: buildLeaderboardSnapshot(competition.players, liveMatches),
+    official: buildLeaderboardSnapshot(
+      competition.players,
+      officialMatches,
+      bonusPointsByUser,
+    ),
+    live: buildLeaderboardSnapshot(
+      competition.players,
+      liveMatches,
+      bonusPointsByUser,
+    ),
     liveMatches: liveMatchCards,
   };
 }
@@ -669,6 +726,10 @@ export async function getLeaderboardProgressData(
       slug: true,
       kind: true,
       emblemUrl: true,
+      bonusEnabled: true,
+      bonusWinnerTeamId: true,
+      bonusSecondTeamId: true,
+      bonusThirdTeamId: true,
       players: {
         select: {
           user: {
@@ -679,6 +740,14 @@ export async function getLeaderboardProgressData(
               name: true,
             },
           },
+        },
+      },
+      bonusPredictions: {
+        select: {
+          userId: true,
+          winnerTeamId: true,
+          secondTeamId: true,
+          thirdTeamId: true,
         },
       },
       matches: {
@@ -724,5 +793,20 @@ export async function getLeaderboardProgressData(
     return null;
   }
 
-  return buildLeaderboardProgressData(competition);
+  const bonusPointsByUser = buildBonusPointsByUser(
+    competition.bonusPredictions,
+    competition.bonusEnabled &&
+      competition.bonusWinnerTeamId &&
+      competition.bonusSecondTeamId &&
+      competition.bonusThirdTeamId
+      ? {
+          winnerTeamId: competition.bonusWinnerTeamId,
+          secondTeamId: competition.bonusSecondTeamId,
+          thirdTeamId: competition.bonusThirdTeamId,
+        }
+      : null,
+    competition.bonusEnabled,
+  );
+
+  return buildLeaderboardProgressData(competition, bonusPointsByUser);
 }

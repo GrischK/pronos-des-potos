@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { CompetitionBonusForm } from "@/components/admin/CompetitionBonusForm";
 import { CompetitionForm } from "@/components/admin/CompetitionForm";
 import { PageHeader } from "@/components/PageHeader";
 import {
@@ -108,6 +109,12 @@ export default async function AdminPage() {
                         Modifier
                       </button>
                     </form>
+                    <CompetitionBonusForm
+                      competition={{
+                        id: competition.id,
+                        bonusEnabled: competition.bonusEnabled,
+                      }}
+                    />
                     <div className="admin-item-actions">
                       <form action={toggleCompetitionOpenAction}>
                         <input

@@ -28,6 +28,26 @@ export type PredictionMatch = {
   } | null;
 };
 
+export type CompetitionTeam = {
+  id: string;
+  name: string;
+  flagUrl: string | null;
+};
+
+export type CompetitionBonusPrediction = {
+  winnerTeamId: string;
+  secondTeamId: string;
+  thirdTeamId: string;
+};
+
+export type PredictionBonusData = {
+  enabled: boolean;
+  canPredict: boolean;
+  teams: CompetitionTeam[];
+  prediction: CompetitionBonusPrediction | null;
+  result: CompetitionBonusPrediction | null;
+};
+
 export async function getPredictionPageData(slug: string) {
   const user = await getCurrentUser();
 
@@ -46,6 +66,21 @@ export async function getPredictionPageData(slug: string) {
       kind: true,
       emblemUrl: true,
       status: true,
+      startsAt: true,
+      bonusEnabled: true,
+      bonusWinnerTeamId: true,
+      bonusSecondTeamId: true,
+      bonusThirdTeamId: true,
+      teams: {
+        orderBy: {
+          name: "asc",
+        },
+        select: {
+          id: true,
+          name: true,
+          flagUrl: true,
+        },
+      },
       matches: {
         orderBy: [{ kickoffAt: "asc" }, { createdAt: "asc" }],
         select: {
@@ -82,6 +117,17 @@ export async function getPredictionPageData(slug: string) {
           },
         },
       },
+      bonusPredictions: {
+        where: {
+          userId: user.id,
+        },
+        select: {
+          winnerTeamId: true,
+          secondTeamId: true,
+          thirdTeamId: true,
+        },
+        take: 1,
+      },
     },
   });
 
@@ -98,6 +144,27 @@ export async function getPredictionPageData(slug: string) {
     kind: competition.kind,
     emblemUrl: competition.emblemUrl,
     status: competition.status,
+    bonus: {
+      enabled: competition.bonusEnabled,
+      canPredict:
+        competition.status === "OPEN" &&
+        competition.bonusEnabled &&
+        competition.startsAt !== null &&
+        competition.startsAt.getTime() > now,
+      teams: competition.teams,
+      prediction: competition.bonusPredictions[0] ?? null,
+      result:
+        competition.bonusEnabled &&
+        competition.bonusWinnerTeamId &&
+        competition.bonusSecondTeamId &&
+        competition.bonusThirdTeamId
+          ? {
+              winnerTeamId: competition.bonusWinnerTeamId,
+              secondTeamId: competition.bonusSecondTeamId,
+              thirdTeamId: competition.bonusThirdTeamId,
+            }
+          : null,
+    },
     isOpen: competition.status === "OPEN",
     matches: competition.matches.map((match): PredictionMatch => ({
       id: match.id,

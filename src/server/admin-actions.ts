@@ -37,6 +37,11 @@ const updateCompetitionKindSchema = z.object({
   kind: z.enum(["WORLD_CUP", "EURO", "CHAMPIONS_LEAGUE", "OTHER"]),
 });
 
+const updateCompetitionBonusSchema = z.object({
+  competitionId: z.string().min(1),
+  bonusEnabled: z.enum(["on"]).optional(),
+});
+
 function slugify(value: string) {
   return value
     .normalize("NFD")
@@ -400,6 +405,60 @@ export async function updateCompetitionKindAction(formData: FormData) {
   updateTag("competitions");
   updateTag("admin-competitions");
   updateTag(`competition:${competition.slug}`);
+}
+
+export async function updateCompetitionBonusAction(
+  _state: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const admin = await getCurrentAdmin();
+
+  if (!admin) {
+    return { error: "Accès réservé aux admins." };
+  }
+
+  const parsed = updateCompetitionBonusSchema.safeParse(
+    Object.fromEntries(formData),
+  );
+
+  if (!parsed.success) {
+    return {
+      error: parsed.error.issues[0]?.message ?? "Bonus invalide.",
+    };
+  }
+
+  const competition = await prisma.competition.findUnique({
+    where: {
+      id: parsed.data.competitionId,
+    },
+    select: {
+      id: true,
+      slug: true,
+    },
+  });
+
+  if (!competition) {
+    return { error: "Compétition introuvable." };
+  }
+
+  const enableBonus = parsed.data.bonusEnabled === "on";
+
+  await prisma.competition.update({
+    where: {
+      id: competition.id,
+    },
+    data: {
+      bonusEnabled: enableBonus,
+    },
+  });
+
+  updateTag("competitions");
+  updateTag("admin-competitions");
+  updateTag(`competition:${competition.slug}`);
+
+  return {
+    success: enableBonus ? "Bonus podium activé." : "Bonus podium désactivé.",
+  };
 }
 
 export async function deleteCompetitionAction(formData: FormData) {

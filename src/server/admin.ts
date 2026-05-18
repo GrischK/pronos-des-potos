@@ -18,6 +18,7 @@ export const getAdminCompetitions = unstable_cache(
         slug: true,
         kind: true,
         status: true,
+        bonusEnabled: true,
         apiFootballLeagueId: true,
         apiFootballSeason: true,
         apiFootballLastSyncAt: true,
