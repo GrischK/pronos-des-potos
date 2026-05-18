@@ -53,7 +53,29 @@ function getPointsLabel(points: number | null) {
   return `${points} pt${points > 1 ? "s" : ""}`;
 }
 
+function getPointsToneClass(points: number | null) {
+  if (points === null || points === 0) {
+    return "player-points-neutral";
+  }
+
+  if (points === 1) {
+    return "player-points-outcome";
+  }
+
+  if (points === 3) {
+    return "player-points-exact";
+  }
+
+  if (points === 4) {
+    return "player-points-unique";
+  }
+
+  return "player-points-neutral";
+}
+
 function PlayerMatchRow({ match }: { match: PlayerProfileMatch }) {
+  const points = match.prediction?.points ?? null;
+
   return (
     <article className="player-match-row">
       <div>
@@ -62,15 +84,24 @@ function PlayerMatchRow({ match }: { match: PlayerProfileMatch }) {
           {getTeamName(match, "home")} - {getTeamName(match, "away")}
         </strong>
       </div>
-      <span>{renderScore(match.homeScore, match.awayScore)}</span>
-      <span>
-        {match.canRevealPrediction
-          ? match.prediction
-            ? renderScore(match.prediction.homeScore, match.prediction.awayScore)
-            : "Pas de prono"
-          : "Visible au coup d'envoi"}
+      <span className="player-score-cell">
+        <span className="player-score-label">Résultat match</span>
+        <strong>{renderScore(match.homeScore, match.awayScore)}</strong>
       </span>
-      <strong>{getPointsLabel(match.prediction?.points ?? null)}</strong>
+      <span className="player-score-cell">
+        <span className="player-score-label">Prono</span>
+        <strong>
+          {match.canRevealPrediction
+            ? match.prediction
+              ? renderScore(match.prediction.homeScore, match.prediction.awayScore)
+              : "Pas de prono"
+            : "Visible au coup d'envoi"}
+        </strong>
+      </span>
+      <strong className={`player-points-cell ${getPointsToneClass(points)}`}>
+        <span className="player-score-label">Points</span>
+        <span className="player-points-badge">{getPointsLabel(points)}</span>
+      </strong>
     </article>
   );
 }
@@ -181,7 +212,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
           <div className="player-match-list">
             <div className="player-match-row player-match-row-header">
               <span>Match</span>
-              <span>Score</span>
+              <span>Résultat match</span>
               <span>Prono</span>
               <span>Pts</span>
             </div>

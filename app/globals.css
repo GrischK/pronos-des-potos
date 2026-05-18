@@ -2173,8 +2173,51 @@
     @apply text-center;
   }
 
+  .player-score-cell,
+  .player-points-cell {
+    @apply grid justify-items-center gap-1;
+  }
+
+  .player-score-label {
+    @apply text-[0.68rem] font-black uppercase tracking-normal text-muted;
+  }
+
+  .player-score-cell strong,
+  .player-points-badge {
+    @apply text-sm font-black text-foreground;
+  }
+
+  .player-points-badge {
+    @apply inline-flex items-center justify-center rounded-lg px-2.5 py-1;
+    min-height: 1.9rem;
+  }
+
+  .player-points-neutral .player-points-badge {
+    background: color-mix(in srgb, var(--surface-alt) 88%, white);
+    color: var(--muted);
+  }
+
+  .player-points-outcome .player-points-badge {
+    background: color-mix(in srgb, var(--navy) 12%, white);
+    color: var(--navy);
+  }
+
+  .player-points-exact .player-points-badge {
+    background: color-mix(in srgb, var(--mint) 28%, white);
+    color: var(--pitch-strong);
+  }
+
+  .player-points-unique .player-points-badge {
+    background: color-mix(in srgb, var(--coral) 14%, white);
+    color: var(--coral);
+  }
+
   .player-match-row-header {
     @apply bg-surface-alt text-xs font-black uppercase text-muted;
+  }
+
+  .player-match-row-header .player-score-label {
+    @apply hidden;
   }
 
   .leaderboard-table tbody tr:last-child td {
@@ -2380,6 +2423,11 @@
     .player-match-row > span,
     .player-match-row > strong {
       @apply text-left;
+    }
+
+    .player-score-cell,
+    .player-points-cell {
+      @apply justify-items-start;
     }
 
     .player-match-row-header {
@@ -3105,6 +3153,26 @@
 
   :root[data-theme="dark"] .leaderboard-rule span {
     color: var(--muted);
+  }
+
+  :root[data-theme="dark"] .player-points-neutral .player-points-badge {
+    background: color-mix(in srgb, var(--surface-alt) 84%, white);
+    color: #b6c2d3;
+  }
+
+  :root[data-theme="dark"] .player-points-outcome .player-points-badge {
+    background: color-mix(in srgb, var(--navy) 22%, var(--surface-alt));
+    color: #a8c8ff;
+  }
+
+  :root[data-theme="dark"] .player-points-exact .player-points-badge {
+    background: color-mix(in srgb, var(--mint) 18%, var(--surface-alt));
+    color: #c9f5d8;
+  }
+
+  :root[data-theme="dark"] .player-points-unique .player-points-badge {
+    background: color-mix(in srgb, var(--coral) 12%, var(--surface-alt));
+    color: #ffd0c5;
   }
 
   :root[data-theme="dark"] .leaderboard-info-popover {
