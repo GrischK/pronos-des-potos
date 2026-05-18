@@ -1,5 +1,6 @@
 import "server-only";
 
+import { getCompetitionStageLabel, isTwoLeggedCompetitionStage } from "@/src/domain/competition-stage";
 import { computePredictionPoints } from "@/src/domain/scoring";
 import { prisma } from "@/src/db/prisma";
 
@@ -229,7 +230,27 @@ function buildLeaderboardSnapshot(
   };
 }
 
-function getSectionKey(match: LeaderboardMatch) {
+function getStageSectionMeta(stage: string) {
+  const phaseTitle = getCompetitionStageLabel(stage);
+  const phaseLabelMap: Record<string, string> = {
+    FINAL: "Finale",
+    GROUP_STAGE: "Groupes",
+    LAST_16: "8es",
+    LAST_32: "16es",
+    LEAGUE_STAGE: "Ligue",
+    PLAYOFFS: "Barrages",
+    QUARTER_FINALS: "Quarts",
+    SEMI_FINALS: "Demies",
+    THIRD_PLACE: "3e place",
+  };
+
+  return {
+    label: phaseLabelMap[stage] ?? phaseTitle,
+    title: phaseTitle,
+  };
+}
+
+function getDateSectionKey(match: LeaderboardMatch) {
   if (match.stage === "LEAGUE_STAGE" && match.matchday !== null && match.matchday !== undefined) {
     return {
       id: `matchday-${match.matchday}`,
@@ -282,9 +303,41 @@ function buildLeaderboardProgressData(
     });
   const sectionMatches = new Map<string, LeaderboardMatch[]>();
   const sections: LeaderboardProgressData["sections"] = [];
+  const finishedMatchesByStage = new Map<string, LeaderboardMatch[]>();
 
   for (const match of finishedMatches) {
-    const section = getSectionKey(match);
+    if (match.stage === "LEAGUE_STAGE" && match.matchday !== null && match.matchday !== undefined) {
+      const section = getDateSectionKey(match);
+
+      if (!sectionMatches.has(section.id)) {
+        sectionMatches.set(section.id, []);
+        sections.push({
+          id: section.id,
+          label: section.label,
+          title: section.title,
+          matchCount: 0,
+        });
+      }
+
+      sectionMatches.set(section.id, [...(sectionMatches.get(section.id) ?? []), match]);
+      const targetSection = sections.find((item) => item.id === section.id);
+
+      if (targetSection) {
+        targetSection.matchCount += 1;
+      }
+
+      continue;
+    }
+
+    if (match.stage) {
+      finishedMatchesByStage.set(match.stage, [
+        ...(finishedMatchesByStage.get(match.stage) ?? []),
+        match,
+      ]);
+      continue;
+    }
+
+    const section = getDateSectionKey(match);
 
     if (!sectionMatches.has(section.id)) {
       sectionMatches.set(section.id, []);
@@ -302,6 +355,65 @@ function buildLeaderboardProgressData(
     if (targetSection) {
       targetSection.matchCount += 1;
     }
+  }
+
+  for (const [stage, stageMatches] of finishedMatchesByStage.entries()) {
+    const stageSection = getStageSectionMeta(stage);
+    const orderedStageMatches = [...stageMatches].sort((a, b) => {
+      const kickoffDiff = (a.kickoffAt?.getTime() ?? 0) - (b.kickoffAt?.getTime() ?? 0);
+
+      if (kickoffDiff !== 0) {
+        return kickoffDiff;
+      }
+
+      return a.id.localeCompare(b.id, "fr");
+    });
+    const shouldSplitLegs =
+      isTwoLeggedCompetitionStage(competition.kind, stage) &&
+      orderedStageMatches.length > 1 &&
+      orderedStageMatches.length % 2 === 0;
+
+    if (shouldSplitLegs) {
+      const splitIndex = orderedStageMatches.length / 2;
+      const allerMatches = orderedStageMatches.slice(0, splitIndex);
+      const retourMatches = orderedStageMatches.slice(splitIndex);
+      const legSections = [
+        {
+          id: `stage-${stage}-aller`,
+          label: `${stageSection.label} A`,
+          title: `${stageSection.title} aller`,
+          matches: allerMatches,
+        },
+        {
+          id: `stage-${stage}-retour`,
+          label: `${stageSection.label} R`,
+          title: `${stageSection.title} retour`,
+          matches: retourMatches,
+        },
+      ];
+
+      for (const legSection of legSections) {
+        sectionMatches.set(legSection.id, legSection.matches);
+        sections.push({
+          id: legSection.id,
+          label: legSection.label,
+          title: legSection.title,
+          matchCount: legSection.matches.length,
+        });
+      }
+
+      continue;
+    }
+
+    const sectionId = `stage-${stage}`;
+
+    sectionMatches.set(sectionId, orderedStageMatches);
+    sections.push({
+      id: sectionId,
+      label: stageSection.label,
+      title: stageSection.title,
+      matchCount: orderedStageMatches.length,
+    });
   }
 
   const snapshots = sections.map((section) => {
