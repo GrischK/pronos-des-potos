@@ -881,6 +881,50 @@
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
+  .admin-bonus-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-bonus-form > .readonly-notice,
+  .admin-bonus-form > .form-error,
+  .admin-bonus-form > .form-success {
+    @apply mb-0;
+  }
+
+  .admin-bonus-options {
+    @apply grid gap-2;
+  }
+
+  .admin-bonus-option {
+    @apply flex items-start gap-3 rounded-lg border border-line bg-white p-3;
+  }
+
+  .admin-bonus-option input {
+    appearance: auto;
+    min-height: 18px;
+    width: 18px;
+    margin-top: 2px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    flex-shrink: 0;
+    accent-color: var(--pitch);
+  }
+
+  .admin-bonus-option-copy {
+    @apply grid min-w-0 gap-1;
+  }
+
+  .admin-bonus-option-copy strong {
+    @apply block text-sm font-black leading-tight text-foreground;
+  }
+
+  .admin-bonus-option-copy small {
+    @apply block text-sm font-bold leading-tight text-muted;
+  }
+
   .admin-item-actions {
     @apply mt-2 flex flex-wrap gap-2;
   }
@@ -924,6 +968,18 @@
 
   .btn-secondary {
     @apply border-line bg-surface text-foreground;
+  }
+
+  .btn-important {
+    color: color-mix(in srgb, var(--coral) 70%, var(--foreground));
+    background: color-mix(in srgb, var(--coral) 10%, white);
+    border-color: color-mix(in srgb, var(--coral) 34%, var(--line));
+  }
+
+  .btn-important:hover {
+    border-color: color-mix(in srgb, var(--coral) 34%, var(--line));
+    background: color-mix(in srgb, var(--coral) 10%, white);
+    color: color-mix(in srgb, var(--coral) 84%, black);
   }
 
   .btn-secondary:hover {
@@ -2884,7 +2940,7 @@
     @apply text-[0.88rem] font-[850] text-foreground;
   }
 
-  .field input,
+  .field input:not([type="checkbox"]):not([type="radio"]),
   .field select {
     @apply min-h-[46px] w-full rounded-lg border border-line bg-white px-3 text-foreground outline-none;
     transition:
@@ -2892,7 +2948,7 @@
       box-shadow 160ms ease;
   }
 
-  .field input:focus,
+  .field input:not([type="checkbox"]):not([type="radio"]):focus,
   .field select:focus {
     @apply border-pitch;
     box-shadow: 0 0 0 4px color-mix(in srgb, var(--pitch) 14%, transparent);
@@ -3013,7 +3069,7 @@
     background: color-mix(in srgb, var(--card) 8%, var(--surface-alt));
   }
 
-  :root[data-theme="dark"] .nav-link-logout {
+  :root[data-theme="dark"] .nav-link-logout, :root[data-theme="dark"] .btn-important {
     border-color: color-mix(in srgb, var(--coral) 26%, var(--line));
     background: color-mix(in srgb, var(--coral) 10%, var(--surface-alt));
     color: color-mix(in srgb, var(--coral) 78%, white);
@@ -3024,7 +3080,7 @@
     color: var(--foreground);
   }
 
-  :root[data-theme="dark"] .nav-link-logout:hover {
+  :root[data-theme="dark"] .nav-link-logout:hover, :root[data-theme="dark"] .btn-important:hover {
     background: color-mix(in srgb, var(--coral) 16%, var(--surface-alt));
     color: #ffd8cf;
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--coral) 22%, transparent);

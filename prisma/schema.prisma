@@ -60,6 +60,7 @@ model Competition {
   kind      CompetitionKind
   status    CompetitionStatus @default(DRAFT)
   bonusEnabled Boolean @default(false)
+  bonusLateEntriesEnabled Boolean @default(false)
   bonusWinnerTeamId String?
   bonusSecondTeamId String?
   bonusThirdTeamId String?

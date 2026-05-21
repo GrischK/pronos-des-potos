@@ -42,6 +42,7 @@ export type CompetitionBonusPrediction = {
 
 export type PredictionBonusData = {
   enabled: boolean;
+  allowLateEntries: boolean;
   canPredict: boolean;
   teams: CompetitionTeam[];
   prediction: CompetitionBonusPrediction | null;
@@ -68,6 +69,7 @@ export async function getPredictionPageData(slug: string) {
       status: true,
       startsAt: true,
       bonusEnabled: true,
+      bonusLateEntriesEnabled: true,
       bonusWinnerTeamId: true,
       bonusSecondTeamId: true,
       bonusThirdTeamId: true,
@@ -146,11 +148,13 @@ export async function getPredictionPageData(slug: string) {
     status: competition.status,
     bonus: {
       enabled: competition.bonusEnabled,
+      allowLateEntries: competition.bonusLateEntriesEnabled,
       canPredict:
         competition.status === "OPEN" &&
         competition.bonusEnabled &&
-        competition.startsAt !== null &&
-        competition.startsAt.getTime() > now,
+        (competition.bonusLateEntriesEnabled ||
+          (competition.startsAt !== null &&
+            competition.startsAt.getTime() > now)),
       teams: competition.teams,
       prediction: competition.bonusPredictions[0] ?? null,
       result:

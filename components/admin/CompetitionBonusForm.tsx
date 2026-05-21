@@ -11,6 +11,8 @@ type CompetitionBonusFormProps = {
   competition: {
     id: string;
     bonusEnabled: boolean;
+    bonusLateEntriesEnabled: boolean;
+    status: string;
   };
 };
 
@@ -23,22 +25,45 @@ export function CompetitionBonusForm({ competition }: CompetitionBonusFormProps)
   );
 
   return (
-    <form action={formAction} className="admin-rename-form">
+    <form action={formAction} className="admin-rename-form admin-bonus-form">
       <input name="competitionId" type="hidden" value={competition.id} />
-      <label className="field">
-        <span>Option bonus</span>
-        <select name="bonusEnabled" defaultValue={competition.bonusEnabled ? "on" : ""}>
-          <option value="">Bonus désactivé</option>
-          <option value="on">Bonus activé</option>
-        </select>
-      </label>
+      <div className="field">
+        <span>Prono podium</span>
+        <div className="admin-bonus-options">
+          <label className="admin-bonus-option">
+            <input
+              defaultChecked={competition.bonusEnabled}
+              name="bonusEnabled"
+              type="checkbox"
+              value="on"
+            />
+            <div className="admin-bonus-option-copy">
+              <strong>Activer le bonus podium</strong>
+              <small>Affiche le module podium sur la page pronos.</small>
+            </div>
+          </label>
+          <label className="admin-bonus-option">
+            <input
+              defaultChecked={competition.bonusLateEntriesEnabled}
+              name="bonusLateEntriesEnabled"
+              type="checkbox"
+              value="on"
+            />
+            <div className="admin-bonus-option-copy">
+              <strong>Autoriser le podium apres le debut</strong>
+              <small>Concerne uniquement le podium bonus, pas les pronos de matchs.</small>
+            </div>
+          </label>
+        </div>
+      </div>
 
       <p className="readonly-notice">
-        Le bonus activé apparaît dans la page pronos avant le début de la
-        compétition.
+        Le bonus peut etre active a tout moment. Quand l'option ci-dessus est
+        cochee, les joueurs peuvent encore enregistrer leur podium meme si la
+        competition est deja {competition.status === "OPEN" || competition.status === "LIVE" ? "commencee" : "ouverte"}.
       </p>
 
-      <button className="btn btn-secondary" disabled={pending} type="submit">
+      <button className="btn btn-primary" disabled={pending} type="submit">
         {pending ? "Sauvegarde..." : "Mettre à jour"}
       </button>
 

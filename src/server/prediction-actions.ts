@@ -173,6 +173,7 @@ export async function saveBonusPredictionAction(
       slug: true,
       status: true,
       bonusEnabled: true,
+      bonusLateEntriesEnabled: true,
       startsAt: true,
       teams: {
         select: {
@@ -194,7 +195,10 @@ export async function saveBonusPredictionAction(
     return { error: "La compétition est fermée aux pronos." };
   }
 
-  if (!competition.startsAt || competition.startsAt.getTime() <= Date.now()) {
+  if (
+    !competition.bonusLateEntriesEnabled &&
+    (!competition.startsAt || competition.startsAt.getTime() <= Date.now())
+  ) {
     return { error: "Le bonus podium est verrouillé." };
   }
 

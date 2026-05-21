@@ -226,7 +226,9 @@ export function BonusPredictionForm({
 
         {isLocked ? (
           <p className="readonly-notice">
-            Le bonus podium est verrouillé dès le début de la compétition.
+            {bonus.allowLateEntries
+              ? "Le bonus podium est indisponible tant que la competition est fermee."
+              : "Le bonus podium est verrouille des le debut de la competition."}
           </p>
         ) : null}
       </form>

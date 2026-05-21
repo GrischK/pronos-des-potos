@@ -40,6 +40,7 @@ const updateCompetitionKindSchema = z.object({
 const updateCompetitionBonusSchema = z.object({
   competitionId: z.string().min(1),
   bonusEnabled: z.enum(["on"]).optional(),
+  bonusLateEntriesEnabled: z.enum(["on"]).optional(),
 });
 
 function slugify(value: string) {
@@ -442,6 +443,7 @@ export async function updateCompetitionBonusAction(
   }
 
   const enableBonus = parsed.data.bonusEnabled === "on";
+  const enableLateEntries = parsed.data.bonusLateEntriesEnabled === "on";
 
   await prisma.competition.update({
     where: {
@@ -449,6 +451,7 @@ export async function updateCompetitionBonusAction(
     },
     data: {
       bonusEnabled: enableBonus,
+      bonusLateEntriesEnabled: enableLateEntries,
     },
   });
 
@@ -457,7 +460,11 @@ export async function updateCompetitionBonusAction(
   updateTag(`competition:${competition.slug}`);
 
   return {
-    success: enableBonus ? "Bonus podium activé." : "Bonus podium désactivé.",
+    success: enableBonus
+      ? enableLateEntries
+        ? "Bonus podium activé, avec pronos autorisés après le début."
+        : "Bonus podium activé."
+      : "Bonus podium désactivé.",
   };
 }
 

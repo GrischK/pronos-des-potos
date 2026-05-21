@@ -83,7 +83,7 @@ export default async function AdminPage() {
                           required
                         />
                       </label>
-                      <button className="btn btn-secondary" type="submit">
+                      <button className="btn btn-primary" type="submit">
                         Renommer
                       </button>
                     </form>
@@ -105,7 +105,7 @@ export default async function AdminPage() {
                           <option value="OTHER">Autre</option>
                         </select>
                       </label>
-                      <button className="btn btn-secondary" type="submit">
+                      <button className="btn btn-primary" type="submit">
                         Modifier
                       </button>
                     </form>
@@ -113,6 +113,8 @@ export default async function AdminPage() {
                       competition={{
                         id: competition.id,
                         bonusEnabled: competition.bonusEnabled,
+                        bonusLateEntriesEnabled: competition.bonusLateEntriesEnabled,
+                        status: competition.status,
                       }}
                     />
                     <div className="admin-item-actions">
@@ -125,7 +127,7 @@ export default async function AdminPage() {
                         <button
                           className={
                             competition.status === "OPEN"
-                              ? "btn btn-warning"
+                              ? "btn btn-important"
                               : "btn btn-primary"
                           }
                           type="submit"
