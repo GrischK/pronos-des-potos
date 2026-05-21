@@ -82,7 +82,7 @@ export function AndroidInstallPrompt({ variant = "default" }: AndroidInstallProm
       </p>
       <button
         className={
-          isCompact ? "btn btn-secondary landing-install-button" : "btn btn-secondary auth-submit"
+          isCompact ? "btn btn-primary landing-install-button" : "btn btn-secondary auth-submit"
         }
         disabled={!deferredPrompt || isInstalling}
         type="button"
