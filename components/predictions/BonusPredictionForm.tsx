@@ -1,7 +1,7 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
-import { useActionState, useState } from "react";
+import { Check, ChevronDown } from "lucide-react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 import {
   saveBonusPredictionAction,
@@ -121,8 +121,14 @@ export function BonusPredictionForm({
     saveBonusPredictionAction,
     initialState,
   );
+  const lastHandledSuccessState = useRef<PredictionActionState | null>(null);
   const [openField, setOpenField] = useState<BonusField | null>(null);
   const [values, setValues] = useState<Record<BonusField, string>>({
+    winnerTeamId: bonus.prediction?.winnerTeamId ?? "",
+    secondTeamId: bonus.prediction?.secondTeamId ?? "",
+    thirdTeamId: bonus.prediction?.thirdTeamId ?? "",
+  });
+  const [savedValues, setSavedValues] = useState<Record<BonusField, string>>({
     winnerTeamId: bonus.prediction?.winnerTeamId ?? "",
     secondTeamId: bonus.prediction?.secondTeamId ?? "",
     thirdTeamId: bonus.prediction?.thirdTeamId ?? "",
@@ -130,11 +136,26 @@ export function BonusPredictionForm({
   const isLocked = !bonus.canPredict;
   const selectedIds = new Set(Object.values(values).filter(Boolean));
   const isComplete = Object.values(values).every(Boolean);
+  const hasSavedPodium = Object.values(savedValues).every(Boolean);
+  const isDirty =
+    values.winnerTeamId !== savedValues.winnerTeamId ||
+    values.secondTeamId !== savedValues.secondTeamId ||
+    values.thirdTeamId !== savedValues.thirdTeamId;
+  const showSavedState = hasSavedPodium && !isDirty;
   const summaryLabel = isLocked
     ? "Verrouillé"
-    : isComplete
+    : showSavedState
       ? "Podium enregistré"
       : "À compléter";
+
+  useEffect(() => {
+    if (!state.success || lastHandledSuccessState.current === state) {
+      return;
+    }
+
+    lastHandledSuccessState.current = state;
+    setSavedValues(values);
+  }, [state, values]);
 
   if (!bonus.enabled) {
     return null;
@@ -182,14 +203,25 @@ export function BonusPredictionForm({
 
         <div className="prediction-actions">
           <button
-            className="btn btn-primary"
-            disabled={isLocked || pending || !isComplete}
+            aria-label={showSavedState ? "Podium enregistré" : "Enregistrer le podium"}
+            className={`btn ${showSavedState ? "btn-saved" : "btn-primary"}`}
+            disabled={isLocked || pending || !isComplete || showSavedState}
             type="submit"
           >
-            {pending ? "Enregistrement..." : "Enregistrer le podium"}
+            {pending ? (
+              "Enregistrement..."
+            ) : showSavedState ? (
+              <>
+                <span aria-hidden="true" className="btn-check-icon">
+                  <Check size={14} strokeWidth={3} />
+                </span>
+                Podium enregistré
+              </>
+            ) : (
+              "Enregistrer le podium"
+            )}
           </button>
           {state.error ? <span className="form-error">{state.error}</span> : null}
-          {state.success ? <span className="form-success">{state.success}</span> : null}
         </div>
 
         {isLocked ? (

@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 
-import {
-  stopLiveScoreCronIfIdle,
-  syncLiveScores,
-} from "@/src/server/live-score-sync";
+import { prepareLiveScoreCron } from "@/src/server/live-score-sync";
 
 export const dynamic = "force-dynamic";
 
@@ -26,13 +23,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const result = await syncLiveScores();
-  const scheduler = await stopLiveScoreCronIfIdle();
+  const result = await prepareLiveScoreCron();
 
-  return NextResponse.json({
-    ...result,
-    scheduler,
-  }, {
-    status: result.errors.length > 0 ? 207 : 200,
-  });
+  return NextResponse.json(result);
 }

@@ -82,6 +82,29 @@ local/dev : npm run db:migrate
 prod      : npx prisma migrate deploy
 ```
 
+## Cron de scores live
+
+Le cron de scores live utilise deux jobs `cron-job.org` :
+
+- un job quotidien qui appelle `/api/cron/live-scores/prepare` vers 00:00, heure de Paris
+- un job minute qui appelle `/api/cron/live-scores`, desactive par defaut
+
+Le job quotidien cherche les matchs a suivre dans les prochaines heures, configure le job minute uniquement sur les heures utiles, puis l'active. Apres chaque synchronisation, le job minute se desactive automatiquement s'il n'y a plus de match `SCHEDULED` ou `LIVE` dans la fenetre de suivi.
+
+Variables requises en production :
+
+```txt
+CRON_SECRET=...
+CRON_JOB_ORG_API_KEY=...
+CRON_JOB_ORG_LIVE_SCORES_JOB_ID=...
+```
+
+Les deux jobs doivent envoyer l'en-tete HTTP :
+
+```txt
+Authorization: Bearer <CRON_SECRET>
+```
+
 ## Scripts utiles
 
 ```bash

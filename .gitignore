@@ -21,6 +21,9 @@ yarn-error.log*
 pnpm-debug.log*
 tsconfig.tsbuildinfo
 
+# database dumps
+*.dump
+
 # os / editors
 .DS_Store
 .idea/

@@ -939,6 +939,10 @@
     transform: none;
   }
 
+  .btn-saved:disabled {
+    @apply cursor-default opacity-100;
+  }
+
   .btn-check-icon {
     @apply inline-flex h-5 w-5 items-center justify-center rounded-full mr-2;
     background: color-mix(in srgb, var(--pitch) 14%, white);
@@ -3546,6 +3550,32 @@
     background: color-mix(in srgb, var(--pitch) 22%, var(--surface));
     color: var(--foreground);
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pitch) 30%, transparent);
+  }
+
+  :root[data-theme="dark"] .bonus-team-picker-trigger,
+  :root[data-theme="dark"] .bonus-team-picker-menu {
+    border-color: color-mix(in srgb, white 12%, var(--line));
+    background: color-mix(in srgb, var(--surface-alt) 72%, var(--surface));
+    color: var(--foreground);
+  }
+
+  :root[data-theme="dark"] .bonus-team-picker-trigger svg {
+    color: var(--muted);
+  }
+
+  :root[data-theme="dark"] .bonus-team-picker-option {
+    color: var(--foreground);
+  }
+
+  :root[data-theme="dark"] .bonus-team-picker-option:hover:not(:disabled),
+  :root[data-theme="dark"] .bonus-team-picker-option[aria-selected="true"] {
+    background: color-mix(in srgb, var(--pitch) 18%, var(--surface));
+  }
+
+  :root[data-theme="dark"] .bonus-team-fallback {
+    border-color: color-mix(in srgb, white 12%, var(--line));
+    background: var(--surface);
+    color: var(--foreground);
   }
 
   :root[data-theme="dark"] .highlight-match-card-cta {
