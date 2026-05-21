@@ -82,6 +82,36 @@ local/dev : npm run db:migrate
 prod      : npx prisma migrate deploy
 ```
 
+### Appliquer les migrations sur la base de production
+
+Quand le code est pousse mais que la base de production n'a pas encore ete mise a jour, il faut appliquer les migrations Prisma sur la vraie DB prod avant de compter sur le nouveau schema.
+
+Procedure recommandeee :
+
+```bash
+vercel env pull .env.production.local --environment=production
+PRISMA_ENV_FILE=.env.production.local npx prisma migrate deploy
+```
+
+Verification rapide de la cible avant execution :
+
+```bash
+PRISMA_ENV_FILE=.env.production.local node -e 'require("dotenv").config({ path: process.env.PRISMA_ENV_FILE, override: true }); const redact = (value) => value?.replace(/:\/\/([^:]+):([^@]+)@/, "://$1:***@"); console.log(redact(process.env.DATABASE_URL)); console.log(redact(process.env.POSTGRES_PRISMA_URL));'
+```
+
+Puis verifier l'etat :
+
+```bash
+PRISMA_ENV_FILE=.env.production.local npx prisma migrate status
+```
+
+Important :
+
+- ne pas utiliser `prisma migrate dev` sur la base de production
+- garder `.env.local` pour la base de dev
+- utiliser `.env.production.local` uniquement pour lancer les migrations prod
+- ne pas `source` un fichier `.env` contenant des URLs Postgres avec `&`, le shell les interprete comme des commandes en arriere-plan
+
 ## Cron de scores live
 
 Le cron de scores live utilise deux jobs `cron-job.org` :
