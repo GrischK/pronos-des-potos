@@ -59,7 +59,7 @@ export function AppShell({ children, showAdminNav = false }: AppShellProps) {
             </span>
             <span>
               <span className="brand-name">Pronos des potos</span>
-              <span className="brand-tagline">Tournois entre amis</span>
+              <span className="brand-tagline">Le terrain des classements</span>
             </span>
           </Link>
 
