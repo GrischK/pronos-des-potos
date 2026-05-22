@@ -77,7 +77,7 @@ export async function sendPasswordResetEmail(input: {
   resetToken: string;
 }) {
   const resetUrl = new URL(`/reset-password?token=${encodeURIComponent(input.resetToken)}`, getAppBaseUrl()).toString();
-  const logoUrl = new URL("/logo.png", getAppBaseUrl()).toString();
+  const logoUrl = new URL("/android-chrome-192x192.png", getAppBaseUrl()).toString();
 
   await sendViaBrevoApi({
     to: {
@@ -88,7 +88,7 @@ export async function sendPasswordResetEmail(input: {
       <div style="margin:0;background:#f5f7f1;padding:32px 16px;font-family:Arial,sans-serif;color:#102014;">
         <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #dce4d7;border-radius:24px;overflow:hidden;box-shadow:0 16px 40px rgba(16,32,20,.08);">
           <div style="padding:28px 28px 18px;text-align:center;background:linear-gradient(180deg,#f2f8ef 0%,#ffffff 100%);">
-            <img src="${logoUrl}" alt="Pronos des potos" width="92" height="127" style="display:block;margin:0 auto 12px;width:92px;height:auto;border-radius:20px;" />
+            <img src="${logoUrl}" alt="Pronos des potos" width="92" height="92" style="display:block;margin:0 auto 12px;width:92px;height:92px;border-radius:24px;" />
             <p style="margin:0;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#4f6b55;font-weight:700;">Pronos des potos</p>
             <h1 style="margin:12px 0 0;font-size:26px;line-height:1.15;color:#0f2715;">Bon retour sur les terrains</h1>
           </div>
