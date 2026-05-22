@@ -27,6 +27,26 @@ npm run dev
 
 `vercel env pull .env.local` recupere les variables du projet Vercel, dont `DATABASE_URL` pour Neon.
 
+Si ton shell garde d'anciennes variables Postgres exportees, purge-les avant de relancer le dev local :
+
+```bash
+unset DATABASE_URL
+unset POSTGRES_PRISMA_URL
+unset DATABASE_URL_UNPOOLED
+unset POSTGRES_URL
+unset POSTGRES_URL_NON_POOLING
+rm -rf .next
+npm run dev
+```
+
+Verification rapide :
+
+```bash
+printenv | grep DATABASE_URL
+printenv | grep POSTGRES_PRISMA_URL
+printenv | grep POSTGRES_URL
+```
+
 ## Base de donnees et migrations
 
 Le schema Prisma est dans `prisma/schema.prisma`.
