@@ -27,6 +27,7 @@ export type LeaderboardData = {
   kind: string;
   emblemUrl: string | null;
   bonusEnabled: boolean;
+  bonusResultKnown: boolean;
   participantCount: number;
   official: LeaderboardSnapshot;
   live: LeaderboardSnapshot;
@@ -657,6 +658,13 @@ export async function getLeaderboardData(
       : null,
     competition.bonusEnabled,
   );
+  const bonusResultKnown =
+    competition.bonusEnabled &&
+    Boolean(
+      competition.bonusWinnerTeamId ||
+        competition.bonusSecondTeamId ||
+        competition.bonusThirdTeamId,
+    );
 
   const officialMatches = competition.matches.filter(
     (match) => match.status === "FINISHED",
@@ -698,6 +706,7 @@ export async function getLeaderboardData(
     kind: competition.kind,
     emblemUrl: competition.emblemUrl,
     bonusEnabled: competition.bonusEnabled,
+    bonusResultKnown,
     participantCount: competition.players.length,
     official: buildLeaderboardSnapshot(
       competition.players,

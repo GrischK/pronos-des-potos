@@ -127,6 +127,14 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
       label: "Rang live",
       value: profile.stats.liveRank ? `#${profile.stats.liveRank}` : "-",
     },
+    ...(profile.stats.bonusResultKnown
+      ? [
+          {
+            label: "Bonus podium",
+            value: getPointsLabel(profile.stats.bonusPoints),
+          },
+        ]
+      : []),
     {
       label: "Participation",
       value: `${profile.stats.participationRate}%`,

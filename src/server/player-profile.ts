@@ -46,6 +46,8 @@ export type PlayerProfileData = {
     officialRank: number | null;
     liveRank: number | null;
     points: number;
+    bonusPoints: number;
+    bonusResultKnown: boolean;
     predictedMatches: number;
     exactUnique: number;
     exactShared: number;
@@ -238,6 +240,7 @@ export async function getPlayerProfileData(
 
   const officialRank = leaderboard.official.rows.find((row) => row.userId === userId);
   const liveRank = leaderboard.live.rows.find((row) => row.userId === userId);
+  const bonusPoints = officialRank?.bonusPoints ?? liveRank?.bonusPoints ?? 0;
 
   return {
     competition: {
@@ -256,6 +259,8 @@ export async function getPlayerProfileData(
       officialRank: officialRank?.rank ?? null,
       liveRank: liveRank?.rank ?? null,
       points,
+      bonusPoints,
+      bonusResultKnown: leaderboard.bonusResultKnown,
       predictedMatches,
       exactUnique,
       exactShared,

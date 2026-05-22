@@ -97,9 +97,11 @@ function PlayerAvatar({
 function LeaderboardTable({
   slug,
   snapshot,
+  showBonusPoints,
 }: {
   slug: string;
   snapshot: LeaderboardSnapshot;
+  showBonusPoints: boolean;
 }) {
   if (snapshot.rows.length === 0) {
     return (
@@ -118,6 +120,7 @@ function LeaderboardTable({
             <th>Rang</th>
             <th>Joueur</th>
             <th>Pts</th>
+            {showBonusPoints ? <th>Bonus</th> : null}
             <th>Pronos</th>
             <th>Exact unique</th>
             <th>Exact</th>
@@ -141,6 +144,7 @@ function LeaderboardTable({
               <td>
                 <strong>{row.points}</strong>
               </td>
+              {showBonusPoints ? <td>{row.bonusPoints}</td> : null}
               <td>{row.predictedMatches}</td>
               <td>{row.exactUnique}</td>
               <td>{row.exactShared}</td>
@@ -376,7 +380,11 @@ export function LeaderboardTabs({
               : "Basé uniquement sur les matchs terminés."}
           </p>
         </div>
-        <LeaderboardTable slug={leaderboard.slug} snapshot={snapshot} />
+        <LeaderboardTable
+          slug={leaderboard.slug}
+          snapshot={snapshot}
+          showBonusPoints={leaderboard.bonusResultKnown}
+        />
       </section>
 
       <div className="actions mb-4">
