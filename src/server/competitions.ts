@@ -753,7 +753,7 @@ export async function getCompetitionBySlug(slug: string) {
   const { prisma } = await import("@/src/db/prisma");
   const now = new Date();
   const urgentPredictionWindowEnd = new Date(
-    now.getTime() + 10 * 24 * 60 * 60 * 1000,
+    now.getTime() + 7 * 24 * 60 * 60 * 1000,
   );
 
   return prisma.competition.findUnique({
