@@ -45,6 +45,31 @@ export default async function TousLesPronosPage({
           >
             Retour à la compétition
           </Link>
+          {competition.bonusEnabled ? (
+            competition.hasBonusPrediction ? (
+              <Link
+                className="btn btn-secondary competition-back-button"
+                href={`/competitions/${slug}/tous-les-pronos/podium-bonus`}
+              >
+                Voir les pronos bonus
+              </Link>
+            ) : (
+              <div className="bonus-pronos-gate competition-back-button" aria-live="polite">
+                <button
+                  className="btn btn-secondary competition-back-button"
+                  disabled
+                  aria-describedby="bonus-pronos-tooltip"
+                  title="Enregistre d'abord ton podium bonus pour voir celui des autres."
+                  type="button"
+                >
+                  Voir les pronos bonus
+                </button>
+                <span className="bonus-pronos-tooltip" id="bonus-pronos-tooltip" role="tooltip">
+                  Disponible après avoir enregistré ton podium bonus.
+                </span>
+              </div>
+            )
+          ) : null}
         </div>
       </section>
 

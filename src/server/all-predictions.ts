@@ -55,6 +55,16 @@ export async function getAllPredictionsPageData(slug: string) {
       slug: true,
       kind: true,
       emblemUrl: true,
+      bonusEnabled: true,
+      bonusPredictions: {
+        where: {
+          userId: user.id,
+        },
+        select: {
+          id: true,
+        },
+        take: 1,
+      },
       matches: {
         orderBy: [{ kickoffAt: "asc" }, { createdAt: "asc" }],
         select: {
@@ -111,6 +121,8 @@ export async function getAllPredictionsPageData(slug: string) {
     slug: competition.slug,
     kind: competition.kind,
     emblemUrl: competition.emblemUrl,
+    bonusEnabled: competition.bonusEnabled,
+    hasBonusPrediction: competition.bonusPredictions.length > 0,
     matches: competition.matches.map((match): PublicPredictionMatch => ({
       id: match.id,
       kickoffAt: match.kickoffAt.toISOString(),
