@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { ArrowRight, Shirt, TriangleAlert } from "lucide-react";
+import { ArrowRight, Shirt } from "lucide-react";
 
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
+import { UrgentPredictionBadge } from "@/components/competitions/UrgentPredictionBadge";
 import { competitionKindLabels } from "@/src/domain/competition-kind";
 import { getLiveMatchStatusLabel, getMatchStatusLabel } from "@/src/domain/match-status";
 import {
@@ -298,23 +299,14 @@ export default async function CompetitionsPage() {
                   </span>
                   <span className="competition-card-stat competition-card-stat-pending">
                     {competition.urgentPendingPredictionCount > 0 ? (
-                      <span className="competition-action-alert-wrap competition-card-stat-alert-wrap">
-                        <span
-                          aria-label={
-                            competition.urgentPendingPredictionCount === 1
-                              ? "1 prono urgent à poser dans les 7 prochains jours"
-                              : `${competition.urgentPendingPredictionCount} pronos urgents à poser dans les 7 prochains jours`
-                          }
-                          className="competition-action-alert"
-                        >
-                          <TriangleAlert aria-hidden="true" size={14} strokeWidth={2.6} />
-                        </span>
-                        <span className="competition-action-alert-tooltip" role="tooltip">
-                          {competition.urgentPendingPredictionCount === 1
+                      <UrgentPredictionBadge
+                        className="competition-card-stat-alert-wrap"
+                        label={
+                          competition.urgentPendingPredictionCount === 1
                             ? "1 prono urgent à poser dans les 7 prochains jours"
-                            : `${competition.urgentPendingPredictionCount} pronos urgents à poser dans les 7 prochains jours`}
-                        </span>
-                      </span>
+                            : `${competition.urgentPendingPredictionCount} pronos urgents à poser dans les 7 prochains jours`
+                        }
+                      />
                     ) : null}
                     <strong>{competition.missingPredictionCount}</strong>
                     Pronos à poser
@@ -338,17 +330,10 @@ export default async function CompetitionsPage() {
         <section className="page-section">
           <div className="next-prediction-panel">
             {urgentPendingPredictionCount > 0 ? (
-              <span className="competition-action-alert-wrap next-prediction-alert-wrap">
-                <span
-                  aria-label={urgentPredictionLabel}
-                  className="competition-action-alert"
-                >
-                  <TriangleAlert aria-hidden="true" size={14} strokeWidth={2.6} />
-                </span>
-                <span className="competition-action-alert-tooltip" role="tooltip">
-                  {urgentPredictionLabel}
-                </span>
-              </span>
+              <UrgentPredictionBadge
+                className="next-prediction-alert-wrap"
+                label={urgentPredictionLabel}
+              />
             ) : null}
             <div>
               <p className="badge badge-live">Prochain prono à poser</p>

@@ -1497,7 +1497,7 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .competition-card-stats span {
+  .competition-card-stats > span {
     @apply grid min-w-0 content-start justify-items-start gap-1 rounded-lg px-3 py-2 text-left text-xs font-bold leading-tight text-muted;
     border: 1px solid color-mix(in srgb, var(--pitch) 10%, var(--line));
   }
@@ -1510,8 +1510,8 @@
     @apply -right-2 -top-2;
   }
 
-  .competition-card-stat-pending:hover .competition-action-alert-tooltip,
-  .competition-card-stat-pending:focus-within .competition-action-alert-tooltip {
+  .competition-card-stat-alert-wrap:hover .competition-action-alert-tooltip,
+  .competition-card-stat-alert-wrap:focus-within .competition-action-alert-tooltip {
     opacity: 1;
     transform: translateY(0);
   }
@@ -1553,8 +1553,8 @@
     @apply -right-3 -top-3;
   }
 
-  .next-prediction-panel:hover .competition-action-alert-tooltip,
-  .next-prediction-panel:focus-within .competition-action-alert-tooltip {
+  .next-prediction-alert-wrap:hover .competition-action-alert-tooltip,
+  .next-prediction-alert-wrap:focus-within .competition-action-alert-tooltip {
     opacity: 1;
     transform: translateY(0);
   }
@@ -1728,7 +1728,7 @@
   }
 
   .competition-action-alert-wrap {
-    @apply pointer-events-none absolute -right-3 -top-3 z-10;
+    @apply absolute -right-3 -top-3 z-10;
   }
 
   .competition-action-alert {
@@ -1757,9 +1757,8 @@
       transform 140ms ease;
   }
 
-  .competition-action:hover .competition-action-alert-tooltip,
-  .competition-action:focus-visible .competition-action-alert-tooltip,
-  .competition-action:focus-within .competition-action-alert-tooltip {
+  .competition-action-alert-wrap:hover .competition-action-alert-tooltip,
+  .competition-action-alert-wrap:focus-within .competition-action-alert-tooltip {
     opacity: 1;
     transform: translateY(0);
   }
@@ -3239,7 +3238,7 @@
 
   :root[data-theme="dark"] .nav-link-mobile,
   :root[data-theme="dark"] .competition-kind-badge,
-  :root[data-theme="dark"] .competition-card-stats span,
+  :root[data-theme="dark"] .competition-card-stats > span,
   :root[data-theme="dark"] .highlight-match-card,
   :root[data-theme="dark"] .leaderboard-info-button,
   :root[data-theme="dark"] .prediction-inputs input,
@@ -3632,7 +3631,7 @@
   }
 
   :root[data-theme="dark"] .competition-card-summary span,
-  :root[data-theme="dark"] .competition-card-stats span {
+  :root[data-theme="dark"] .competition-card-stats > span {
     border-color: color-mix(in srgb, white 12%, var(--line));
     background:
       linear-gradient(
@@ -4131,11 +4130,11 @@
     @apply gap-1.5;
   }
 
-  .competition-card-stats span {
+  .competition-card-stats > span {
     @apply px-2 py-2 text-[0.68rem];
   }
 
-  .competition-card-stats span strong {
+  .competition-card-stats > span strong {
     @apply text-[1.15rem] text-foreground;
   }
 

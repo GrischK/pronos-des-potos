@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  TriangleAlert,
   CalendarDays,
   ChevronRight,
   PencilLine,
@@ -11,6 +10,7 @@ import { notFound } from "next/navigation";
 
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { CompetitionHighlights } from "@/components/competitions/CompetitionHighlights";
+import { UrgentPredictionBadge } from "@/components/competitions/UrgentPredictionBadge";
 import { PageHeader } from "@/components/PageHeader";
 import {
   getCompetitionHostCountries,
@@ -83,17 +83,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
             href={`/competitions/${competition.slug}/pronos`}
           >
             {competition.urgentPendingPredictionCount > 0 ? (
-              <span className="competition-action-alert-wrap">
-                <span
-                  aria-label={urgentPredictionLabel}
-                  className="competition-action-alert"
-                >
-                  <TriangleAlert aria-hidden="true" size={14} strokeWidth={2.6} />
-                </span>
-                <span className="competition-action-alert-tooltip" role="tooltip">
-                  {urgentPredictionLabel}
-                </span>
-              </span>
+              <UrgentPredictionBadge label={urgentPredictionLabel} />
             ) : null}
             <span className="competition-action-icon">
               <PencilLine aria-hidden="true" size={20} strokeWidth={2.8} />
