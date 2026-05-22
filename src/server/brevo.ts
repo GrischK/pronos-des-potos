@@ -94,7 +94,7 @@ export async function sendPasswordResetEmail(input: {
           </div>
           <div style="padding:0 28px 28px;font-size:15px;line-height:1.7;color:#213126;">
             <p style="margin:0 0 18px;">Tu as demandé une réinitialisation de mot de passe pour ton compte.</p>
-            <p style="margin:0 0 22px;">
+            <p style="margin:0 0 22px;text-align:center;">
               <a href="${resetUrl}" style="display:inline-block;padding:14px 20px;border-radius:12px;background:#166534;color:#ffffff;text-decoration:none;font-weight:700;">Réinitialiser mon mot de passe</a>
             </p>
             <p style="margin:0 0 8px;">Si le bouton ne fonctionne pas, copie ce lien dans ton navigateur :</p>
@@ -102,7 +102,6 @@ export async function sendPasswordResetEmail(input: {
               <a href="${resetUrl}" style="color:#0f5a31;">${resetUrl}</a>
             </p>
             <p style="margin:0;color:#5d6c61;font-size:13px;">Ce lien expire dans 1 heure.</p>
-            <p style="margin:18px 0 0;color:#5d6c61;font-size:13px;">Bon retour sur les terrains.</p>
           </div>
         </div>
       </div>
