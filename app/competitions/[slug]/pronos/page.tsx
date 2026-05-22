@@ -60,6 +60,7 @@ export default async function PronosticsPage({ params }: PronosticsPageProps) {
 
         <BonusPredictionForm
           bonus={competition.bonus}
+          competitionKind={competition.kind}
           competitionId={competition.id}
           slug={competition.slug}
         />

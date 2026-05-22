@@ -11,6 +11,7 @@ import type { PredictionBonusData } from "@/src/server/predictions";
 
 type BonusPredictionFormProps = {
   competitionId: string;
+  competitionKind: string;
   slug: string;
   bonus: PredictionBonusData;
 };
@@ -120,6 +121,7 @@ function BonusTeamPicker({
 
 export function BonusPredictionForm({
   competitionId,
+  competitionKind,
   slug,
   bonus,
 }: BonusPredictionFormProps) {
@@ -153,6 +155,10 @@ export function BonusPredictionForm({
     : showSavedState
       ? "Podium enregistré"
       : "À compléter";
+  const visibleBonusFields =
+    competitionKind === "CHAMPIONS_LEAGUE"
+      ? bonusFields.filter((field) => field.name !== "thirdTeamId")
+      : bonusFields;
 
   useEffect(() => {
     if (!state.success || lastHandledSuccessState.current === state) {
@@ -168,9 +174,9 @@ export function BonusPredictionForm({
       ...values,
       [field]: teamId,
     };
-    const currentIndex = bonusFields.findIndex((entry) => entry.name === field);
+    const currentIndex = visibleBonusFields.findIndex((entry) => entry.name === field);
     const nextEmptyField =
-      bonusFields
+      visibleBonusFields
         .slice(currentIndex + 1)
         .find((entry) => !nextValues[entry.name])?.name ?? null;
 
@@ -205,7 +211,7 @@ export function BonusPredictionForm({
         <input name="slug" type="hidden" value={slug} />
 
         <div className="bonus-podium-grid">
-          {bonusFields.map((field) => (
+          {visibleBonusFields.map((field) => (
             <BonusTeamPicker
               disabled={isLocked || pending}
               field={field}
