@@ -646,9 +646,9 @@ export async function getLeaderboardData(
   const bonusPointsByUser = buildBonusPointsByUser(
     competition.bonusPredictions,
     competition.bonusEnabled &&
-      competition.bonusWinnerTeamId &&
-      competition.bonusSecondTeamId &&
-      competition.bonusThirdTeamId
+      (competition.bonusWinnerTeamId ||
+        competition.bonusSecondTeamId ||
+        competition.bonusThirdTeamId)
       ? {
           winnerTeamId: competition.bonusWinnerTeamId,
           secondTeamId: competition.bonusSecondTeamId,
@@ -796,9 +796,9 @@ export async function getLeaderboardProgressData(
   const bonusPointsByUser = buildBonusPointsByUser(
     competition.bonusPredictions,
     competition.bonusEnabled &&
-      competition.bonusWinnerTeamId &&
-      competition.bonusSecondTeamId &&
-      competition.bonusThirdTeamId
+      (competition.bonusWinnerTeamId ||
+        competition.bonusSecondTeamId ||
+        competition.bonusThirdTeamId)
       ? {
           winnerTeamId: competition.bonusWinnerTeamId,
           secondTeamId: competition.bonusSecondTeamId,

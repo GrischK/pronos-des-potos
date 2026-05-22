@@ -4,9 +4,9 @@ import { computeBonusPoints, type BonusPodiumPick } from "@/src/domain/bonus-sco
 
 export type BonusPredictionRow = {
   userId: string;
-  winnerTeamId: string;
-  secondTeamId: string;
-  thirdTeamId: string;
+  winnerTeamId: string | null;
+  secondTeamId: string | null;
+  thirdTeamId: string | null;
 };
 
 export function buildBonusPointsByUser(

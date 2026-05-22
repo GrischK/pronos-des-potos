@@ -35,9 +35,9 @@ export type CompetitionTeam = {
 };
 
 export type CompetitionBonusPrediction = {
-  winnerTeamId: string;
-  secondTeamId: string;
-  thirdTeamId: string;
+  winnerTeamId: string | null;
+  secondTeamId: string | null;
+  thirdTeamId: string | null;
 };
 
 export type PredictionBonusData = {
@@ -159,9 +159,9 @@ export async function getPredictionPageData(slug: string) {
       prediction: competition.bonusPredictions[0] ?? null,
       result:
         competition.bonusEnabled &&
-        competition.bonusWinnerTeamId &&
-        competition.bonusSecondTeamId &&
-        competition.bonusThirdTeamId
+        (competition.bonusWinnerTeamId ||
+          competition.bonusSecondTeamId ||
+          competition.bonusThirdTeamId)
           ? {
               winnerTeamId: competition.bonusWinnerTeamId,
               secondTeamId: competition.bonusSecondTeamId,

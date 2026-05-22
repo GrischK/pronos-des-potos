@@ -497,9 +497,9 @@ export async function getCompetitionsOverview() {
       const bonusPointsByUser = buildBonusPointsByUser(
         competition.bonusPredictions,
         competition.bonusEnabled &&
-          competition.bonusWinnerTeamId &&
-          competition.bonusSecondTeamId &&
-          competition.bonusThirdTeamId
+          (competition.bonusWinnerTeamId ||
+            competition.bonusSecondTeamId ||
+            competition.bonusThirdTeamId)
           ? {
               winnerTeamId: competition.bonusWinnerTeamId,
               secondTeamId: competition.bonusSecondTeamId,

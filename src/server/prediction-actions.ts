@@ -26,21 +26,45 @@ const predictionSchema = z.object({
     .max(99, "Score extérieur invalide."),
 });
 
+const optionalTeamId = z.preprocess(
+  (value) => {
+    if (typeof value !== "string") {
+      return value;
+    }
+
+    const trimmed = value.trim();
+    return trimmed === "" ? undefined : trimmed;
+  },
+  z.string().min(1).optional(),
+);
+
 const bonusPredictionSchema = z
   .object({
     competitionId: z.string().min(1),
     slug: z.string().min(1),
-    winnerTeamId: z.string().min(1),
-    secondTeamId: z.string().min(1),
-    thirdTeamId: z.string().min(1),
+    winnerTeamId: optionalTeamId,
+    secondTeamId: optionalTeamId,
+    thirdTeamId: optionalTeamId,
   })
   .refine(
     (value) =>
-      value.winnerTeamId !== value.secondTeamId &&
-      value.winnerTeamId !== value.thirdTeamId &&
-      value.secondTeamId !== value.thirdTeamId,
+      Boolean(value.winnerTeamId || value.secondTeamId || value.thirdTeamId),
     {
-      message: "Le podium bonus doit contenir trois équipes distinctes.",
+      message: "Choisis au moins une equipe pour le bonus podium.",
+    },
+  )
+  .refine(
+    (value) => {
+      const selectedIds = [
+        value.winnerTeamId,
+        value.secondTeamId,
+        value.thirdTeamId,
+      ].filter((teamId): teamId is string => Boolean(teamId));
+
+      return new Set(selectedIds).size === selectedIds.length;
+    },
+    {
+      message: "Le podium bonus ne peut pas contenir deux fois la meme equipe.",
     },
   );
 
@@ -204,11 +228,13 @@ export async function saveBonusPredictionAction(
 
   const teamIds = new Set(competition.teams.map((team) => team.id));
 
-  if (
-    !teamIds.has(parsed.data.winnerTeamId) ||
-    !teamIds.has(parsed.data.secondTeamId) ||
-    !teamIds.has(parsed.data.thirdTeamId)
-  ) {
+  const selectedIds = [
+    parsed.data.winnerTeamId,
+    parsed.data.secondTeamId,
+    parsed.data.thirdTeamId,
+  ].filter((teamId): teamId is string => Boolean(teamId));
+
+  if (!selectedIds.every((teamId) => teamIds.has(teamId))) {
     return { error: "Le podium doit utiliser des équipes de la compétition." };
   }
 
@@ -221,8 +247,16 @@ export async function saveBonusPredictionAction(
         },
       },
       create: {
-        userId: user.id,
-        competitionId: competition.id,
+        user: {
+          connect: {
+            id: user.id,
+          },
+        },
+        competition: {
+          connect: {
+            id: competition.id,
+          },
+        },
       },
       update: {},
     }),
@@ -236,14 +270,14 @@ export async function saveBonusPredictionAction(
       create: {
         userId: user.id,
         competitionId: competition.id,
-        winnerTeamId: parsed.data.winnerTeamId,
-        secondTeamId: parsed.data.secondTeamId,
-        thirdTeamId: parsed.data.thirdTeamId,
+        winnerTeamId: parsed.data.winnerTeamId ?? null,
+        secondTeamId: parsed.data.secondTeamId ?? null,
+        thirdTeamId: parsed.data.thirdTeamId ?? null,
       },
       update: {
-        winnerTeamId: parsed.data.winnerTeamId,
-        secondTeamId: parsed.data.secondTeamId,
-        thirdTeamId: parsed.data.thirdTeamId,
+        winnerTeamId: parsed.data.winnerTeamId ?? null,
+        secondTeamId: parsed.data.secondTeamId ?? null,
+        thirdTeamId: parsed.data.thirdTeamId ?? null,
       },
     }),
   ]);

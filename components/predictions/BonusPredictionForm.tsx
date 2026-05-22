@@ -43,10 +43,10 @@ function TeamLogo({ team }: { team: PredictionBonusData["teams"][number] }) {
 function BonusTeamPicker({
   disabled,
   field,
+  onPick,
   openField,
   selectedIds,
   setOpenField,
-  setValue,
   teams,
   value,
 }: {
@@ -55,10 +55,10 @@ function BonusTeamPicker({
     label: string;
     name: BonusField;
   };
+  onPick: (field: BonusField, value: string) => void;
   openField: BonusField | null;
   selectedIds: Set<string>;
   setOpenField: (field: BonusField | null) => void;
-  setValue: (field: BonusField, value: string) => void;
   teams: PredictionBonusData["teams"];
   value: string;
 }) {
@@ -85,6 +85,15 @@ function BonusTeamPicker({
 
       {isOpen ? (
         <div className="bonus-team-picker-menu" role="listbox">
+          <button
+            aria-selected={value === ""}
+            className="bonus-team-picker-option bonus-team-picker-option-clear"
+            onClick={() => onPick(field.name, "")}
+            role="option"
+            type="button"
+          >
+            <span>Aucun choix</span>
+          </button>
           {teams.map((team) => {
             const isSelectedElsewhere = selectedIds.has(team.id) && team.id !== value;
 
@@ -94,10 +103,7 @@ function BonusTeamPicker({
                 className="bonus-team-picker-option"
                 disabled={isSelectedElsewhere}
                 key={team.id}
-                onClick={() => {
-                  setValue(field.name, team.id);
-                  setOpenField(null);
-                }}
+                onClick={() => onPick(field.name, team.id)}
                 role="option"
                 type="button"
               >
@@ -135,8 +141,8 @@ export function BonusPredictionForm({
   });
   const isLocked = !bonus.canPredict;
   const selectedIds = new Set(Object.values(values).filter(Boolean));
-  const isComplete = Object.values(values).every(Boolean);
-  const hasSavedPodium = Object.values(savedValues).every(Boolean);
+  const isComplete = Object.values(values).some(Boolean);
+  const hasSavedPodium = Object.values(savedValues).some(Boolean);
   const isDirty =
     values.winnerTeamId !== savedValues.winnerTeamId ||
     values.secondTeamId !== savedValues.secondTeamId ||
@@ -157,12 +163,30 @@ export function BonusPredictionForm({
     setSavedValues(values);
   }, [state, values]);
 
+  function handlePick(field: BonusField, teamId: string) {
+    const nextValues = {
+      ...values,
+      [field]: teamId,
+    };
+    const currentIndex = bonusFields.findIndex((entry) => entry.name === field);
+    const nextEmptyField =
+      bonusFields
+        .slice(currentIndex + 1)
+        .find((entry) => !nextValues[entry.name])?.name ?? null;
+
+    setValues(nextValues);
+    setOpenField(nextEmptyField);
+  }
+
   if (!bonus.enabled) {
     return null;
   }
 
   return (
-    <details className="pending-predictions-panel bonus-predictions-panel" open={!isLocked && !isComplete}>
+    <details
+      className="pending-predictions-panel bonus-predictions-panel"
+      open={!isLocked && !showSavedState}
+    >
       <summary>
         <span>
           <span className="badge badge-warning">Bonus podium</span>
@@ -186,15 +210,10 @@ export function BonusPredictionForm({
               disabled={isLocked || pending}
               field={field}
               key={field.name}
+              onPick={handlePick}
               openField={openField}
               selectedIds={selectedIds}
               setOpenField={setOpenField}
-              setValue={(name, value) =>
-                setValues((current) => ({
-                  ...current,
-                  [name]: value,
-                }))
-              }
               teams={bonus.teams}
               value={values[field.name]}
             />
