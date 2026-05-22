@@ -2145,7 +2145,7 @@
   }
 
   .leaderboard-info-popover {
-    @apply absolute top-full left-0 z-10 mt-3 grid min-w-[260px] gap-2 rounded-lg border border-line bg-white p-3;
+    @apply absolute bottom-full left-0 z-10 mt-3 grid min-w-[260px] gap-3 rounded-lg border border-line bg-white p-3;
     box-shadow: 0 16px 34px color-mix(in srgb, var(--foreground) 10%, transparent);
   }
 
