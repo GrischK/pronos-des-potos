@@ -406,6 +406,9 @@ export async function getCompetitionsOverview() {
       const futureMatches = competition.matches.filter(
         (match) => match.status === "SCHEDULED" && match.kickoffAt > now,
       );
+      const urgentPredictionWindowEnd = new Date(
+        now.getTime() + 10 * 24 * 60 * 60 * 1000,
+      );
       const liveMatches = competition.matches.filter(
         (match) => match.status === "LIVE",
       );
@@ -415,6 +418,18 @@ export async function getCompetitionsOverview() {
         competition.status === "OPEN" && user
           ? futureMatches.filter(
               (match) =>
+                match.homeTeamId !== null &&
+                match.awayTeamId !== null &&
+                !match.predictions.some(
+                  (prediction) => prediction.userId === user.id,
+                ),
+            ).length
+          : 0;
+      const urgentPendingPredictionCount =
+        competition.status === "OPEN" && user
+          ? futureMatches.filter(
+              (match) =>
+                match.kickoffAt <= urgentPredictionWindowEnd &&
                 match.homeTeamId !== null &&
                 match.awayTeamId !== null &&
                 !match.predictions.some(
@@ -571,7 +586,7 @@ export async function getCompetitionsOverview() {
                       : null;
                   })()
                 : null,
-            }
+        }
           : null,
         nextMatch: nextMatch
           ? {
@@ -585,6 +600,7 @@ export async function getCompetitionsOverview() {
           : null,
         remainingMatchCount: futureMatches.length,
         missingPredictionCount,
+        urgentPendingPredictionCount,
         leader: leader
           ? {
               name: leader.name,
@@ -612,6 +628,48 @@ export type NextPredictionOpportunity = {
   homePlaceholder: string | null;
   awayPlaceholder: string | null;
 };
+
+export async function getUrgentPendingPredictionCount(): Promise<number> {
+  if (!process.env.DATABASE_URL) {
+    return 0;
+  }
+
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return 0;
+  }
+
+  const { prisma } = await import("@/src/db/prisma");
+  const now = new Date();
+  const urgentPredictionWindowEnd = new Date(
+    now.getTime() + 10 * 24 * 60 * 60 * 1000,
+  );
+
+  return prisma.match.count({
+    where: {
+      status: "SCHEDULED",
+      kickoffAt: {
+        gt: now,
+        lte: urgentPredictionWindowEnd,
+      },
+      homeTeamId: {
+        not: null,
+      },
+      awayTeamId: {
+        not: null,
+      },
+      competition: {
+        status: "OPEN",
+      },
+      predictions: {
+        none: {
+          userId: user.id,
+        },
+      },
+    },
+  });
+}
 
 export async function getNextPredictionOpportunity(): Promise<NextPredictionOpportunity | null> {
   if (!process.env.DATABASE_URL) {
@@ -691,7 +749,12 @@ export async function getCompetitionBySlug(slug: string) {
     return null;
   }
 
+  const user = await getCurrentUser();
   const { prisma } = await import("@/src/db/prisma");
+  const now = new Date();
+  const urgentPredictionWindowEnd = new Date(
+    now.getTime() + 10 * 24 * 60 * 60 * 1000,
+  );
 
   return prisma.competition.findUnique({
     where: { slug },
@@ -736,6 +799,19 @@ export async function getCompetitionBySlug(slug: string) {
               flagUrl: true,
             },
           },
+          ...(user
+            ? {
+                predictions: {
+                  where: {
+                    userId: user.id,
+                  },
+                  select: {
+                    id: true,
+                  },
+                  take: 1,
+                },
+              }
+            : {}),
         },
       },
     },
@@ -744,9 +820,22 @@ export async function getCompetitionBySlug(slug: string) {
       return null;
     }
 
+    const urgentPendingPredictionCount = user
+      ? competition.matches.filter(
+          (match) =>
+            match.status === "SCHEDULED" &&
+            match.kickoffAt > now &&
+            match.kickoffAt <= urgentPredictionWindowEnd &&
+            match.homeTeam !== null &&
+            match.awayTeam !== null &&
+            match.predictions.length === 0,
+        ).length
+      : 0;
+
     return {
       ...competition,
       matchCount: competition.matches.length,
+      urgentPendingPredictionCount,
       groups: isWorldCup2026Competition(competition)
         ? buildWorldCup2026Groups(competition.matches)
         : [],

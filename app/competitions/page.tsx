@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Shirt } from "lucide-react";
+import { ArrowRight, Shirt, TriangleAlert } from "lucide-react";
 
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { EmptyState } from "@/components/EmptyState";
@@ -9,6 +9,7 @@ import { getLiveMatchStatusLabel, getMatchStatusLabel } from "@/src/domain/match
 import {
   getCompetitionsOverview,
   getNextPredictionOpportunity,
+  getUrgentPendingPredictionCount,
 } from "@/src/server/competitions";
 
 export const dynamic = "force-dynamic";
@@ -168,10 +169,15 @@ function MatchTeamsInline({ match }: { match: MatchPreview }) {
 }
 
 export default async function CompetitionsPage() {
-  const [competitions, nextPrediction] = await Promise.all([
+  const [competitions, nextPrediction, urgentPendingPredictionCount] = await Promise.all([
     getCompetitionsOverview(),
     getNextPredictionOpportunity(),
+    getUrgentPendingPredictionCount(),
   ]);
+  const urgentPredictionLabel =
+    urgentPendingPredictionCount === 1
+      ? "1 prono urgent à poser dans les 7 prochains jours"
+      : `${urgentPendingPredictionCount} pronos urgents à poser dans les 7 prochains jours`;
 
   return (
     <main className="page-shell">
@@ -233,9 +239,6 @@ export default async function CompetitionsPage() {
                   <p className={statusBadgeClasses[competition.status]}>
                     {statusLabels[competition.status]}
                   </p>
-                  {competition.bonusEnabled ? (
-                    <p className="badge badge-warning">Bonus podium</p>
-                  ) : null}
                 </div>
                 <div className="competition-card-summary">
                   <span>
@@ -293,7 +296,26 @@ export default async function CompetitionsPage() {
                     <strong>{competition.remainingMatchCount}</strong>
                     Matchs restants
                   </span>
-                  <span className="competition-card-stat">
+                  <span className="competition-card-stat competition-card-stat-pending">
+                    {competition.urgentPendingPredictionCount > 0 ? (
+                      <span className="competition-action-alert-wrap competition-card-stat-alert-wrap">
+                        <span
+                          aria-label={
+                            competition.urgentPendingPredictionCount === 1
+                              ? "1 prono urgent à poser dans les 7 prochains jours"
+                              : `${competition.urgentPendingPredictionCount} pronos urgents à poser dans les 7 prochains jours`
+                          }
+                          className="competition-action-alert"
+                        >
+                          <TriangleAlert aria-hidden="true" size={14} strokeWidth={2.6} />
+                        </span>
+                        <span className="competition-action-alert-tooltip" role="tooltip">
+                          {competition.urgentPendingPredictionCount === 1
+                            ? "1 prono urgent à poser dans les 7 prochains jours"
+                            : `${competition.urgentPendingPredictionCount} pronos urgents à poser dans les 7 prochains jours`}
+                        </span>
+                      </span>
+                    ) : null}
                     <strong>{competition.missingPredictionCount}</strong>
                     Pronos à poser
                   </span>
@@ -315,6 +337,19 @@ export default async function CompetitionsPage() {
       {nextPrediction ? (
         <section className="page-section">
           <div className="next-prediction-panel">
+            {urgentPendingPredictionCount > 0 ? (
+              <span className="competition-action-alert-wrap next-prediction-alert-wrap">
+                <span
+                  aria-label={urgentPredictionLabel}
+                  className="competition-action-alert"
+                >
+                  <TriangleAlert aria-hidden="true" size={14} strokeWidth={2.6} />
+                </span>
+                <span className="competition-action-alert-tooltip" role="tooltip">
+                  {urgentPredictionLabel}
+                </span>
+              </span>
+            ) : null}
             <div>
               <p className="badge badge-live">Prochain prono à poser</p>
               <h2>

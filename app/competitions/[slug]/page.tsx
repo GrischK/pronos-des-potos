@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  TriangleAlert,
   CalendarDays,
   ChevronRight,
   PencilLine,
@@ -39,6 +40,10 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
   }
 
   const hostCountries = getCompetitionHostCountries(competition);
+  const urgentPredictionLabel =
+    competition.urgentPendingPredictionCount === 1
+      ? "1 prono urgent à poser dans les 7 prochains jours"
+      : `${competition.urgentPendingPredictionCount} pronos urgents à poser dans les 7 prochains jours`;
 
   return (
     <main className="page-shell">
@@ -77,6 +82,19 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
             className="competition-action competition-action-primary"
             href={`/competitions/${competition.slug}/pronos`}
           >
+            {competition.urgentPendingPredictionCount > 0 ? (
+              <span className="competition-action-alert-wrap">
+                <span
+                  aria-label={urgentPredictionLabel}
+                  className="competition-action-alert"
+                >
+                  <TriangleAlert aria-hidden="true" size={14} strokeWidth={2.6} />
+                </span>
+                <span className="competition-action-alert-tooltip" role="tooltip">
+                  {urgentPredictionLabel}
+                </span>
+              </span>
+            ) : null}
             <span className="competition-action-icon">
               <PencilLine aria-hidden="true" size={20} strokeWidth={2.8} />
             </span>
