@@ -2,6 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { PageHeader } from "@/components/PageHeader";
+import {
+  getPlayerPointsLabel,
+  PlayerPointsBadge,
+} from "@/components/player/PlayerPointsBadge";
 import { PlayerProfileAvatar } from "@/components/player/PlayerProfileAvatar";
 import { getCompetitionKindLabel } from "@/src/domain/competition-kind";
 import { getPlayerProfileData } from "@/src/server/player-profile";
@@ -45,34 +49,6 @@ function renderScore(homeScore: number | null, awayScore: number | null) {
   return `${homeScore} · ${awayScore}`;
 }
 
-function getPointsLabel(points: number | null) {
-  if (points === null) {
-    return "À venir";
-  }
-
-  return `${points} pt${points > 1 ? "s" : ""}`;
-}
-
-function getPointsToneClass(points: number | null) {
-  if (points === null || points === 0) {
-    return "player-points-neutral";
-  }
-
-  if (points === 1) {
-    return "player-points-outcome";
-  }
-
-  if (points === 3) {
-    return "player-points-exact";
-  }
-
-  if (points === 4) {
-    return "player-points-unique";
-  }
-
-  return "player-points-neutral";
-}
-
 function PlayerMatchRow({ match }: { match: PlayerProfileMatch }) {
   const points = match.prediction?.points ?? null;
 
@@ -98,10 +74,7 @@ function PlayerMatchRow({ match }: { match: PlayerProfileMatch }) {
             : "Visible au coup d'envoi"}
         </strong>
       </span>
-      <strong className={`player-points-cell ${getPointsToneClass(points)}`}>
-        <span className="player-score-label">Points</span>
-        <span className="player-points-badge">{getPointsLabel(points)}</span>
-      </strong>
+      <PlayerPointsBadge points={points} />
     </article>
   );
 }
@@ -131,7 +104,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
       ? [
           {
             label: "Bonus podium",
-            value: getPointsLabel(profile.stats.bonusPoints),
+            value: getPlayerPointsLabel(profile.stats.bonusPoints),
           },
         ]
       : []),

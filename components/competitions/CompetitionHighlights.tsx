@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { PlayerPointsBadge } from "@/components/player/PlayerPointsBadge";
 import type {
   CompetitionHighlightMatch,
   CompetitionHighlightsData,
@@ -104,11 +105,22 @@ function MatchCard({ match }: { match: CompetitionHighlightMatch }) {
 
       <div className="highlight-prono-line">
         <span>Ton prono</span>
-        <strong>
-          {match.ownPrediction
-            ? `${match.ownPrediction.homeScore} · ${match.ownPrediction.awayScore}`
-            : "Aucun prono"}
-        </strong>
+        {match.ownPrediction ? (
+          <div className="public-prediction-meta">
+            <strong className="public-prediction-score">
+              {match.ownPrediction.homeScore} · {match.ownPrediction.awayScore}
+            </strong>
+            {match.ownPrediction.points !== null ? (
+              <PlayerPointsBadge
+                points={match.ownPrediction.points}
+                label="Pts"
+                className="public-prediction-points"
+              />
+            ) : null}
+          </div>
+        ) : (
+          <strong>Aucun prono</strong>
+        )}
       </div>
 
       {match.canRevealPredictions ? (
@@ -119,9 +131,18 @@ function MatchCard({ match }: { match: CompetitionHighlightMatch }) {
             match.predictions.map((prediction) => (
               <div className="public-prediction-row" key={prediction.id}>
                 <strong>{prediction.user.name}</strong>
-                <span>
-                  {prediction.homeScore} · {prediction.awayScore}
-                </span>
+                <div className="public-prediction-meta">
+                  <span className="public-prediction-score">
+                    {prediction.homeScore} · {prediction.awayScore}
+                  </span>
+                  {prediction.points !== null ? (
+                    <PlayerPointsBadge
+                      points={prediction.points}
+                      label="Pts"
+                      className="public-prediction-points"
+                    />
+                  ) : null}
+                </div>
               </div>
             ))
           )}

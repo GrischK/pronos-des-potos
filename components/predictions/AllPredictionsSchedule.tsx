@@ -2,6 +2,7 @@
 
 import type { CompetitionKind } from "@prisma/client";
 
+import { PlayerPointsBadge } from "@/components/player/PlayerPointsBadge";
 import { PredictionScheduleBrowser } from "@/components/predictions/PredictionSchedule";
 import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
 import { getLiveMatchStatusLabel, getMatchStatusLabel } from "@/src/domain/match-status";
@@ -126,9 +127,18 @@ function AllPredictionsMatchCard({ match }: { match: PublicPredictionMatch }) {
             match.predictions.map((prediction) => (
               <div className="public-prediction-row" key={prediction.id}>
                 <strong>{prediction.user.name}</strong>
-                <span>
-                  {prediction.homeScore} · {prediction.awayScore}
-                </span>
+                <div className="public-prediction-meta">
+                  <span className="public-prediction-score">
+                    {prediction.homeScore} · {prediction.awayScore}
+                  </span>
+                  {prediction.points !== null ? (
+                    <PlayerPointsBadge
+                      points={prediction.points}
+                      label="Pts"
+                      className="public-prediction-points"
+                    />
+                  ) : null}
+                </div>
               </div>
             ))
           )}

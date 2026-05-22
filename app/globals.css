@@ -1743,11 +1743,12 @@
     @apply flex items-center justify-between gap-3 rounded-lg bg-surface-alt px-3 py-2;
   }
 
-  .highlight-prono-line span {
+  .highlight-prono-line > span {
     @apply text-sm font-bold text-muted;
   }
 
-  .highlight-prono-line strong {
+  .highlight-prono-line > strong,
+  .highlight-prono-line > .public-prediction-meta > .public-prediction-score {
     @apply rounded-lg bg-foreground px-2.5 py-1 text-sm font-black text-white;
   }
 
@@ -2667,8 +2668,20 @@
     @apply min-w-0 truncate font-black text-foreground;
   }
 
-  .public-prediction-row span {
+  .public-prediction-meta {
+    @apply flex shrink-0 items-center gap-2;
+  }
+
+  .public-prediction-score {
     @apply shrink-0 rounded-lg bg-foreground px-2.5 py-1 text-sm font-black text-white;
+  }
+
+  .public-prediction-points {
+    @apply gap-0;
+  }
+
+  .public-prediction-points .player-score-label {
+    @apply sr-only;
   }
 
   .bonus-podium-list {
@@ -3714,7 +3727,8 @@
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pitch) 30%, transparent);
   }
 
-  :root[data-theme="dark"] .highlight-prono-line strong {
+  :root[data-theme="dark"] .highlight-prono-line > strong,
+  :root[data-theme="dark"] .highlight-prono-line > .public-prediction-meta > .public-prediction-score {
     background: color-mix(in srgb, var(--pitch) 22%, var(--surface));
     color: var(--foreground);
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pitch) 30%, transparent);
@@ -3743,7 +3757,7 @@
     color: var(--foreground);
   }
 
-  :root[data-theme="dark"] .public-prediction-row span {
+  :root[data-theme="dark"] .public-prediction-score {
     background: color-mix(in srgb, var(--pitch) 22%, var(--surface));
     color: var(--foreground);
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pitch) 30%, transparent);

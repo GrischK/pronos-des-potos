@@ -1,12 +1,14 @@
 import "server-only";
 
 import { getCurrentUser } from "@/src/auth/current-user";
+import { computePredictionPoints } from "@/src/domain/scoring";
 import { prisma } from "@/src/db/prisma";
 
 export type CompetitionHighlightPrediction = {
   id: string;
   homeScore: number;
   awayScore: number;
+  points: number | null;
   user: {
     id: string;
     name: string;
@@ -28,6 +30,7 @@ export type CompetitionHighlightMatch = {
   ownPrediction: {
     homeScore: number;
     awayScore: number;
+    points: number | null;
   } | null;
   predictions: CompetitionHighlightPrediction[];
   homeTeam: {
@@ -173,15 +176,44 @@ export async function getCompetitionHighlights(
     const canRevealPredictions =
       match.status !== "SCHEDULED" || match.kickoffAt.getTime() <= nowTime;
     const predictions = match.predictions
-      .map((prediction) => ({
-        id: prediction.id,
-        homeScore: prediction.homeScore,
-        awayScore: prediction.awayScore,
-        user: {
-          id: prediction.user.id,
-          name: getUserDisplayName(prediction.user),
-        },
-      }))
+      .map((prediction) => {
+        let points: number | null = null;
+
+        if (
+          match.homeScore !== null &&
+          match.awayScore !== null &&
+          (match.status === "FINISHED" || match.status === "LIVE")
+        ) {
+          const exactScorePredictionCount = match.predictions.filter(
+            (matchPrediction) =>
+              matchPrediction.homeScore === match.homeScore &&
+              matchPrediction.awayScore === match.awayScore,
+          ).length;
+
+          points = computePredictionPoints({
+            prediction: {
+              homeScore: prediction.homeScore,
+              awayScore: prediction.awayScore,
+            },
+            result: {
+              homeScore: match.homeScore,
+              awayScore: match.awayScore,
+            },
+            exactScorePredictionCount,
+          });
+        }
+
+        return {
+          id: prediction.id,
+          homeScore: prediction.homeScore,
+          awayScore: prediction.awayScore,
+          points,
+          user: {
+            id: prediction.user.id,
+            name: getUserDisplayName(prediction.user),
+          },
+        };
+      })
       .sort((a, b) => a.user.name.localeCompare(b.user.name, "fr"));
     const ownPrediction = user
       ? predictions.find((prediction) => prediction.user.id === user.id) ?? null
@@ -203,6 +235,7 @@ export async function getCompetitionHighlights(
         ? {
             homeScore: ownPrediction.homeScore,
             awayScore: ownPrediction.awayScore,
+            points: ownPrediction.points,
           }
         : null,
       predictions,
