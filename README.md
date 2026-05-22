@@ -132,6 +132,44 @@ Important :
 - utiliser `.env.production.local` uniquement pour lancer les migrations prod
 - ne pas `source` un fichier `.env` contenant des URLs Postgres avec `&`, le shell les interprete comme des commandes en arriere-plan
 
+## Reset mot de passe
+
+Le flux de mot de passe oublie utilise Brevo pour l'email transactionnel.
+
+### Configuration Brevo
+
+1. Creer un API key dans Brevo via `Settings > SMTP & API`.
+2. Ajouter et authentifier un domaine ou sous-domaine d'envoi dans `Settings > Senders, Domains, IPs`.
+3. Declarer un sender comme `no-reply@mail.pronosdespotos.fr`.
+4. Configurer les variables d'environnement suivantes :
+
+```txt
+BREVO_API_KEY=...
+BREVO_SENDER_EMAIL=no-reply@mail.pronosdespotos.fr
+BREVO_SENDER_NAME=Pronos des potos
+APP_URL=https://pronosdespotos.fr
+```
+
+### Flux applicatif
+
+- `/forgot-password` demande l'email du compte et envoie un lien de reinitialisation.
+- `/reset-password?token=...` permet de definir un nouveau mot de passe.
+- Les tokens sont haches en base, expires au bout d'1 heure, et marques comme utilises apres reset.
+
+### Migration associee
+
+La table `PasswordResetToken` est ajoutee via Prisma. En local :
+
+```bash
+npm run db:migrate
+```
+
+En production :
+
+```bash
+PRISMA_ENV_FILE=.env.production.local npx prisma migrate deploy
+```
+
 ## Cron de scores live
 
 Le cron de scores live utilise deux jobs `cron-job.org` :

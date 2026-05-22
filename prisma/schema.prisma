@@ -39,18 +39,19 @@ enum MatchStatus {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  image     String?
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  image        String?
   passwordHash String?
-  role      UserRole @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role         UserRole @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  competitions CompetitionPlayer[]
-  predictions  Prediction[]
+  competitions      CompetitionPlayer[]
+  predictions       Prediction[]
   bonusPredictions CompetitionBonusPrediction[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 model Competition {
@@ -198,4 +199,18 @@ model CompetitionBonusPrediction {
 
   @@unique([userId, competitionId])
   @@index([competitionId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }

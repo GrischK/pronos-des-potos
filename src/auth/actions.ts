@@ -7,6 +7,10 @@ import { z } from "zod";
 import { prisma } from "@/src/db/prisma";
 import { hashPassword, verifyPassword } from "@/src/auth/password";
 import { createSession, destroySession } from "@/src/auth/session";
+import {
+  consumePasswordResetToken,
+  createPasswordResetRequest,
+} from "@/src/auth/password-reset";
 
 const signupSchema = z.object({
   name: z.string().trim().min(2, "Ton nom doit contenir au moins 2 caractères."),
@@ -19,8 +23,26 @@ const loginSchema = z.object({
   password: z.string().min(1, "Mot de passe requis."),
 });
 
+const forgotPasswordSchema = z.object({
+  email: z.string().trim().email("Email invalide.").toLowerCase(),
+});
+
+const resetPasswordSchema = z
+  .object({
+    token: z.string().min(1, "Lien invalide."),
+    password: z
+      .string()
+      .min(8, "Le mot de passe doit contenir au moins 8 caractères."),
+    confirmPassword: z.string().min(1, "Confirme ton mot de passe."),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Les deux mots de passe doivent correspondre.",
+    path: ["confirmPassword"],
+  });
+
 export type AuthActionState = {
   error?: string;
+  success?: string;
 };
 
 export async function signupAction(
@@ -98,6 +120,80 @@ export async function loginAction(
 
   await createSession(user.id);
   redirect("/competitions");
+}
+
+export async function requestPasswordResetAction(
+  _state: AuthActionState,
+  formData: FormData,
+): Promise<AuthActionState> {
+  const parsed = forgotPasswordSchema.safeParse(Object.fromEntries(formData));
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Demande impossible." };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: parsed.data.email },
+    select: {
+      id: true,
+      passwordHash: true,
+      email: true,
+    },
+  });
+
+  if (user?.passwordHash) {
+    try {
+      await createPasswordResetRequest(user.id, user.email);
+    } catch (error) {
+      if (process.env.NODE_ENV !== "production") {
+        console.error(error);
+      }
+
+      return { error: "Impossible d'envoyer le lien pour le moment." };
+    }
+  }
+
+  return {
+    success: "Si un compte existe avec cet email, un lien vient d'être envoyé.",
+  };
+}
+
+export async function resetPasswordAction(
+  _state: AuthActionState,
+  formData: FormData,
+): Promise<AuthActionState> {
+  const parsed = resetPasswordSchema.safeParse(Object.fromEntries(formData));
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Réinitialisation impossible." };
+  }
+
+  const tokenRecord = await consumePasswordResetToken(parsed.data.token);
+
+  if (!tokenRecord) {
+    return { error: "Lien invalide ou expiré." };
+  }
+
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: tokenRecord.userId },
+      data: { passwordHash: await hashPassword(parsed.data.password) },
+    }),
+    prisma.passwordResetToken.update({
+      where: { id: tokenRecord.id },
+      data: { usedAt: new Date() },
+    }),
+    prisma.passwordResetToken.deleteMany({
+      where: {
+        userId: tokenRecord.userId,
+        id: { not: tokenRecord.id },
+      },
+    }),
+  ]);
+
+  await destroySession();
+
+  redirect("/login?reset=1");
 }
 
 export async function logoutAction() {
