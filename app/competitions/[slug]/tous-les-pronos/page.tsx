@@ -54,10 +54,10 @@ export default async function TousLesPronosPage({
           competition.hasBonusPrediction ? (
             <CompetitionActionCard
               className="my-4"
-              description="Voir l'évolution du classement"
+              description="Voir les pronos bonus des potos"
               href={`/competitions/${slug}/tous-les-pronos/podium-bonus`}
               icon={<Star aria-hidden="true" size={20} strokeWidth={2.8} />}
-              title="Graphique du classement"
+              title="Points bonus"
               tone="navy"
               width="inline"
             />
