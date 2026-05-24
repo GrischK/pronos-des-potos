@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronDown } from "lucide-react";
+import {ChartLine, ChevronDown, ChevronRight} from "lucide-react";
 import { useRef, useState } from "react";
 
 import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
@@ -348,7 +348,7 @@ export function LeaderboardTabs({
 
   return (
     <>
-      <section className="page-section">
+      <section className="toggle-section">
         <div className="schedule-view-switch" aria-label="Type de classement">
           <button
             aria-pressed={mode === "official"}
@@ -389,10 +389,22 @@ export function LeaderboardTabs({
 
       <div className="actions mb-4">
         <Link
-          className="btn btn-primary competition-back-button"
+          className="competition-action"
           href={`/competitions/${leaderboard.slug}/classement/evolution`}
         >
-          Graphique du classement
+            <span className="competition-action-icon">
+              <ChartLine aria-hidden="true" size={20} strokeWidth={2.8} />
+            </span>
+          <span>
+              <strong>Graphique du classement</strong>
+              <small>Voir l'évolution du classement</small>
+            </span>
+          <ChevronRight
+            aria-hidden="true"
+            className="competition-action-arrow"
+            size={20}
+            strokeWidth={3}
+          />
         </Link>
       </div>
 

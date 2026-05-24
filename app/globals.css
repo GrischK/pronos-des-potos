@@ -662,6 +662,10 @@
     @apply border-t border-line py-11;
   }
 
+  .toggle-section {
+    @apply border-t border-line py-3;
+  }
+
   .content-grid {
     @apply grid gap-4;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -1578,7 +1582,9 @@
 
   .competition-action {
     @apply relative grid min-h-[92px] items-center gap-3 overflow-visible rounded-lg border border-line bg-surface px-4 py-3 text-left;
+    --competition-action-accent: var(--pitch);
     box-shadow:
+      inset 4px 0 0 var(--competition-action-accent),
       inset 0 1px 0 color-mix(in srgb, white 70%, transparent),
       0 14px 30px color-mix(in srgb, var(--foreground) 6%, transparent);
     grid-template-columns: auto minmax(0, 1fr) auto;
@@ -1588,21 +1594,17 @@
       transform 160ms ease;
   }
 
-  .competition-action::before {
-    @apply absolute inset-y-0 left-0 w-1;
-    background: var(--pitch);
-    content: "";
-  }
-
   .competition-action:hover {
     border-color: color-mix(in srgb, var(--pitch) 38%, var(--line));
     box-shadow:
+      inset 4px 0 0 var(--competition-action-accent),
       inset 0 1px 0 color-mix(in srgb, white 78%, transparent),
       0 18px 38px color-mix(in srgb, var(--foreground) 10%, transparent);
     transform: translateY(-2px);
   }
 
   .competition-action-primary {
+    --competition-action-accent: var(--pitch);
     border-color: color-mix(in srgb, var(--pitch) 52%, var(--line));
     background:
       linear-gradient(
@@ -1614,6 +1616,7 @@
   }
 
   .competition-action:nth-child(2) {
+    --competition-action-accent: var(--coral);
     border-color: color-mix(in srgb, var(--coral) 30%, var(--line));
     background:
       linear-gradient(
@@ -1625,6 +1628,7 @@
   }
 
   .competition-action:nth-child(3) {
+    --competition-action-accent: var(--navy);
     border-color: color-mix(in srgb, var(--navy) 28%, var(--line));
     background:
       linear-gradient(
@@ -1636,6 +1640,7 @@
   }
 
   .competition-action:nth-child(4) {
+    --competition-action-accent: var(--card);
     border-color: color-mix(in srgb, var(--card) 34%, var(--line));
     background:
       linear-gradient(
@@ -1644,18 +1649,6 @@
         color-mix(in srgb, var(--mint) 12%, var(--surface)) 58%,
         var(--surface)
       );
-  }
-
-  .competition-action:nth-child(2)::before {
-    background: var(--coral);
-  }
-
-  .competition-action:nth-child(3)::before {
-    background: var(--navy);
-  }
-
-  .competition-action:nth-child(4)::before {
-    background: var(--card);
   }
 
   .competition-action-icon {
