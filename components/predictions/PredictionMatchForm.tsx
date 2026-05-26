@@ -105,13 +105,15 @@ export function PredictionMatchForm({ match, slug, anchorId }: PredictionMatchFo
     setSavedHomeScore(homeScore);
     setSavedAwayScore(awayScore);
     setHasSavedState(true);
-  }, [awayScore, homeScore, state.success]);
+  }, [state.success]);
 
   const hasResult = match.homeScore !== null && match.awayScore !== null;
   const showReadonlyEmptyState = !match.canPredict && !match.prediction;
   const isDirty = homeScore !== savedHomeScore || awayScore !== savedAwayScore;
   const hasCompleteScore = homeScore !== "" && awayScore !== "";
   const showSavedState = hasSavedState && !isDirty;
+  const hasExistingPrediction = savedHomeScore !== "" && savedAwayScore !== "";
+  const submitLabel = hasExistingPrediction ? "Modifier" : "Enregistrer";
   const matchMetaBadges = getMatchMetaBadges(match);
 
   return (
@@ -214,7 +216,7 @@ export function PredictionMatchForm({ match, slug, anchorId }: PredictionMatchFo
                 Enregistré
               </>
             ) : (
-              "Enregistrer"
+              submitLabel
             )}
           </button>
           {state.error ? <span className="form-error">{state.error}</span> : null}
