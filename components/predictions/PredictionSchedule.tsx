@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { CompetitionKind } from "@prisma/client";
@@ -58,6 +59,17 @@ type ChronologicalSection<TMatch extends ScheduleMatch> = {
 };
 
 type ScheduleView = "structure" | "chronology";
+
+type PersistedScheduleState = {
+  activeDayId?: string;
+  activeGroupId?: string;
+  activeStageIndex?: number;
+  view?: ScheduleView;
+};
+
+function isScheduleView(value: unknown): value is ScheduleView {
+  return value === "structure" || value === "chronology";
+}
 
 const groups = [
   { name: "Groupe A", teams: ["Mexico", "South Africa", "South Korea", "Czech Republic"] },
@@ -296,10 +308,13 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
   phaseHeading,
   renderMatch,
 }: PredictionScheduleBrowserProps<TMatch>) {
+  const pathname = usePathname();
   const dayNavRef = useRef<HTMLElement>(null);
   const groupNavRef = useRef<HTMLElement>(null);
   const dayButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const groupButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const hasHydratedRef = useRef(false);
+  const storageKey = `prediction-schedule:${pathname}`;
   const [dayNavCanScrollLeft, setDayNavCanScrollLeft] = useState(false);
   const [dayNavCanScrollRight, setDayNavCanScrollRight] = useState(false);
   const groupSections = useMemo(
@@ -366,18 +381,17 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
     [matches],
   );
   const priorityMatch = useMemo(() => getPriorityMatch(matches), [matches]);
-  const [view, setView] = useState<ScheduleView>("chronology");
-  const [activeStageIndex, setActiveStageIndex] = useState(() => {
-    if (!priorityMatch) {
-      return 0;
-    }
-
-    return 0;
-  });
-  const [activeGroupId, setActiveGroupId] = useState(groupSections[0]?.id ?? "");
-  const [activeDayId, setActiveDayId] = useState(
-    getDefaultChronologicalSectionId(chronologicalSections, priorityMatch),
+  const defaultDayId = getDefaultChronologicalSectionId(
+    chronologicalSections,
+    priorityMatch,
   );
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [view, setView] = useState<ScheduleView>("chronology");
+  const [activeStageIndex, setActiveStageIndex] = useState(0);
+  const [activeGroupId, setActiveGroupId] = useState<string>(
+    groupSections[0]?.id ?? "",
+  );
+  const [activeDayId, setActiveDayId] = useState(defaultDayId);
   const activeStage = stages[activeStageIndex] ?? stages[0];
   const activeGroup =
     groupSections.find((section) => section.id === activeGroupId) ?? groupSections[0];
@@ -388,39 +402,118 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
   const nextStage = stages[activeStageIndex + 1];
 
   useEffect(() => {
-    if (!priorityMatch) {
+    if (typeof window === "undefined" || hasHydratedRef.current) {
       return;
     }
 
-    const targetDayId = getDefaultChronologicalSectionId(
-      chronologicalSections,
-      priorityMatch,
-    );
+    hasHydratedRef.current = true;
 
-    if (targetDayId) {
-      setActiveDayId(targetDayId);
+    try {
+      const rawState = window.sessionStorage.getItem(storageKey);
+
+      if (rawState) {
+        const parsedState = JSON.parse(rawState) as PersistedScheduleState;
+
+        if (
+          parsedState.activeDayId &&
+          chronologicalSections.some((section) => section.id === parsedState.activeDayId)
+        ) {
+          setActiveDayId(parsedState.activeDayId);
+        }
+
+        if (
+          parsedState.activeGroupId &&
+          groupSections.some((section) => section.id === parsedState.activeGroupId)
+        ) {
+          setActiveGroupId(parsedState.activeGroupId);
+        }
+
+        if (
+          typeof parsedState.activeStageIndex === "number" &&
+          parsedState.activeStageIndex >= 0 &&
+          parsedState.activeStageIndex < stages.length
+        ) {
+          setActiveStageIndex(parsedState.activeStageIndex);
+        }
+
+        if (isScheduleView(parsedState.view)) {
+          setView(parsedState.view);
+        }
+      }
+    } catch {
+      // Ignore corrupted browser state and keep the default server-driven selection.
     }
+    setIsHydrated(true);
+  }, [chronologicalSections, groupSections, stages.length, storageKey]);
 
-    const targetGroup = groupSections.find((section) =>
-      section.matches.some((match) => match.id === priorityMatch.id),
-    );
-
-    if (targetGroup) {
-      setActiveStageIndex(0);
-      setActiveGroupId(targetGroup.id);
+  useEffect(() => {
+    if (!isHydrated) {
       return;
     }
 
-    const targetStageIndex = stages.findIndex(
-      (stage) =>
-        stage.kind === "phase" &&
-        stage.matches.some((match) => match.id === priorityMatch.id),
-    );
-
-    if (targetStageIndex >= 0) {
-      setActiveStageIndex(targetStageIndex);
+    if (
+      activeDayId &&
+      chronologicalSections.some((section) => section.id === activeDayId)
+    ) {
+      return;
     }
-  }, [chronologicalSections, groupSections, priorityMatch, stages]);
+
+    if (defaultDayId && defaultDayId !== activeDayId) {
+      setActiveDayId(defaultDayId);
+    }
+  }, [activeDayId, chronologicalSections, defaultDayId, isHydrated]);
+
+  useEffect(() => {
+    if (!isHydrated) {
+      return;
+    }
+
+    if (
+      !activeGroupId ||
+      !groupSections.some((section) => section.id === activeGroupId)
+    ) {
+      if (groupSections[0] && activeGroupId !== groupSections[0].id) {
+        setActiveGroupId(groupSections[0].id);
+      }
+    }
+  }, [activeGroupId, groupSections, isHydrated]);
+
+  useEffect(() => {
+    if (!isHydrated) {
+      return;
+    }
+
+    if (activeStageIndex < 0 || activeStageIndex >= stages.length) {
+      if (stages.length > 0) {
+        setActiveStageIndex(0);
+      }
+    }
+  }, [activeStageIndex, isHydrated, stages.length]);
+
+  useEffect(() => {
+    if (!isHydrated || typeof window === "undefined") {
+      return;
+    }
+
+    const nextState: PersistedScheduleState = {
+      activeDayId,
+      activeGroupId,
+      activeStageIndex,
+      view,
+    };
+
+    window.sessionStorage.setItem(storageKey, JSON.stringify(nextState));
+  }, [activeDayId, activeGroupId, activeStageIndex, isHydrated, storageKey, view]);
+
+  useEffect(() => {
+    if (!isHydrated) {
+      return;
+    }
+
+    if (!activeGroupId && groupSections[0]) {
+      setActiveGroupId(groupSections[0].id);
+    }
+  }, [activeGroupId, groupSections, isHydrated]);
 
   useEffect(() => {
     if (view !== "chronology" || !activeDayId) {
