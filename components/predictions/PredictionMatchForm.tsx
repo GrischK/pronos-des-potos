@@ -1,7 +1,7 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 import {
   savePredictionAction,
@@ -74,27 +74,56 @@ function getPredictionValue(value: number | null | undefined) {
   return value === null || value === undefined ? "" : String(value);
 }
 
+function hasCompleteScore(homeScore: string, awayScore: string) {
+  return homeScore !== "" && awayScore !== "";
+}
+
 export function PredictionMatchForm({ match, slug, anchorId }: PredictionMatchFormProps) {
   const [state, formAction, pending] = useActionState(
     savePredictionAction,
     initialState,
   );
+  const homeInputRef = useRef<HTMLInputElement>(null);
+  const awayInputRef = useRef<HTMLInputElement>(null);
   const initialHomeScore = getPredictionValue(match.prediction?.homeScore);
   const initialAwayScore = getPredictionValue(match.prediction?.awayScore);
-  const [homeScore, setHomeScore] = useState(initialHomeScore);
-  const [awayScore, setAwayScore] = useState(initialAwayScore);
   const [savedHomeScore, setSavedHomeScore] = useState(initialHomeScore);
   const [savedAwayScore, setSavedAwayScore] = useState(initialAwayScore);
   const [hasSavedState, setHasSavedState] = useState(
     initialHomeScore !== "" && initialAwayScore !== "",
   );
+  const [isDirty, setIsDirty] = useState(false);
+  const [isComplete, setIsComplete] = useState(
+    hasCompleteScore(initialHomeScore, initialAwayScore),
+  );
+
+  const syncDraftState = () => {
+    const nextHomeScore = homeInputRef.current?.value ?? "";
+    const nextAwayScore = awayInputRef.current?.value ?? "";
+    const nextIsDirty =
+      nextHomeScore !== savedHomeScore || nextAwayScore !== savedAwayScore;
+    const nextIsComplete = hasCompleteScore(nextHomeScore, nextAwayScore);
+
+    setIsDirty((current) => (current === nextIsDirty ? current : nextIsDirty));
+    setIsComplete((current) =>
+      current === nextIsComplete ? current : nextIsComplete,
+    );
+  };
 
   useEffect(() => {
-    setHomeScore(initialHomeScore);
-    setAwayScore(initialAwayScore);
+    if (homeInputRef.current) {
+      homeInputRef.current.value = initialHomeScore;
+    }
+
+    if (awayInputRef.current) {
+      awayInputRef.current.value = initialAwayScore;
+    }
+
     setSavedHomeScore(initialHomeScore);
     setSavedAwayScore(initialAwayScore);
     setHasSavedState(initialHomeScore !== "" && initialAwayScore !== "");
+    setIsDirty(false);
+    setIsComplete(hasCompleteScore(initialHomeScore, initialAwayScore));
   }, [initialAwayScore, initialHomeScore, match.id]);
 
   useEffect(() => {
@@ -102,15 +131,18 @@ export function PredictionMatchForm({ match, slug, anchorId }: PredictionMatchFo
       return;
     }
 
-    setSavedHomeScore(homeScore);
-    setSavedAwayScore(awayScore);
+    const nextHomeScore = homeInputRef.current?.value ?? "";
+    const nextAwayScore = awayInputRef.current?.value ?? "";
+
+    setSavedHomeScore(nextHomeScore);
+    setSavedAwayScore(nextAwayScore);
     setHasSavedState(true);
+    setIsDirty(false);
+    setIsComplete(hasCompleteScore(nextHomeScore, nextAwayScore));
   }, [state.success]);
 
   const hasResult = match.homeScore !== null && match.awayScore !== null;
   const showReadonlyEmptyState = !match.canPredict && !match.prediction;
-  const isDirty = homeScore !== savedHomeScore || awayScore !== savedAwayScore;
-  const hasCompleteScore = homeScore !== "" && awayScore !== "";
   const showSavedState = hasSavedState && !isDirty;
   const hasExistingPrediction = savedHomeScore !== "" && savedAwayScore !== "";
   const submitLabel = hasExistingPrediction ? "Modifier" : "Enregistrer";
@@ -151,28 +183,30 @@ export function PredictionMatchForm({ match, slug, anchorId }: PredictionMatchFo
             <div className="prediction-inputs">
               <input
                 aria-label={`Score ${getTeamName(match, "home")}`}
-                onChange={(event) => setHomeScore(event.target.value)}
+                defaultValue={initialHomeScore}
                 disabled={!match.canPredict || pending}
                 inputMode="numeric"
                 max="99"
                 min="0"
                 name="homeScore"
+                onInput={syncDraftState}
+                ref={homeInputRef}
                 required
                 type="number"
-                value={homeScore}
               />
               <span>·</span>
               <input
                 aria-label={`Score ${getTeamName(match, "away")}`}
-                onChange={(event) => setAwayScore(event.target.value)}
+                defaultValue={initialAwayScore}
                 disabled={!match.canPredict || pending}
                 inputMode="numeric"
                 max="99"
                 min="0"
                 name="awayScore"
+                onInput={syncDraftState}
+                ref={awayInputRef}
                 required
                 type="number"
-                value={awayScore}
               />
             </div>
           )}
@@ -203,7 +237,7 @@ export function PredictionMatchForm({ match, slug, anchorId }: PredictionMatchFo
           <button
             aria-label={showSavedState ? "Prono enregistré" : "Enregistrer le prono"}
             className={`btn ${showSavedState ? "btn-saved" : "btn-primary"}`}
-            disabled={!match.canPredict || pending || !hasCompleteScore || !isDirty}
+            disabled={!match.canPredict || pending || !isComplete || !isDirty}
             type="submit"
           >
             {pending ? (
