@@ -99,7 +99,7 @@ export function AccountForms({ user }: AccountFormsProps) {
             />
           </label>
           <label className="field">
-            <span>Mot de passe actuel</span>
+            <span>Saisis ton mot de passe pour valider</span>
             <input
               autoComplete="current-password"
               name="currentPassword"
