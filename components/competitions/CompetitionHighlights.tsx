@@ -188,7 +188,7 @@ function HighlightSection({
                 <MatchCard match={match} />
                 <div className="flex gap-2 py-2">
                   <span className="highlight-match-card-cta">{ctaLabel}</span>
-                  <span className="competition-card-title-cta" aria-hidden="true">
+                  <span className="highlight-match-card-cta-icon" aria-hidden="true">
                     <ArrowRight size={18} strokeWidth={2.6} />
                   </span>
                 </div>

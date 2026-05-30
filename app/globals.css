@@ -1805,6 +1805,11 @@
     color: var(--pitch-strong);
   }
 
+  .highlight-match-card-cta-icon {
+    @apply inline-flex items-center justify-center rounded-full;
+    color: var(--pitch-strong);
+  }
+
   .highlight-prono-line {
     @apply flex items-center justify-between gap-3 rounded-lg bg-surface-alt px-3 py-2;
   }
@@ -3856,6 +3861,10 @@
   }
 
   :root[data-theme="dark"] .highlight-match-card-cta {
+    color: #bdf0d2;
+  }
+
+  :root[data-theme="dark"] .highlight-match-card-cta-icon {
     color: #bdf0d2;
   }
 
