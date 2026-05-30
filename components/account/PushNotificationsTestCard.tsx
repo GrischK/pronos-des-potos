@@ -24,8 +24,8 @@ export function PushNotificationsTestCard({
   );
   const [message, setMessage] = useState(
     hasExistingSubscription
-      ? "Les notifications test sont déjà activées sur cet appareil."
-      : "Active les notifications test pour recevoir une alerte toutes les minutes.",
+      ? "Les notifications sont activées sur cet appareil."
+      : "Active les notifications pour recevoir les alertes importantes sur cet appareil.",
   );
 
   const isSupported = useMemo(
@@ -45,15 +45,46 @@ export function PushNotificationsTestCard({
     }
   }, [isSupported]);
 
-  async function enablePushTest() {
+  const isIosStandaloneRequired = useMemo(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+
+    const isIos =
+      /iP(ad|hone|od)/.test(window.navigator.userAgent) ||
+      (window.navigator.platform === "MacIntel" &&
+        window.navigator.maxTouchPoints > 1);
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      ("standalone" in navigator && navigator.standalone === true);
+
+    return isIos && !isStandalone;
+  }, []);
+
+  async function readApiError(response: Response, fallback: string) {
+    try {
+      const payload = (await response.json()) as { error?: string };
+      return payload.error ?? fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  async function enablePush() {
     if (!isSupported || !pushPublicKey) {
       setStatus("unsupported");
       setMessage("La configuration push n'est pas complète sur cette instance.");
       return;
     }
 
+    if (isIosStandaloneRequired) {
+      setStatus("idle");
+      setMessage("Sur iPhone, installe d'abord la PWA sur l'écran d'accueil pour activer les notifications.");
+      return;
+    }
+
     setStatus("loading");
-    setMessage("Activation des notifications test...");
+    setMessage("Activation des notifications...");
 
     try {
       const permission = await Notification.requestPermission();
@@ -82,25 +113,50 @@ export function PushNotificationsTestCard({
       });
 
       if (!response.ok) {
-        throw new Error("Subscription registration failed.");
+        throw new Error(
+          await readApiError(
+            response,
+            "L'enregistrement de l'abonnement push a échoué.",
+          ),
+        );
+      }
+
+      if ("showNotification" in registration) {
+        await registration.showNotification("Notifications activées", {
+          body: "Tu recevras les rappels importants de tes pronos sur cet appareil.",
+          icon: "/android-chrome-192x192.png",
+          badge: "/favicon-32x32.png",
+          tag: "push-activation-success",
+          data: {
+            url: "/mon-compte",
+          },
+        });
+      } else {
+        new Notification("Notifications activées", {
+          body: "Tu recevras les rappels importants de tes pronos sur cet appareil.",
+        });
       }
 
       setStatus("enabled");
-      setMessage("Notifications test activées. La prochaine alerte part au prochain passage minute.");
+      setMessage("Notifications activées sur cet appareil.");
     } catch (error) {
       console.error(error);
       setStatus("idle");
-      setMessage("Impossible d'activer les notifications test pour le moment.");
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Impossible d'activer les notifications pour le moment.",
+      );
     }
   }
 
-  async function disablePushTest() {
+  async function disablePush() {
     if (!isSupported) {
       return;
     }
 
     setStatus("loading");
-    setMessage("Désactivation des notifications test...");
+    setMessage("Désactivation des notifications...");
 
     try {
       const registration = await navigator.serviceWorker.ready;
@@ -120,11 +176,11 @@ export function PushNotificationsTestCard({
       }
 
       setStatus("idle");
-      setMessage("Notifications test désactivées sur cet appareil.");
+      setMessage("Notifications désactivées sur cet appareil.");
     } catch (error) {
       console.error(error);
       setStatus(hasExistingSubscription ? "enabled" : "idle");
-      setMessage("Impossible de désactiver les notifications test pour le moment.");
+      setMessage("Impossible de désactiver les notifications pour le moment.");
     }
   }
 
@@ -133,18 +189,18 @@ export function PushNotificationsTestCard({
       ? "Traitement..."
       : status === "enabled"
         ? "Désactiver sur cet appareil"
-        : "Activer les notifications test";
+        : "Activer les notifications";
 
   return (
     <section className="card account-card">
-      <h2>Notifications test</h2>
+      <h2>Notifications</h2>
       <div className="account-form">
         <p>{message}</p>
-        <div className="actions">
+        <div className="actions mt-auto">
           <button
             className="btn btn-primary"
             disabled={status === "loading" || status === "unsupported"}
-            onClick={status === "enabled" ? disablePushTest : enablePushTest}
+            onClick={status === "enabled" ? disablePush : enablePush}
             type="button"
           >
             {actionLabel}

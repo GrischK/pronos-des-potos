@@ -4,11 +4,9 @@ import { ArrowRight, Shirt } from "lucide-react";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
-import { PushNotificationTestButton } from "@/components/competitions/PushNotificationTestButton";
 import { UrgentPredictionBadge } from "@/components/competitions/UrgentPredictionBadge";
 import { competitionKindLabels } from "@/src/domain/competition-kind";
 import { getLiveMatchStatusLabel, getMatchStatusLabel } from "@/src/domain/match-status";
-import { isPushNotificationConfigured } from "@/src/server/push-notifications";
 import {
   getCompetitionsOverview,
   getNextPredictionOpportunity,
@@ -187,15 +185,6 @@ export default async function CompetitionsPage() {
       <AutoRefresh intervalMs={30000} />
       <PageHeader
          className="competitions-page-header"
-        actions={
-          <PushNotificationTestButton
-            pushPublicKey={
-              isPushNotificationConfigured()
-                ? process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null
-                : null
-            }
-          />
-        }
         eyebrow="Compétitions"
         title="Choisis ta compét'"
         description="Retrouve tes tournois, pose tes prochains pronos et surveille les classements quand les scores tombent."

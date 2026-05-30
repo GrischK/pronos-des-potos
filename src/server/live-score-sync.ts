@@ -11,12 +11,18 @@ import {
   scheduleLiveScoresCron,
   setLiveScoresCronEnabled,
 } from "@/src/server/cron-job-org";
+import {
+  getPreMatchReminderLeadTimeMs,
+  processFinishedMatchNotifications,
+  processPreMatchReminderNotifications,
+} from "@/src/server/push-notification-jobs";
 
 const LIVE_TRACKING_WINDOW_HOURS = 4;
 const LIVE_SCORE_LOOKAHEAD_HOURS = 26;
 const LIVE_SCORE_CRON_TIMEZONE = "Europe/Paris";
 const SCHEDULED_START_GRACE_MINUTES = 20;
 const SCHEDULED_START_LOOKAHEAD_MINUTES = 60;
+const PRE_MATCH_REMINDER_WINDOW_MINUTES = 10;
 
 async function upsertImportedTeam(
   competitionId: string,
@@ -83,6 +89,7 @@ export async function syncLiveScores(now = new Date()) {
 
   let updatedCount = 0;
   const errors: string[] = [];
+  const finishedMatchIds: string[] = [];
 
   for (const match of candidateMatches) {
     if (!match.externalMatchId || !match.competition.externalProvider) {
@@ -100,6 +107,9 @@ export async function syncLiveScores(now = new Date()) {
         match.id,
         importedMatch,
       );
+      if (importedMatch.status === "FINISHED" && match.status !== "FINISHED") {
+        finishedMatchIds.push(match.id);
+      }
       updatedCount += 1;
     } catch (error) {
       errors.push(
@@ -110,9 +120,18 @@ export async function syncLiveScores(now = new Date()) {
     }
   }
 
+  const [preMatchNotifications, finishedMatchNotifications] = await Promise.all([
+    processPreMatchReminderNotifications(now),
+    processFinishedMatchNotifications(finishedMatchIds),
+  ]);
+
   return {
     checkedCount: candidateMatches.length,
     updatedCount,
+    notifications: {
+      preMatchSentCount: preMatchNotifications.sentCount,
+      finishedMatchSentCount: finishedMatchNotifications.sentCount,
+    },
     errors,
   };
 }
@@ -157,6 +176,7 @@ async function getLiveScoreCandidateMatches(now: Date) {
       id: true,
       competitionId: true,
       externalMatchId: true,
+      status: true,
       competition: {
         select: {
           externalProvider: true,
@@ -181,20 +201,40 @@ async function hasUpcomingScheduledStart(now: Date) {
   );
   const match = await prisma.match.findFirst({
     where: {
-      externalMatchId: {
-        not: null,
-      },
-      status: "SCHEDULED",
-      kickoffAt: {
-        gt: now,
-        lte: lookaheadEnd,
-      },
-      competition: {
-        externalProvider: "FOOTBALL_DATA",
-        status: {
-          in: ["OPEN", "LIVE"],
+      OR: [
+        {
+          externalMatchId: {
+            not: null,
+          },
+          status: "SCHEDULED",
+          kickoffAt: {
+            gt: now,
+            lte: lookaheadEnd,
+          },
+          competition: {
+            externalProvider: "FOOTBALL_DATA",
+            status: {
+              in: ["OPEN", "LIVE"],
+            },
+          },
         },
-      },
+        {
+          status: "SCHEDULED",
+          kickoffAt: {
+            gt: now,
+            lte: lookaheadEnd,
+          },
+          homeTeamId: {
+            not: null,
+          },
+          awayTeamId: {
+            not: null,
+          },
+          competition: {
+            status: "OPEN",
+          },
+        },
+      ],
     },
     select: {
       id: true,
@@ -238,8 +278,15 @@ function getHourlyCronSchedule(matches: { kickoffAt: Date }[], now: Date) {
   const todayKey = getTimeZoneDateKey(now, LIVE_SCORE_CRON_TIMEZONE);
 
   for (const match of matches) {
-    const start =
-      match.kickoffAt > minimumStart ? match.kickoffAt : minimumStart;
+    const reminderStart = new Date(match.kickoffAt.getTime() - getPreMatchReminderLeadTimeMs());
+    if (reminderStart > now) {
+      hours.add(getTimeZoneHour(reminderStart, LIVE_SCORE_CRON_TIMEZONE));
+    }
+
+    const liveTrackingStart = new Date(
+      match.kickoffAt.getTime() - SCHEDULED_START_GRACE_MINUTES * 60 * 1000,
+    );
+    const start = liveTrackingStart > minimumStart ? liveTrackingStart : minimumStart;
     const end = new Date(
       match.kickoffAt.getTime() + LIVE_TRACKING_WINDOW_HOURS * 60 * 60 * 1000,
     );
@@ -267,22 +314,42 @@ export async function prepareLiveScoreCron(now = new Date()) {
   );
   const matches = await prisma.match.findMany({
     where: {
-      externalMatchId: {
-        not: null,
-      },
-      status: {
-        in: ["SCHEDULED", "LIVE"],
-      },
-      kickoffAt: {
-        gte: trackingWindowStart,
-        lte: trackingWindowEnd,
-      },
-      competition: {
-        externalProvider: "FOOTBALL_DATA",
-        status: {
-          in: ["OPEN", "LIVE"],
+      OR: [
+        {
+          externalMatchId: {
+            not: null,
+          },
+          status: {
+            in: ["SCHEDULED", "LIVE"],
+          },
+          kickoffAt: {
+            gte: trackingWindowStart,
+            lte: trackingWindowEnd,
+          },
+          competition: {
+            externalProvider: "FOOTBALL_DATA",
+            status: {
+              in: ["OPEN", "LIVE"],
+            },
+          },
         },
-      },
+        {
+          status: "SCHEDULED",
+          kickoffAt: {
+            gt: now,
+            lte: trackingWindowEnd,
+          },
+          homeTeamId: {
+            not: null,
+          },
+          awayTeamId: {
+            not: null,
+          },
+          competition: {
+            status: "OPEN",
+          },
+        },
+      ],
     },
     select: {
       id: true,
@@ -294,10 +361,22 @@ export async function prepareLiveScoreCron(now = new Date()) {
   });
   const todayKey = getTimeZoneDateKey(now, LIVE_SCORE_CRON_TIMEZONE);
   const matchesToSchedule = matches.filter(
-    (match) =>
-      match.kickoffAt <= now ||
-      getTimeZoneDateKey(match.kickoffAt, LIVE_SCORE_CRON_TIMEZONE) ===
-        todayKey,
+    (match) => {
+      const reminderStart = new Date(
+        match.kickoffAt.getTime() - getPreMatchReminderLeadTimeMs(),
+      );
+      const reminderWindowEnd = new Date(
+        reminderStart.getTime() + PRE_MATCH_REMINDER_WINDOW_MINUTES * 60 * 1000,
+      );
+
+      return (
+        match.kickoffAt <= now ||
+        getTimeZoneDateKey(match.kickoffAt, LIVE_SCORE_CRON_TIMEZONE) ===
+          todayKey ||
+        (reminderWindowEnd > now &&
+          getTimeZoneDateKey(reminderStart, LIVE_SCORE_CRON_TIMEZONE) === todayKey)
+      );
+    },
   );
   const hours = getHourlyCronSchedule(matchesToSchedule, now);
   const cronJob =
@@ -329,6 +408,17 @@ export async function stopLiveScoreCronIfIdle(now = new Date()) {
     return {
       stopped: false,
       reason: "Un coup d'envoi approche.",
+    };
+  }
+
+  const nextSchedule = await prepareLiveScoreCron(now);
+
+  if (nextSchedule.hours.length > 0) {
+    return {
+      stopped: false,
+      reason: "Cron replanifié sur la prochaine fenêtre utile.",
+      cronJob: nextSchedule.cronJob,
+      hours: nextSchedule.hours,
     };
   }
 

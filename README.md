@@ -110,7 +110,7 @@ Procedure recommandeee :
 
 ```bash
 vercel env pull .env.production.local --environment=production
-PRISMA_ENV_FILE=.env.production.local npx prisma migrate deploy
+PRISMA_ENV_FILE=.env.production npx prisma migrate deploy
 ```
 
 Verification rapide de la cible avant execution :
