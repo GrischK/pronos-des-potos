@@ -1810,6 +1810,18 @@
     color: var(--pitch-strong);
   }
 
+  .competition-push-test {
+    @apply grid gap-2 justify-items-start;
+  }
+
+  .competition-push-test-button {
+    @apply gap-2;
+  }
+
+  .competition-push-test-message {
+    @apply m-0 text-sm font-bold text-muted;
+  }
+
   .highlight-prono-line {
     @apply flex items-center justify-between gap-3 rounded-lg bg-surface-alt px-3 py-2;
   }
@@ -3866,6 +3878,10 @@
 
   :root[data-theme="dark"] .highlight-match-card-cta-icon {
     color: #bdf0d2;
+  }
+
+  :root[data-theme="dark"] .competition-push-test-message {
+    color: #b8c4d0;
   }
 
   :root[data-theme="dark"] .competition-card-title .competition-emblem {

@@ -5,6 +5,7 @@ import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { getSessionUserId } from "@/src/auth/session";
 import { prisma } from "@/src/db/prisma";
+import { isPushNotificationConfigured } from "@/src/server/push-notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,12 @@ export default async function AccountPage() {
     where: { id: userId },
     select: {
       email: true,
+      pushSubscriptions: {
+        select: {
+          id: true,
+        },
+        take: 1,
+      },
       image: true,
       name: true,
       role: true,
@@ -39,7 +46,19 @@ export default async function AccountPage() {
         />
 
         <section className="page-section">
-          <AccountForms user={user} />
+          <AccountForms
+            pushPublicKey={
+              isPushNotificationConfigured()
+                ? process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null
+                : null
+            }
+            user={{
+              email: user.email,
+              hasPushSubscription: user.pushSubscriptions.length > 0,
+              image: user.image,
+              name: user.name,
+            }}
+          />
         </section>
       </main>
     </AppShell>

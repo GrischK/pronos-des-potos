@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 
+import { PushNotificationsTestCard } from "@/components/account/PushNotificationsTestCard";
 import { AvatarUploadForm } from "@/components/account/AvatarUploadForm";
 import { PlayerProfileAvatar } from "@/components/player/PlayerProfileAvatar";
 import {
@@ -14,9 +15,11 @@ import {
 type AccountFormsProps = {
   user: {
     email: string;
+    hasPushSubscription: boolean;
     image: string | null;
     name: string | null;
   };
+  pushPublicKey: string | null;
 };
 
 const initialState: AccountActionState = {};
@@ -33,7 +36,7 @@ function ActionMessage({ state }: { state: AccountActionState }) {
   return null;
 }
 
-export function AccountForms({ user }: AccountFormsProps) {
+export function AccountForms({ pushPublicKey, user }: AccountFormsProps) {
   const [nameState, nameAction, namePending] = useActionState(
     updateAccountNameAction,
     initialState,
@@ -65,6 +68,11 @@ export function AccountForms({ user }: AccountFormsProps) {
         <h2>Photo</h2>
         <AvatarUploadForm />
       </section>
+
+      <PushNotificationsTestCard
+        hasExistingSubscription={user.hasPushSubscription}
+        pushPublicKey={pushPublicKey}
+      />
 
       <section className="card account-card">
         <h2>Nom</h2>
