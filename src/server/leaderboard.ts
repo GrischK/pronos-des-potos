@@ -7,7 +7,10 @@ import {
   getMatchResultForPoints,
 } from "@/src/domain/scoring";
 import { prisma } from "@/src/db/prisma";
-import { buildBonusPointsByUser } from "@/src/server/bonus";
+import {
+  buildBonusPointsByUser,
+  resolveBonusResult,
+} from "@/src/server/bonus";
 
 export type LeaderboardRow = {
   userId: string;
@@ -112,6 +115,8 @@ type LeaderboardMatch = {
   matchday?: number | null;
   stage?: string;
   status: string;
+  homeTeamId?: string | null;
+  awayTeamId?: string | null;
   predictions: {
     userId: string;
     homeScore: number;
@@ -610,6 +615,8 @@ export async function getLeaderboardData(
           extraTimeAwayScore: true,
           penaltyHomeScore: true,
           penaltyAwayScore: true,
+          homeTeamId: true,
+          awayTeamId: true,
           homePlaceholder: true,
           awayPlaceholder: true,
           homeTeam: {
@@ -649,8 +656,8 @@ export async function getLeaderboardData(
     return null;
   }
 
-  const bonusPointsByUser = buildBonusPointsByUser(
-    competition.bonusPredictions,
+  const bonusResult = resolveBonusResult(
+    competition.bonusEnabled,
     competition.bonusEnabled &&
       (competition.bonusWinnerTeamId ||
         competition.bonusSecondTeamId ||
@@ -661,15 +668,14 @@ export async function getLeaderboardData(
           thirdTeamId: competition.bonusThirdTeamId,
         }
       : null,
+    competition.matches,
+  );
+  const bonusPointsByUser = buildBonusPointsByUser(
+    competition.bonusPredictions,
+    bonusResult,
     competition.bonusEnabled,
   );
-  const bonusResultKnown =
-    competition.bonusEnabled &&
-    Boolean(
-      competition.bonusWinnerTeamId ||
-        competition.bonusSecondTeamId ||
-        competition.bonusThirdTeamId,
-    );
+  const bonusResultKnown = competition.bonusEnabled && bonusResult !== null;
 
   const officialMatches = competition.matches.filter(
     (match) => match.status === "FINISHED",
@@ -787,6 +793,8 @@ export async function getLeaderboardProgressData(
           matchday: true,
           stage: true,
           status: true,
+          homeTeamId: true,
+          awayTeamId: true,
           homeScore: true,
           awayScore: true,
           regularHomeScore: true,
@@ -819,8 +827,8 @@ export async function getLeaderboardProgressData(
     return null;
   }
 
-  const bonusPointsByUser = buildBonusPointsByUser(
-    competition.bonusPredictions,
+  const bonusResult = resolveBonusResult(
+    competition.bonusEnabled,
     competition.bonusEnabled &&
       (competition.bonusWinnerTeamId ||
         competition.bonusSecondTeamId ||
@@ -831,6 +839,11 @@ export async function getLeaderboardProgressData(
           thirdTeamId: competition.bonusThirdTeamId,
         }
       : null,
+    competition.matches,
+  );
+  const bonusPointsByUser = buildBonusPointsByUser(
+    competition.bonusPredictions,
+    bonusResult,
     competition.bonusEnabled,
   );
 

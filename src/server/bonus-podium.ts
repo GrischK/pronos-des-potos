@@ -3,6 +3,7 @@ import "server-only";
 import { getCurrentUser } from "@/src/auth/current-user";
 import { computeBonusPoints, type BonusPodiumPick } from "@/src/domain/bonus-scoring";
 import { prisma } from "@/src/db/prisma";
+import { resolveBonusResult } from "@/src/server/bonus";
 
 type BonusTeam = {
   id: string;
@@ -87,6 +88,27 @@ export async function getBonusPodiumPageData(slug: string) {
           thirdTeamId: true,
         },
       },
+      matches: {
+        where: {
+          status: "FINISHED",
+          homeScore: {
+            not: null,
+          },
+          awayScore: {
+            not: null,
+          },
+        },
+        select: {
+          stage: true,
+          status: true,
+          homeTeamId: true,
+          awayTeamId: true,
+          homeScore: true,
+          awayScore: true,
+          penaltyHomeScore: true,
+          penaltyAwayScore: true,
+        },
+      },
     },
   });
 
@@ -98,17 +120,20 @@ export async function getBonusPodiumPageData(slug: string) {
     competition.teams.map((team) => [team.id, team] as const),
   );
 
-  const result =
+  const result = resolveBonusResult(
+    competition.bonusEnabled,
     competition.bonusEnabled &&
-    (competition.bonusWinnerTeamId ||
-      competition.bonusSecondTeamId ||
-      competition.bonusThirdTeamId)
+      (competition.bonusWinnerTeamId ||
+        competition.bonusSecondTeamId ||
+        competition.bonusThirdTeamId)
       ? {
           winnerTeamId: competition.bonusWinnerTeamId,
           secondTeamId: competition.bonusSecondTeamId,
           thirdTeamId: competition.bonusThirdTeamId,
         }
-      : null;
+      : null,
+    competition.matches,
+  );
 
   const pointsByUser = new Map<string, number>();
   if (result) {

@@ -12,7 +12,10 @@ import {
   type MatchScoreDisplayInput,
   getMatchResultForPoints,
 } from "@/src/domain/scoring";
-import { buildBonusPointsByUser } from "@/src/server/bonus";
+import {
+  buildBonusPointsByUser,
+  resolveBonusResult,
+} from "@/src/server/bonus";
 
 const WORLD_CUP_2026_GROUPS = [
   {
@@ -359,6 +362,7 @@ export async function getCompetitionsOverview() {
         select: {
           id: true,
           kickoffAt: true,
+          stage: true,
           status: true,
           liveMinute: true,
           homeScore: true,
@@ -510,8 +514,8 @@ export async function getCompetitionsOverview() {
         }
       }
 
-      const bonusPointsByUser = buildBonusPointsByUser(
-        competition.bonusPredictions,
+      const bonusResult = resolveBonusResult(
+        competition.bonusEnabled,
         competition.bonusEnabled &&
           (competition.bonusWinnerTeamId ||
             competition.bonusSecondTeamId ||
@@ -522,6 +526,11 @@ export async function getCompetitionsOverview() {
               thirdTeamId: competition.bonusThirdTeamId,
             }
           : null,
+        competition.matches,
+      );
+      const bonusPointsByUser = buildBonusPointsByUser(
+        competition.bonusPredictions,
+        bonusResult,
         competition.bonusEnabled,
       );
 

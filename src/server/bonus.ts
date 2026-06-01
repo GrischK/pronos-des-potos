@@ -1,6 +1,10 @@
 import "server-only";
 
 import { computeBonusPoints, type BonusPodiumPick } from "@/src/domain/bonus-scoring";
+import {
+  resolveBonusResult,
+  type BonusResultMatch,
+} from "@/src/domain/bonus-result";
 
 export type BonusPredictionRow = {
   userId: string;
@@ -8,6 +12,8 @@ export type BonusPredictionRow = {
   secondTeamId: string | null;
   thirdTeamId: string | null;
 };
+
+export { resolveBonusResult, type BonusResultMatch };
 
 export function buildBonusPointsByUser(
   predictions: BonusPredictionRow[],
