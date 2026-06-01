@@ -1,6 +1,10 @@
 import "server-only";
 
-import { computePredictionPoints } from "@/src/domain/scoring";
+import {
+  computePredictionPoints,
+  formatMatchScoreText,
+  getMatchResultForPoints,
+} from "@/src/domain/scoring";
 import { prisma } from "@/src/db/prisma";
 import { sendPushNotificationToUser } from "@/src/server/push-notifications";
 
@@ -196,6 +200,12 @@ export async function processFinishedMatchNotifications(finishedMatchIds: string
       },
       homeScore: true,
       awayScore: true,
+      regularHomeScore: true,
+      regularAwayScore: true,
+      extraTimeHomeScore: true,
+      extraTimeAwayScore: true,
+      penaltyHomeScore: true,
+      penaltyAwayScore: true,
       predictions: {
         select: {
           homeScore: true,
@@ -247,10 +257,16 @@ export async function processFinishedMatchNotifications(finishedMatchIds: string
   for (const match of matches) {
     const homeTeamName = getTeamName(match, "home");
     const awayTeamName = getTeamName(match, "away");
+    const result = getMatchResultForPoints(match);
+
+    if (result === null) {
+      continue;
+    }
+
     const exactScorePredictionCount = match.predictions.filter(
       (prediction) =>
-        prediction.homeScore === match.homeScore &&
-        prediction.awayScore === match.awayScore,
+        prediction.homeScore === result.homeScore &&
+        prediction.awayScore === result.awayScore,
     ).length;
 
     for (const prediction of match.predictions) {
@@ -265,21 +281,20 @@ export async function processFinishedMatchNotifications(finishedMatchIds: string
           awayScore: prediction.awayScore,
           homeScore: prediction.homeScore,
         },
-        result: {
-          awayScore: match.awayScore ?? 0,
-          homeScore: match.homeScore ?? 0,
-        },
+        result,
         exactScorePredictionCount,
       });
 
-      const result = await sendPushNotificationToUser(prediction.userId, {
-        body: `Score final : ${match.homeScore} · ${match.awayScore}. Ton prono : ${prediction.homeScore} · ${prediction.awayScore}. Tu gagnes ${points} ${points > 1 ? "points" : "point"}.`,
+      const scoreSummary = formatMatchScoreText(match).replace(/\n/g, " | ");
+
+      const notificationResult = await sendPushNotificationToUser(prediction.userId, {
+        body: `Résultat : ${scoreSummary}. Ton prono : ${prediction.homeScore} · ${prediction.awayScore}. Tu gagnes ${points} ${points > 1 ? "points" : "point"}.`,
         tag: `match-result-${match.id}`,
         title: `${homeTeamName} ${match.homeScore} · ${match.awayScore} ${awayTeamName}`,
         url: `/competitions/${match.competition.slug}/classement?mode=live`,
       });
 
-      if (result.delivered > 0) {
+      if (notificationResult.delivered > 0) {
         deliveredRecords.push({
           deliveryKey,
           kind: "MATCH_RESULT",

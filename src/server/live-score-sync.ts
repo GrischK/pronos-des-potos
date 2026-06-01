@@ -80,6 +80,12 @@ async function updateMatchFromExternalData(
       liveMinute: importedMatch.liveMinute,
       homeScore: importedMatch.homeScore,
       awayScore: importedMatch.awayScore,
+      regularHomeScore: importedMatch.regularHomeScore,
+      regularAwayScore: importedMatch.regularAwayScore,
+      extraTimeHomeScore: importedMatch.extraTimeHomeScore,
+      extraTimeAwayScore: importedMatch.extraTimeAwayScore,
+      penaltyHomeScore: importedMatch.penaltyHomeScore,
+      penaltyAwayScore: importedMatch.penaltyAwayScore,
     },
   });
 }

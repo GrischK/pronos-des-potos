@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 import { UrgentPredictionBadge } from "@/components/competitions/UrgentPredictionBadge";
 import { competitionKindLabels } from "@/src/domain/competition-kind";
+import { formatMatchScoreText } from "@/src/domain/scoring";
 import { getLiveMatchStatusLabel, getMatchStatusLabel } from "@/src/domain/match-status";
 import {
   getCompetitionsOverview,
@@ -61,6 +62,12 @@ type LiveMatchPreview = MatchPreview & {
   liveMinute: number | null;
   homeScore: number | null;
   awayScore: number | null;
+  regularHomeScore: number | null;
+  regularAwayScore: number | null;
+  extraTimeHomeScore?: number | null;
+  extraTimeAwayScore?: number | null;
+  penaltyHomeScore?: number | null;
+  penaltyAwayScore?: number | null;
   ownPrediction: {
     homeScore: number;
     awayScore: number;
@@ -117,14 +124,6 @@ function formatKickoffCountdown(value: string) {
   const days = Math.round(hours / 24);
 
   return `Plus que ${days} j avant fermeture`;
-}
-
-function renderScore(homeScore: number | null, awayScore: number | null) {
-  if (homeScore === null || awayScore === null) {
-    return "- · -";
-  }
-
-  return `${homeScore} · ${awayScore}`;
 }
 
 function renderOwnPrediction(match: LiveMatchPreview | null) {
@@ -264,10 +263,7 @@ export default async function CompetitionsPage() {
                     </strong>
                     <div className="competition-card-live-scoreline">
                       <span className="match-score">
-                        {renderScore(
-                          competition.liveMatch.homeScore,
-                          competition.liveMatch.awayScore,
-                        )}
+                        {formatMatchScoreText(competition.liveMatch)}
                       </span>
                       <span className="match-status match-live-status">
                         <span>{getMatchStatusLabel("LIVE")}</span>

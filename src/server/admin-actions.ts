@@ -149,6 +149,12 @@ async function importCompetitionData(
         status: match.status,
         homeScore: match.homeScore,
         awayScore: match.awayScore,
+        regularHomeScore: match.regularHomeScore,
+        regularAwayScore: match.regularAwayScore,
+        extraTimeHomeScore: match.extraTimeHomeScore,
+        extraTimeAwayScore: match.extraTimeAwayScore,
+        penaltyHomeScore: match.penaltyHomeScore,
+        penaltyAwayScore: match.penaltyAwayScore,
       },
       update: {
         homeTeamId: homeTeam?.id,
@@ -161,6 +167,12 @@ async function importCompetitionData(
         status: match.status,
         homeScore: match.homeScore,
         awayScore: match.awayScore,
+        regularHomeScore: match.regularHomeScore,
+        regularAwayScore: match.regularAwayScore,
+        extraTimeHomeScore: match.extraTimeHomeScore,
+        extraTimeAwayScore: match.extraTimeAwayScore,
+        penaltyHomeScore: match.penaltyHomeScore,
+        penaltyAwayScore: match.penaltyAwayScore,
       },
     });
   }
@@ -272,11 +284,14 @@ export async function createCompetitionAction(
   }
 }
 
-export async function syncCompetitionAction(formData: FormData) {
+export async function syncCompetitionAction(
+  _state: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
   const admin = await getCurrentAdmin();
 
   if (!admin) {
-    throw new Error("Accès réservé aux admins.");
+    return { error: "Accès réservé aux admins." };
   }
 
   const competitionId = z.string().min(1).parse(formData.get("competitionId"));
@@ -294,7 +309,7 @@ export async function syncCompetitionAction(formData: FormData) {
   });
 
   if (!competition) {
-    throw new Error("Compétition introuvable.");
+    return { error: "Compétition introuvable." };
   }
 
   let provider = competition.externalProvider;
@@ -302,14 +317,14 @@ export async function syncCompetitionAction(formData: FormData) {
   let externalSeason = competition.externalSeason;
 
   if (!provider || !externalCompetitionId || !externalSeason) {
-    throw new Error("Source de données externe manquante pour cette compétition.");
+    return { error: "Source de données externe manquante pour cette compétition." };
   }
 
   if (provider !== "FOOTBALL_DATA") {
-    throw new Error("football-data.org est la seule source active.");
+    return { error: "football-data.org est la seule source active." };
   }
 
-  await importCompetitionData(
+  const result = await importCompetitionData(
     competition.id,
     provider,
     externalCompetitionId,
@@ -319,6 +334,10 @@ export async function syncCompetitionAction(formData: FormData) {
   updateTag("competitions");
   updateTag("admin-competitions");
   updateTag(`competition:${competition.slug}`);
+
+  return {
+    success: `Synchronisation terminée : ${result.teamCount} équipes et ${result.fixtureCount} matchs réimportés.`,
+  };
 }
 
 export async function toggleCompetitionOpenAction(formData: FormData) {

@@ -151,6 +151,12 @@ model Match {
   liveMinute    Int?
   homeScore     Int?
   awayScore     Int?
+  regularHomeScore Int?
+  regularAwayScore Int?
+  extraTimeHomeScore Int?
+  extraTimeAwayScore Int?
+  penaltyHomeScore Int?
+  penaltyAwayScore Int?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 

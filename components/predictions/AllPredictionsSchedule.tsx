@@ -5,6 +5,7 @@ import type { CompetitionKind } from "@prisma/client";
 import { PlayerPointsBadge } from "@/components/player/PlayerPointsBadge";
 import { PredictionScheduleBrowser } from "@/components/predictions/PredictionSchedule";
 import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
+import { formatMatchScoreText } from "@/src/domain/scoring";
 import { getLiveMatchStatusLabel, getMatchStatusLabel } from "@/src/domain/match-status";
 import type { PublicPredictionMatch } from "@/src/server/all-predictions";
 
@@ -40,14 +41,6 @@ function getTeamFlag(match: PublicPredictionMatch, side: "home" | "away") {
   const team = side === "home" ? match.homeTeam : match.awayTeam;
 
   return team?.flagUrl ?? null;
-}
-
-function renderScore(homeScore: number | null, awayScore: number | null) {
-  if (homeScore === null || awayScore === null) {
-    return "- · -";
-  }
-
-  return `${homeScore} · ${awayScore}`;
 }
 
 function getResultLabel(status: string) {
@@ -97,7 +90,7 @@ function AllPredictionsMatchCard({ match }: { match: PublicPredictionMatch }) {
 
         <div className="prediction-score-block">
           <span className="match-score">
-            {renderScore(match.homeScore, match.awayScore)}
+            {formatMatchScoreText(match)}
           </span>
           {hasResult ? (
             <p className="prediction-result">

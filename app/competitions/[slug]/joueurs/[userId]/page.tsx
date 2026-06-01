@@ -8,6 +8,7 @@ import {
 } from "@/components/player/PlayerPointsBadge";
 import { PlayerProfileAvatar } from "@/components/player/PlayerProfileAvatar";
 import { getCompetitionKindLabel } from "@/src/domain/competition-kind";
+import { formatMatchScoreText } from "@/src/domain/scoring";
 import { getPlayerProfileData } from "@/src/server/player-profile";
 import type { PlayerProfileMatch } from "@/src/server/player-profile";
 
@@ -62,7 +63,7 @@ function PlayerMatchRow({ match }: { match: PlayerProfileMatch }) {
       </div>
       <span className="player-score-cell">
         <span className="player-score-label">Résultat match</span>
-        <strong>{renderScore(match.homeScore, match.awayScore)}</strong>
+        <strong className="player-score-result">{formatMatchScoreText(match)}</strong>
       </span>
       <span className="player-score-cell">
         <span className="player-score-label">Prono</span>

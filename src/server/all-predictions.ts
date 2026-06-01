@@ -1,7 +1,11 @@
 import "server-only";
 
 import { getCurrentUser } from "@/src/auth/current-user";
-import { computePredictionPoints } from "@/src/domain/scoring";
+import {
+  computePredictionPoints,
+  type MatchScoreDisplayInput,
+  getMatchResultForPoints,
+} from "@/src/domain/scoring";
 import { prisma } from "@/src/db/prisma";
 
 export type PublicPredictionMatch = {
@@ -11,8 +15,6 @@ export type PublicPredictionMatch = {
   matchday: number | null;
   status: string;
   liveMinute: number | null;
-  homeScore: number | null;
-  awayScore: number | null;
   homePlaceholder: string | null;
   awayPlaceholder: string | null;
   canRevealPredictions: boolean;
@@ -34,7 +36,7 @@ export type PublicPredictionMatch = {
     name: string;
     flagUrl: string | null;
   } | null;
-};
+} & MatchScoreDisplayInput;
 
 function getUserDisplayName(user: { name: string | null; email: string }) {
   return user.name?.trim() || user.email;
@@ -78,6 +80,12 @@ export async function getAllPredictionsPageData(slug: string) {
           liveMinute: true,
           homeScore: true,
           awayScore: true,
+          regularHomeScore: true,
+          regularAwayScore: true,
+          extraTimeHomeScore: true,
+          extraTimeAwayScore: true,
+          penaltyHomeScore: true,
+          penaltyAwayScore: true,
           homePlaceholder: true,
           awayPlaceholder: true,
           homeTeam: {
@@ -134,6 +142,12 @@ export async function getAllPredictionsPageData(slug: string) {
       liveMinute: match.liveMinute,
       homeScore: match.homeScore,
       awayScore: match.awayScore,
+      regularHomeScore: match.regularHomeScore,
+      regularAwayScore: match.regularAwayScore,
+      extraTimeHomeScore: match.extraTimeHomeScore,
+      extraTimeAwayScore: match.extraTimeAwayScore,
+      penaltyHomeScore: match.penaltyHomeScore,
+      penaltyAwayScore: match.penaltyAwayScore,
       homePlaceholder: match.homePlaceholder,
       awayPlaceholder: match.awayPlaceholder,
       canRevealPredictions:
@@ -142,28 +156,25 @@ export async function getAllPredictionsPageData(slug: string) {
         .map((prediction) => {
           let points: number | null = null;
 
-          if (
-            match.homeScore !== null &&
-            match.awayScore !== null &&
-            (match.status === "FINISHED" || match.status === "LIVE")
-          ) {
-            const exactScorePredictionCount = match.predictions.filter(
-              (matchPrediction) =>
-                matchPrediction.homeScore === match.homeScore &&
-                matchPrediction.awayScore === match.awayScore,
-            ).length;
+          if (match.status === "FINISHED" || match.status === "LIVE") {
+            const result = getMatchResultForPoints(match);
 
-            points = computePredictionPoints({
-              prediction: {
-                homeScore: prediction.homeScore,
-                awayScore: prediction.awayScore,
-              },
-              result: {
-                homeScore: match.homeScore,
-                awayScore: match.awayScore,
-              },
-              exactScorePredictionCount,
-            });
+            if (result !== null) {
+              const exactScorePredictionCount = match.predictions.filter(
+                (matchPrediction) =>
+                  matchPrediction.homeScore === result.homeScore &&
+                  matchPrediction.awayScore === result.awayScore,
+              ).length;
+
+              points = computePredictionPoints({
+                prediction: {
+                  homeScore: prediction.homeScore,
+                  awayScore: prediction.awayScore,
+                },
+                result,
+                exactScorePredictionCount,
+              });
+            }
           }
 
           return {

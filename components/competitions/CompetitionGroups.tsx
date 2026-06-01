@@ -8,6 +8,7 @@ import {
   getCompetitionStageLabel,
   isTwoLeggedCompetitionStage,
 } from "@/src/domain/competition-stage";
+import { formatMatchScoreText } from "@/src/domain/scoring";
 import { getMatchStatusLabel } from "@/src/domain/match-status";
 import type {
   CompetitionGroup,
@@ -35,14 +36,6 @@ function formatKickoffAt(value: string) {
   }
 
   return dateFormatter.format(date);
-}
-
-function renderScore(homeScore: number | null, awayScore: number | null) {
-  if (homeScore === null || awayScore === null) {
-    return "- · -";
-  }
-
-  return `${homeScore} · ${awayScore}`;
 }
 
 function getTeamName(
@@ -153,7 +146,7 @@ function MatchList({ matches }: { matches: CompetitionScheduleMatch[] }) {
               </span>
 
               <span className="match-score">
-                {renderScore(match.homeScore, match.awayScore)}
+                {formatMatchScoreText(match)}
               </span>
 
               <span className="match-team match-team-away">

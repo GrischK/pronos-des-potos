@@ -7,7 +7,11 @@ import {
   competitionStageOrder,
   getCompetitionStageLabel,
 } from "@/src/domain/competition-stage";
-import { computePredictionPoints } from "@/src/domain/scoring";
+import {
+  computePredictionPoints,
+  type MatchScoreDisplayInput,
+  getMatchResultForPoints,
+} from "@/src/domain/scoring";
 import { buildBonusPointsByUser } from "@/src/server/bonus";
 
 const WORLD_CUP_2026_GROUPS = [
@@ -83,13 +87,11 @@ type CompetitionMatch = {
   matchday: number | null;
   status: string;
   liveMinute: number | null;
-  homeScore: number | null;
-  awayScore: number | null;
   homePlaceholder: string | null;
   awayPlaceholder: string | null;
   homeTeam: TeamInfo | null;
   awayTeam: TeamInfo | null;
-};
+} & MatchScoreDisplayInput;
 
 export type CompetitionScheduleMatch = {
   id: string;
@@ -99,13 +101,11 @@ export type CompetitionScheduleMatch = {
   matchday: number | null;
   status: string;
   liveMinute: number | null;
-  homeScore: number | null;
-  awayScore: number | null;
   homePlaceholder: string | null;
   awayPlaceholder: string | null;
   homeTeam: TeamInfo | null;
   awayTeam: TeamInfo | null;
-};
+} & MatchScoreDisplayInput;
 
 export type CompetitionGroup = {
   name: string;
@@ -363,6 +363,12 @@ export async function getCompetitionsOverview() {
           liveMinute: true,
           homeScore: true,
           awayScore: true,
+          regularHomeScore: true,
+          regularAwayScore: true,
+          extraTimeHomeScore: true,
+          extraTimeAwayScore: true,
+          penaltyHomeScore: true,
+          penaltyAwayScore: true,
           homePlaceholder: true,
           awayPlaceholder: true,
           homeTeamId: true,
@@ -459,18 +465,16 @@ export async function getCompetitionsOverview() {
       }
 
       for (const match of competition.matches) {
-        if (
-          match.status !== "FINISHED" ||
-          match.homeScore === null ||
-          match.awayScore === null
-        ) {
+        const result = getMatchResultForPoints(match);
+
+        if (match.status !== "FINISHED" || result === null) {
           continue;
         }
 
         const exactScorePredictionCount = match.predictions.filter(
           (prediction) =>
-            prediction.homeScore === match.homeScore &&
-            prediction.awayScore === match.awayScore,
+            prediction.homeScore === result.homeScore &&
+            prediction.awayScore === result.awayScore,
         ).length;
 
         for (const prediction of match.predictions) {
@@ -488,10 +492,7 @@ export async function getCompetitionsOverview() {
               homeScore: prediction.homeScore,
               awayScore: prediction.awayScore,
             },
-            result: {
-              homeScore: match.homeScore,
-              awayScore: match.awayScore,
-            },
+            result,
             exactScorePredictionCount,
           });
 
@@ -567,6 +568,12 @@ export async function getCompetitionsOverview() {
               liveMinute: liveMatch.liveMinute,
               homeScore: liveMatch.homeScore,
               awayScore: liveMatch.awayScore,
+              regularHomeScore: liveMatch.regularHomeScore,
+              regularAwayScore: liveMatch.regularAwayScore,
+              extraTimeHomeScore: liveMatch.extraTimeHomeScore,
+              extraTimeAwayScore: liveMatch.extraTimeAwayScore,
+              penaltyHomeScore: liveMatch.penaltyHomeScore,
+              penaltyAwayScore: liveMatch.penaltyAwayScore,
               homeTeam: liveMatch.homeTeam,
               awayTeam: liveMatch.awayTeam,
               homePlaceholder: liveMatch.homePlaceholder,
@@ -781,6 +788,12 @@ export async function getCompetitionBySlug(slug: string) {
           liveMinute: true,
           homeScore: true,
           awayScore: true,
+          regularHomeScore: true,
+          regularAwayScore: true,
+          extraTimeHomeScore: true,
+          extraTimeAwayScore: true,
+          penaltyHomeScore: true,
+          penaltyAwayScore: true,
           homePlaceholder: true,
           awayPlaceholder: true,
           homeTeam: {

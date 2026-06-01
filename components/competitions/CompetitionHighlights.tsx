@@ -6,6 +6,7 @@ import type {
   CompetitionHighlightsData,
 } from "@/src/server/competition-highlights";
 import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
+import { formatMatchScoreText } from "@/src/domain/scoring";
 import { ArrowRight } from "lucide-react";
 import { getLiveMatchStatusLabel, getMatchStatusLabel } from "@/src/domain/match-status";
 
@@ -41,14 +42,6 @@ function getTeamFlag(match: CompetitionHighlightMatch, side: "home" | "away") {
   const team = side === "home" ? match.homeTeam : match.awayTeam;
 
   return team?.flagUrl ?? null;
-}
-
-function renderScore(homeScore: number | null, awayScore: number | null) {
-  if (homeScore === null || awayScore === null) {
-    return "- · -";
-  }
-
-  return `${homeScore} · ${awayScore}`;
 }
 
 function renderStatus(status: string, liveMinute: number | null) {
@@ -87,7 +80,7 @@ function MatchCard({ match }: { match: CompetitionHighlightMatch }) {
         </span>
 
         <span className="match-score">
-          {renderScore(match.homeScore, match.awayScore)}
+          {formatMatchScoreText(match)}
         </span>
 
         <span className="match-team match-team-away">

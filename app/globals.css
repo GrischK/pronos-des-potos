@@ -2491,6 +2491,11 @@
     @apply text-sm font-black text-foreground;
   }
 
+  .player-score-result {
+    display: block;
+    white-space: pre-line;
+  }
+
   .player-points-badge {
     @apply inline-flex items-center justify-center rounded-lg px-2.5 py-1;
     min-height: 1.9rem;
@@ -2582,7 +2587,8 @@
   }
 
   .match-score {
-    @apply rounded-lg bg-foreground px-3 py-1 text-sm font-black text-white;
+    @apply inline-block rounded-lg bg-foreground px-3 py-1 text-sm font-black leading-tight text-center text-white;
+    white-space: pre-line;
   }
 
   .match-status {
@@ -2713,7 +2719,8 @@
   }
 
   .prediction-result {
-    @apply rounded-lg bg-surface-alt px-2.5 py-1 text-xs font-black text-muted;
+    @apply rounded-lg bg-surface-alt px-2.5 py-1 text-xs font-black text-muted flex flex-col items-center;
+    white-space: pre-line;
   }
 
   .prediction-empty {

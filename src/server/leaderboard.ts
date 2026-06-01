@@ -1,7 +1,11 @@
 import "server-only";
 
 import { getCompetitionStageLabel, isTwoLeggedCompetitionStage } from "@/src/domain/competition-stage";
-import { computePredictionPoints } from "@/src/domain/scoring";
+import {
+  computePredictionPoints,
+  type MatchScoreDisplayInput,
+  getMatchResultForPoints,
+} from "@/src/domain/scoring";
 import { prisma } from "@/src/db/prisma";
 import { buildBonusPointsByUser } from "@/src/server/bonus";
 
@@ -77,8 +81,6 @@ export type LeaderboardLiveMatch = {
   stage: string;
   status: string;
   liveMinute: number | null;
-  homeScore: number | null;
-  awayScore: number | null;
   homePlaceholder: string | null;
   awayPlaceholder: string | null;
   homeTeam: {
@@ -97,8 +99,8 @@ export type LeaderboardLiveMatch = {
       id: string;
       name: string;
     };
-  }[];
-};
+    }[];
+} & MatchScoreDisplayInput;
 
 function getUserDisplayName(user: { name: string | null; email: string }) {
   return user.name?.trim() || user.email;
@@ -110,8 +112,6 @@ type LeaderboardMatch = {
   matchday?: number | null;
   stage?: string;
   status: string;
-  homeScore: number | null;
-  awayScore: number | null;
   predictions: {
     userId: string;
     homeScore: number;
@@ -123,7 +123,7 @@ type LeaderboardMatch = {
       name: string | null;
     };
   }[];
-};
+} & MatchScoreDisplayInput;
 
 type CompetitionPlayer = {
   user: {
@@ -171,14 +171,16 @@ function buildLeaderboardSnapshot(
   }
 
   for (const match of matches) {
-    if (match.homeScore === null || match.awayScore === null) {
+    const result = getMatchResultForPoints(match);
+
+    if (result === null) {
       continue;
     }
 
     const exactScorePredictionCount = match.predictions.filter(
       (prediction) =>
-        prediction.homeScore === match.homeScore &&
-        prediction.awayScore === match.awayScore,
+        prediction.homeScore === result.homeScore &&
+        prediction.awayScore === result.awayScore,
     ).length;
 
     for (const prediction of match.predictions) {
@@ -201,10 +203,7 @@ function buildLeaderboardSnapshot(
           homeScore: prediction.homeScore,
           awayScore: prediction.awayScore,
         },
-        result: {
-          homeScore: match.homeScore,
-          awayScore: match.awayScore,
-        },
+        result,
         exactScorePredictionCount,
       });
 
@@ -605,6 +604,12 @@ export async function getLeaderboardData(
           liveMinute: true,
           homeScore: true,
           awayScore: true,
+          regularHomeScore: true,
+          regularAwayScore: true,
+          extraTimeHomeScore: true,
+          extraTimeAwayScore: true,
+          penaltyHomeScore: true,
+          penaltyAwayScore: true,
           homePlaceholder: true,
           awayPlaceholder: true,
           homeTeam: {
@@ -682,6 +687,12 @@ export async function getLeaderboardData(
       liveMinute: match.liveMinute,
       homeScore: match.homeScore,
       awayScore: match.awayScore,
+      regularHomeScore: match.regularHomeScore,
+      regularAwayScore: match.regularAwayScore,
+      extraTimeHomeScore: match.extraTimeHomeScore,
+      extraTimeAwayScore: match.extraTimeAwayScore,
+      penaltyHomeScore: match.penaltyHomeScore,
+      penaltyAwayScore: match.penaltyAwayScore,
       homePlaceholder: match.homePlaceholder,
       awayPlaceholder: match.awayPlaceholder,
       homeTeam: match.homeTeam,
@@ -778,6 +789,12 @@ export async function getLeaderboardProgressData(
           status: true,
           homeScore: true,
           awayScore: true,
+          regularHomeScore: true,
+          regularAwayScore: true,
+          extraTimeHomeScore: true,
+          extraTimeAwayScore: true,
+          penaltyHomeScore: true,
+          penaltyAwayScore: true,
           predictions: {
             select: {
               userId: true,

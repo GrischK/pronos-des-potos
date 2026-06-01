@@ -1,12 +1,12 @@
 import Link from "next/link";
 
+import { CompetitionSyncForm } from "@/components/admin/CompetitionSyncForm";
 import { CompetitionBonusForm } from "@/components/admin/CompetitionBonusForm";
 import { CompetitionForm } from "@/components/admin/CompetitionForm";
 import { PageHeader } from "@/components/PageHeader";
 import {
   deleteCompetitionAction,
   renameCompetitionAction,
-  syncCompetitionAction,
   toggleCompetitionOpenAction,
   updateCompetitionKindAction,
 } from "@/src/server/admin-actions";
@@ -138,16 +138,7 @@ export default async function AdminPage() {
                         </button>
                       </form>
 
-                      <form action={syncCompetitionAction}>
-                        <input
-                          name="competitionId"
-                          type="hidden"
-                          value={competition.id}
-                        />
-                        <button className="btn btn-secondary" type="submit">
-                          Synchroniser
-                        </button>
-                      </form>
+                      <CompetitionSyncForm competitionId={competition.id} />
 
                       <form action={deleteCompetitionAction}>
                         <input

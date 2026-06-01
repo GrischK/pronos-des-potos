@@ -11,6 +11,12 @@ export type PredictionMatch = {
   status: string;
   homeScore: number | null;
   awayScore: number | null;
+  regularHomeScore: number | null;
+  regularAwayScore: number | null;
+  extraTimeHomeScore: number | null;
+  extraTimeAwayScore: number | null;
+  penaltyHomeScore: number | null;
+  penaltyAwayScore: number | null;
   homePlaceholder: string | null;
   awayPlaceholder: string | null;
   canPredict: boolean;
@@ -93,6 +99,12 @@ export async function getPredictionPageData(slug: string) {
           status: true,
           homeScore: true,
           awayScore: true,
+          regularHomeScore: true,
+          regularAwayScore: true,
+          extraTimeHomeScore: true,
+          extraTimeAwayScore: true,
+          penaltyHomeScore: true,
+          penaltyAwayScore: true,
           homePlaceholder: true,
           awayPlaceholder: true,
           homeTeam: {
@@ -178,6 +190,12 @@ export async function getPredictionPageData(slug: string) {
       status: match.status,
       homeScore: match.homeScore,
       awayScore: match.awayScore,
+      regularHomeScore: match.regularHomeScore,
+      regularAwayScore: match.regularAwayScore,
+      extraTimeHomeScore: match.extraTimeHomeScore,
+      extraTimeAwayScore: match.extraTimeAwayScore,
+      penaltyHomeScore: match.penaltyHomeScore,
+      penaltyAwayScore: match.penaltyAwayScore,
       homePlaceholder: match.homePlaceholder,
       awayPlaceholder: match.awayPlaceholder,
       canPredict:

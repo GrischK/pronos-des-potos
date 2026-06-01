@@ -8,6 +8,7 @@ import {
   type PredictionActionState,
 } from "@/src/server/prediction-actions";
 import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
+import { formatMatchScoreText } from "@/src/domain/scoring";
 import type { PredictionMatch } from "@/src/server/predictions";
 
 type PredictionMatchFormProps = {
@@ -213,8 +214,8 @@ export function PredictionMatchForm({ match, slug, anchorId }: PredictionMatchFo
 
           {hasResult ? (
             <p className="prediction-result">
-              {getResultLabel(match.status)} : {match.homeScore} ·{" "}
-              {match.awayScore}
+              {getResultLabel(match.status)}{" "}
+              <span className="mt-4">{formatMatchScoreText(match)}</span>
             </p>
           ) : null}
         </div>

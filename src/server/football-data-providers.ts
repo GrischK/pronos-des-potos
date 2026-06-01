@@ -23,6 +23,12 @@ export type ImportedMatch = {
   liveMinute: number | null;
   homeScore: number | null;
   awayScore: number | null;
+  regularHomeScore: number | null;
+  regularAwayScore: number | null;
+  extraTimeHomeScore: number | null;
+  extraTimeAwayScore: number | null;
+  penaltyHomeScore: number | null;
+  penaltyAwayScore: number | null;
 };
 
 export type ImportedCompetitionData = {
@@ -55,6 +61,18 @@ type FootballDataMatch = {
       home: number | null;
       away: number | null;
     };
+    regularTime?: {
+      home: number | null;
+      away: number | null;
+    } | null;
+    extraTime?: {
+      home: number | null;
+      away: number | null;
+    } | null;
+    penalties?: {
+      home: number | null;
+      away: number | null;
+    } | null;
   };
 };
 
@@ -136,6 +154,12 @@ function footballDataTeam(team: FootballDataTeam): ImportedTeam | null {
 function footballDataMatch(match: FootballDataMatch): ImportedMatch {
   const homeTeam = footballDataTeam(match.homeTeam);
   const awayTeam = footballDataTeam(match.awayTeam);
+  const regularHomeScore = match.score.regularTime?.home ?? null;
+  const regularAwayScore = match.score.regularTime?.away ?? null;
+  const extraTimeHomeScore = match.score.extraTime?.home ?? null;
+  const extraTimeAwayScore = match.score.extraTime?.away ?? null;
+  const penaltyHomeScore = match.score.penalties?.home ?? null;
+  const penaltyAwayScore = match.score.penalties?.away ?? null;
 
   return {
     externalId: String(match.id),
@@ -150,6 +174,12 @@ function footballDataMatch(match: FootballDataMatch): ImportedMatch {
     liveMinute: getFootballDataLiveMinute(match),
     homeScore: match.score.fullTime.home,
     awayScore: match.score.fullTime.away,
+    regularHomeScore,
+    regularAwayScore,
+    extraTimeHomeScore,
+    extraTimeAwayScore,
+    penaltyHomeScore,
+    penaltyAwayScore,
   };
 }
 

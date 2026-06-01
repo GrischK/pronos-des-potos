@@ -1,6 +1,10 @@
 import "server-only";
 
-import { computePredictionPoints } from "@/src/domain/scoring";
+import {
+  computePredictionPoints,
+  type MatchScoreDisplayInput,
+  getMatchResultForPoints,
+} from "@/src/domain/scoring";
 import { prisma } from "@/src/db/prisma";
 import { getLeaderboardData } from "@/src/server/leaderboard";
 
@@ -10,8 +14,6 @@ export type PlayerProfileMatch = {
   stage: string;
   status: string;
   canRevealPrediction: boolean;
-  homeScore: number | null;
-  awayScore: number | null;
   homePlaceholder: string | null;
   awayPlaceholder: string | null;
   prediction: {
@@ -27,7 +29,7 @@ export type PlayerProfileMatch = {
     name: string;
     flagUrl: string | null;
   } | null;
-};
+} & MatchScoreDisplayInput;
 
 export type PlayerProfileData = {
   competition: {
@@ -113,6 +115,12 @@ export async function getPlayerProfileData(
             status: true,
             homeScore: true,
             awayScore: true,
+            regularHomeScore: true,
+            regularAwayScore: true,
+            extraTimeHomeScore: true,
+            extraTimeAwayScore: true,
+            penaltyHomeScore: true,
+            penaltyAwayScore: true,
             homePlaceholder: true,
             awayPlaceholder: true,
             homeTeam: {
@@ -174,41 +182,40 @@ export async function getPlayerProfileData(
 
       let matchPoints: number | null = null;
 
-      if (
-        match.homeScore !== null &&
-        match.awayScore !== null &&
-        (match.status === "FINISHED" || match.status === "LIVE")
-      ) {
-        const exactScorePredictionCount = match.predictions.filter(
-          (matchPrediction) =>
-            matchPrediction.homeScore === match.homeScore &&
-            matchPrediction.awayScore === match.awayScore,
-        ).length;
+      if (match.status === "FINISHED" || match.status === "LIVE") {
+        const result = getMatchResultForPoints(match);
 
-        matchPoints = computePredictionPoints({
-          prediction: {
-            homeScore: prediction.homeScore,
-            awayScore: prediction.awayScore,
-          },
-          result: {
-            homeScore: match.homeScore,
-            awayScore: match.awayScore,
-          },
-          exactScorePredictionCount,
-        });
+        if (result !== null) {
+          const exactScorePredictionCount = match.predictions.filter(
+            (matchPrediction) =>
+              matchPrediction.homeScore === result.homeScore &&
+              matchPrediction.awayScore === result.awayScore,
+          ).length;
 
-        points += matchPoints;
-        predictedMatches += 1;
-        scoredMatches += 1;
+          matchPoints = computePredictionPoints({
+            prediction: {
+              homeScore: prediction.homeScore,
+              awayScore: prediction.awayScore,
+            },
+            result,
+            exactScorePredictionCount,
+          });
 
-        if (matchPoints === 4) {
-          exactUnique += 1;
-        } else if (matchPoints === 3) {
-          exactShared += 1;
-        } else if (matchPoints === 1) {
-          correctOutcome += 1;
+          points += matchPoints;
+          predictedMatches += 1;
+          scoredMatches += 1;
+
+          if (matchPoints === 4) {
+            exactUnique += 1;
+          } else if (matchPoints === 3) {
+            exactShared += 1;
+          } else if (matchPoints === 1) {
+            correctOutcome += 1;
+          } else {
+            missed += 1;
+          }
         } else {
-          missed += 1;
+          predictedMatches += 1;
         }
       } else {
         predictedMatches += 1;
@@ -222,6 +229,12 @@ export async function getPlayerProfileData(
         canRevealPrediction,
         homeScore: match.homeScore,
         awayScore: match.awayScore,
+        regularHomeScore: match.regularHomeScore,
+        regularAwayScore: match.regularAwayScore,
+        extraTimeHomeScore: match.extraTimeHomeScore,
+        extraTimeAwayScore: match.extraTimeAwayScore,
+        penaltyHomeScore: match.penaltyHomeScore,
+        penaltyAwayScore: match.penaltyAwayScore,
         homePlaceholder: match.homePlaceholder,
         awayPlaceholder: match.awayPlaceholder,
         prediction: {
