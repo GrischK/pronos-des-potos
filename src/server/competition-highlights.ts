@@ -7,6 +7,7 @@ import {
   getMatchResultForPoints,
 } from "@/src/domain/scoring";
 import { prisma } from "@/src/db/prisma";
+import { getLeaderboardData } from "@/src/server/leaderboard";
 
 export type CompetitionHighlightPrediction = {
   id: string;
@@ -49,6 +50,13 @@ export type CompetitionHighlightsData = {
   todayMatches: CompetitionHighlightMatch[];
   nextMatches: CompetitionHighlightMatch[];
   nextTitle: string | null;
+  competitionFinished: boolean;
+  champion: {
+    userId: string;
+    name: string;
+    image: string | null;
+    points: number;
+  } | null;
 };
 
 const parisDayFormatter = new Intl.DateTimeFormat("en-CA", {
@@ -95,6 +103,32 @@ export async function getCompetitionHighlights(
     },
     select: {
       id: true,
+      name: true,
+      kind: true,
+      bonusEnabled: true,
+      bonusWinnerTeamId: true,
+      bonusSecondTeamId: true,
+      bonusThirdTeamId: true,
+      players: {
+        select: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              image: true,
+            },
+          },
+        },
+      },
+      bonusPredictions: {
+        select: {
+          userId: true,
+          winnerTeamId: true,
+          secondTeamId: true,
+          thirdTeamId: true,
+        },
+      },
       matches: {
         orderBy: [{ kickoffAt: "asc" }, { createdAt: "asc" }],
         select: {
@@ -103,6 +137,8 @@ export async function getCompetitionHighlights(
           stage: true,
           matchday: true,
           status: true,
+          homeTeamId: true,
+          awayTeamId: true,
           liveMinute: true,
           homeScore: true,
           awayScore: true,
@@ -137,6 +173,7 @@ export async function getCompetitionHighlights(
                   id: true,
                   email: true,
                   name: true,
+                  image: true,
                 },
               },
             },
@@ -154,6 +191,9 @@ export async function getCompetitionHighlights(
   const nowTime = now.getTime();
   const todayKey = getParisDayKey(now);
   const matches = competition.matches;
+  const competitionFinished = !matches.some(
+    (match) => match.status === "SCHEDULED" || match.status === "LIVE",
+  );
   const todayMatches = matches.filter(
     (match) => getParisDayKey(match.kickoffAt) === todayKey,
   );
@@ -255,9 +295,30 @@ export async function getCompetitionHighlights(
     };
   }
 
+  const leaderboard = competitionFinished ? await getLeaderboardData(slug) : null;
+  const champion = competitionFinished
+    ? leaderboard?.official.rows[0]
+      ? {
+          userId: leaderboard.official.rows[0].userId,
+          name: leaderboard.official.rows[0].name,
+          image: leaderboard.official.rows[0].image,
+          points: leaderboard.official.rows[0].points,
+        }
+      : null
+    : null;
+
   return {
     todayMatches: todayMatches.map(serializeMatch),
     nextMatches: nextMatches.map(serializeMatch),
     nextTitle: nextBaseMatch ? getNextSectionTitle(nextBaseMatch) : null,
+    competitionFinished,
+    champion: champion
+      ? {
+          userId: champion.userId,
+          name: champion.name,
+          image: champion.image,
+          points: champion.points,
+        }
+      : null,
   };
 }

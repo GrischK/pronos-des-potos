@@ -1925,6 +1925,68 @@
     @apply text-sm font-bold text-muted;
   }
 
+  .competition-finished-panel {
+    @apply grid gap-4;
+  }
+
+  .competition-finished-panel-head {
+    @apply flex flex-wrap items-center gap-3;
+  }
+
+  .competition-finished-panel-head strong {
+    @apply text-lg font-black text-foreground;
+  }
+
+  .competition-finished-panel-body {
+    @apply flex flex-wrap items-center gap-5;
+  }
+
+  .leaderboard-player-avatar.competition-finished-avatar {
+    @apply h-30 w-30 rounded-2xl text-xl;
+    box-shadow:
+      0 14px 30px color-mix(in srgb, var(--foreground) 14%, transparent),
+      inset 0 0 0 1px color-mix(in srgb, white 28%, transparent);
+  }
+
+  .competition-finished-banner {
+    @apply w-full;
+  }
+
+  .competition-finished-panel-link {
+    @apply inline-flex items-center gap-2 self-start rounded-lg border px-3 py-2 text-sm font-black transition-all;
+    border-color: color-mix(in srgb, var(--pitch) 18%, var(--line));
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--pitch) 8%, white),
+        var(--surface)
+      );
+    color: var(--pitch-strong);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, white 70%, transparent),
+      0 10px 22px color-mix(in srgb, var(--foreground) 8%, transparent);
+  }
+
+  .competition-finished-panel-link:hover {
+    border-color: color-mix(in srgb, var(--coral) 40%, var(--line));
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--coral) 10%, white),
+        color-mix(in srgb, var(--pitch) 5%, var(--surface))
+      );
+    color: var(--foreground);
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, white 80%, transparent),
+      0 14px 26px color-mix(in srgb, var(--foreground) 10%, transparent);
+  }
+
+  .competition-finished-panel-link-icon {
+    @apply inline-flex items-center justify-center rounded-full;
+    color: var(--pitch-strong);
+  }
+
   .live-match-predictions-panel {
     @apply rounded-lg border border-line bg-surface-alt p-3;
   }
@@ -3874,6 +3936,44 @@
 
   :root[data-theme="dark"] .highlight-match-card-cta-icon {
     color: #bdf0d2;
+  }
+
+  :root[data-theme="dark"] .competition-finished-panel-link {
+    border-color: color-mix(in srgb, var(--coral) 24%, var(--line));
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--coral) 10%, var(--surface-alt)),
+        color-mix(in srgb, var(--pitch) 6%, var(--surface))
+      );
+    color: color-mix(in srgb, var(--coral) 74%, white);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, white 8%, transparent),
+      0 14px 28px color-mix(in srgb, black 30%, transparent);
+  }
+
+  :root[data-theme="dark"] .competition-finished-panel-link:hover {
+    border-color: color-mix(in srgb, var(--coral) 36%, var(--line));
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--coral) 14%, var(--surface-alt)),
+        color-mix(in srgb, var(--card) 8%, var(--surface))
+      );
+    color: #ffe6df;
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, white 12%, transparent),
+      0 16px 32px color-mix(in srgb, black 36%, transparent);
+  }
+
+  :root[data-theme="dark"] .competition-finished-panel-link-icon {
+    color: color-mix(in srgb, var(--coral) 74%, white);
+  }
+
+  :root[data-theme="dark"] .competition-finished-avatar {
+    box-shadow:
+      0 16px 34px color-mix(in srgb, black 34%, transparent),
+      inset 0 0 0 1px color-mix(in srgb, white 10%, transparent);
   }
 
 

@@ -44,6 +44,24 @@ function getTeamFlag(match: CompetitionHighlightMatch, side: "home" | "away") {
   return team?.flagUrl ?? null;
 }
 
+function getInitial(name: string) {
+  return name.trim().slice(0, 1).toUpperCase();
+}
+
+function ChampionAvatar({
+  image,
+  name,
+}: {
+  image: string | null;
+  name: string;
+}) {
+  return (
+    <span className="leaderboard-player-avatar competition-finished-avatar">
+      {image ? <img alt="" loading="lazy" src={image} /> : getInitial(name)}
+    </span>
+  );
+}
+
 function renderStatus(status: string, liveMinute: number | null) {
   if (status !== "LIVE") {
     return <span className="match-status">{getMatchStatusLabel(status)}</span>;
@@ -198,26 +216,65 @@ function HighlightSection({
   );
 }
 
+export function CompetitionFinishedBanner({
+  champion,
+  href,
+}: {
+  champion: NonNullable<CompetitionHighlightsData["champion"]>;
+  href: string;
+}) {
+  return (
+    <section className="competition-finished-banner">
+      <div className="pending-predictions-panel competition-finished-panel">
+        <div className="competition-finished-panel-head">
+          <span className="badge badge-warning">Compétition terminée</span>
+          <strong>Champion des pronos</strong>
+        </div>
+        <div className="competition-finished-panel-body">
+          <ChampionAvatar image={champion.image} name={champion.name} />
+          <div className="pending-predictions-panel-done">
+            <strong>{champion.name}</strong>
+            <span>
+              Vainqueur avec {champion.points} point
+              {champion.points > 1 ? "s" : ""}.
+            </span>
+            <Link className="competition-finished-panel-link" href={href}>
+              <span>Voir le classement</span>
+              <span aria-hidden="true" className="competition-finished-panel-link-icon">
+                <ArrowRight size={18} strokeWidth={2.6} />
+              </span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function CompetitionHighlights({
                                         highlights,
                                         slug,
                                       }: CompetitionHighlightsProps) {
   return (
     <div className="competition-highlights">
-      <HighlightSection
-        emptyText="Aucun match aujourd'hui."
-        ctaLabel="Voir le classement live"
-        hrefBuilder={slug ? () => `/competitions/${slug}/classement?mode=live` : undefined}
-        matches={highlights.todayMatches}
-        title="Matchs du jour"
-      />
-      <HighlightSection
-        emptyText="Aucun prochain match programmé."
-        ctaLabel="Aller au prono"
-        hrefBuilder={slug ? (match) => `/competitions/${slug}/pronos#match-${match.id}` : undefined}
-        matches={highlights.nextMatches}
-        title={highlights.nextTitle ?? "Prochains matchs"}
-      />
+      {!highlights.competitionFinished ? (
+        <>
+          <HighlightSection
+            emptyText="Aucun match aujourd'hui."
+            ctaLabel="Voir le classement live"
+            hrefBuilder={slug ? () => `/competitions/${slug}/classement?mode=live` : undefined}
+            matches={highlights.todayMatches}
+            title="Matchs du jour"
+          />
+          <HighlightSection
+            emptyText="Aucun prochain match programmé."
+            ctaLabel="Aller au prono"
+            hrefBuilder={slug ? (match) => `/competitions/${slug}/pronos#match-${match.id}` : undefined}
+            matches={highlights.nextMatches}
+            title={highlights.nextTitle ?? "Prochains matchs"}
+          />
+        </>
+      ) : null}
     </div>
   );
 }

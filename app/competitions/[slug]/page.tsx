@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { CompetitionActionCard } from "@/components/competitions/CompetitionActionCard";
-import { CompetitionHighlights } from "@/components/competitions/CompetitionHighlights";
+import {
+  CompetitionFinishedBanner,
+  CompetitionHighlights,
+} from "@/components/competitions/CompetitionHighlights";
 import { PageHeader } from "@/components/PageHeader";
 import {
   getCompetitionHostCountries,
@@ -69,6 +72,15 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
         </div>
       ) : null}
 
+      {highlights.competitionFinished && highlights.champion ? (
+        <section className="page-section">
+          <CompetitionFinishedBanner
+            champion={highlights.champion}
+            href={`/competitions/${competition.slug}/classement`}
+          />
+        </section>
+      ) : null}
+
       <section className="page-section">
         <div className="competition-actions-grid">
           <CompetitionActionCard
@@ -107,9 +119,11 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
         </div>
       </section>
 
-      <section className="page-section">
-        <CompetitionHighlights highlights={highlights} slug={competition.slug} />
-      </section>
+      {highlights.competitionFinished ? null : (
+        <section className="page-section">
+          <CompetitionHighlights highlights={highlights} slug={competition.slug} />
+        </section>
+      )}
     </main>
   );
 }
