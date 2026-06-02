@@ -33,6 +33,7 @@ export type BonusPodiumPageData = {
   kind: string;
   emblemUrl: string | null;
   bonusEnabled: boolean;
+  predictionsVisible: boolean;
   teams: BonusTeam[];
   result: BonusPodiumPick | null;
   predictions: BonusPodiumPagePrediction[];
@@ -57,6 +58,7 @@ export async function getBonusPodiumPageData(slug: string) {
       slug: true,
       kind: true,
       emblemUrl: true,
+      startsAt: true,
       bonusEnabled: true,
       bonusWinnerTeamId: true,
       bonusSecondTeamId: true,
@@ -116,6 +118,10 @@ export async function getBonusPodiumPageData(slug: string) {
     return null;
   }
 
+  const predictionsVisible =
+    competition.startsAt !== null &&
+    competition.startsAt.getTime() <= Date.now();
+
   const teamById = new Map(
     competition.teams.map((team) => [team.id, team] as const),
   );
@@ -136,7 +142,7 @@ export async function getBonusPodiumPageData(slug: string) {
   );
 
   const pointsByUser = new Map<string, number>();
-  if (result) {
+  if (result && predictionsVisible) {
     for (const prediction of competition.bonusPredictions) {
       pointsByUser.set(
         prediction.user.id,
@@ -152,28 +158,30 @@ export async function getBonusPodiumPageData(slug: string) {
     }
   }
 
-  const predictions = competition.bonusPredictions
-    .map((prediction): BonusPodiumPagePrediction => ({
-      id: prediction.id,
-      user: {
-        id: prediction.user.id,
-        name: getUserDisplayName(prediction.user),
-        image: prediction.user.image,
-      },
-      winnerTeam: prediction.winnerTeamId ? teamById.get(prediction.winnerTeamId) ?? null : null,
-      secondTeam: prediction.secondTeamId ? teamById.get(prediction.secondTeamId) ?? null : null,
-      thirdTeam: prediction.thirdTeamId ? teamById.get(prediction.thirdTeamId) ?? null : null,
-      points: pointsByUser.get(prediction.user.id) ?? 0,
-    }))
-    .sort((a, b) => {
-      if (result) {
-        if (b.points !== a.points) {
-          return b.points - a.points;
-        }
-      }
+  const predictions = predictionsVisible
+    ? competition.bonusPredictions
+        .map((prediction): BonusPodiumPagePrediction => ({
+          id: prediction.id,
+          user: {
+            id: prediction.user.id,
+            name: getUserDisplayName(prediction.user),
+            image: prediction.user.image,
+          },
+          winnerTeam: prediction.winnerTeamId ? teamById.get(prediction.winnerTeamId) ?? null : null,
+          secondTeam: prediction.secondTeamId ? teamById.get(prediction.secondTeamId) ?? null : null,
+          thirdTeam: prediction.thirdTeamId ? teamById.get(prediction.thirdTeamId) ?? null : null,
+          points: pointsByUser.get(prediction.user.id) ?? 0,
+        }))
+        .sort((a, b) => {
+          if (result) {
+            if (b.points !== a.points) {
+              return b.points - a.points;
+            }
+          }
 
-      return a.user.name.localeCompare(b.user.name, "fr");
-    });
+          return a.user.name.localeCompare(b.user.name, "fr");
+        })
+    : [];
 
   return {
     id: competition.id,
@@ -182,6 +190,7 @@ export async function getBonusPodiumPageData(slug: string) {
     kind: competition.kind,
     emblemUrl: competition.emblemUrl,
     bonusEnabled: competition.bonusEnabled,
+    predictionsVisible,
     teams: competition.teams,
     result,
     predictions,

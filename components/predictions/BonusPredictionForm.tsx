@@ -253,7 +253,7 @@ export function BonusPredictionForm({
           <p className="readonly-notice">
             {bonus.allowLateEntries
               ? "Le bonus podium est indisponible tant que la competition est fermee."
-              : "Le bonus podium est verrouille des le debut de la competition."}
+              : "Le bonus podium est verrouille des le debut de la competition. Une fois la competition commencee, il n'est plus modifiable."}
           </p>
         ) : null}
       </form>

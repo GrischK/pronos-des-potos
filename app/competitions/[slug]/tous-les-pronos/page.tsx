@@ -67,14 +67,14 @@ export default async function TousLesPronosPage({
                 className="btn btn-secondary competition-back-button"
                 disabled
                 aria-describedby="bonus-pronos-tooltip"
-                title="Enregistre d'abord ton podium bonus pour voir celui des autres."
+                title="Le podium bonus des autres est visible après le début de la compétition."
                 type="button"
               >
                 Voir les pronos bonus
               </button>
               <span className="bonus-pronos-tooltip" id="bonus-pronos-tooltip" role="tooltip">
-                  Disponible après avoir enregistré ton podium bonus.
-                </span>
+                Visible après le début de la compétition.
+              </span>
             </div>
           )
         ) : null}
