@@ -193,6 +193,57 @@ Les deux jobs doivent envoyer l'en-tete HTTP :
 Authorization: Bearer <CRON_SECRET>
 ```
 
+## Backup de la base
+
+L'app est deployee sur Vercel, mais le backup PostgreSQL quotidien ne doit pas s'executer dans une fonction Vercel.
+Vercel cron jobs declenchent des Vercel Functions, avec des limites d'execution et de precision qui ne sont pas adaptees a un `pg_dump` complet.
+
+La solution mise en place est donc externe a Vercel :
+
+- un workflow GitHub Actions lance le backup chaque nuit
+- le script `npm run db:backup` execute `pg_dump`
+- le dump est archive dans Vercel Blob
+
+### Variables et secrets
+
+Sur GitHub Actions, creer les secrets suivants :
+
+```txt
+BACKUP_DATABASE_URL=postgresql://...
+BLOB_READ_WRITE_TOKEN=...
+```
+
+`BACKUP_DATABASE_URL` doit pointer vers la base de production, idealement avec une URL non poollee si ton provider en fournit une.
+On ne s'appuie pas sur les variables d'environnement Vercel pour cette tache, car le job tourne hors de Vercel.
+
+### Execution manuelle
+
+Tu peux lancer le backup a la main avec :
+
+```bash
+npm run db:backup
+```
+
+Il faut alors disposer de `pg_dump` et des deux variables ci-dessus.
+
+### Stockage
+
+Les dumps sont envoyes dans Vercel Blob sous le prefixe `db-backups/`.
+Chaque fichier est horodate pour garder un historique simple.
+
+### Restauration
+
+Pour restaurer un dump custom PostgreSQL, utiliser `pg_restore` sur un environnement cible vide ou prepare :
+
+```bash
+pg_restore --clean --if-exists --no-owner --no-acl --dbname="$DATABASE_URL" backup.dump
+```
+
+### Cron GitHub Actions
+
+Le workflow tourne une fois par nuit en UTC.
+Si tu veux un horaire Paris plus lisible, il faut convertir l'heure cible en UTC dans `.github/workflows/db-backup.yml`.
+
 ## Scripts utiles
 
 ```bash
