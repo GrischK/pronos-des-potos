@@ -68,6 +68,68 @@ function BonusTeamPill({
   );
 }
 
+function BonusPredictionCard({
+  bonusSlots,
+  prediction,
+  title,
+  subtitle,
+}: {
+  bonusSlots: ReturnType<typeof getBonusSlots>;
+  prediction: {
+    user: {
+      name: string;
+      image: string | null;
+    };
+    winnerTeam: {
+      name: string;
+      flagUrl: string | null;
+    } | null;
+    secondTeam: {
+      name: string;
+      flagUrl: string | null;
+    } | null;
+    thirdTeam: {
+      name: string;
+      flagUrl: string | null;
+    } | null;
+    points: number;
+  };
+  title: string;
+  subtitle: string;
+}) {
+  return (
+    <article className="bonus-podium-card bonus-podium-card--own">
+      <div className="bonus-podium-card-head">
+        <div className="bonus-podium-user">
+          {prediction.user.image ? (
+            <img alt="" className="bonus-podium-avatar" loading="lazy" src={prediction.user.image} />
+          ) : (
+            <span className="bonus-podium-avatar bonus-podium-avatar-fallback">
+              {prediction.user.name.charAt(0).toUpperCase()}
+            </span>
+          )}
+          <div>
+            <strong>{title}</strong>
+            <span>{subtitle}</span>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className={`bonus-podium-grid${bonusSlots.length === 2 ? " bonus-podium-grid--two" : ""}`}
+      >
+        {bonusSlots.map((slot) => (
+          <BonusTeamPill
+            key={slot.key}
+            label={slot.label}
+            team={prediction[slot.key === "winnerTeamId" ? "winnerTeam" : slot.key === "secondTeamId" ? "secondTeam" : "thirdTeam"]}
+          />
+        ))}
+      </div>
+    </article>
+  );
+}
+
 export default async function PodiumBonusPage({ params }: PodiumBonusPageProps) {
   const { slug } = await params;
   const competition = await getBonusPodiumPageData(slug);
@@ -132,9 +194,23 @@ export default async function PodiumBonusPage({ params }: PodiumBonusPageProps) 
 
       <section className="page-section">
         {!competition.predictionsVisible ? (
-          <p className="readonly-notice">
-            Le podium bonus des autres sera visible après le début de la competition.
-          </p>
+          <div className="bonus-podium-visible-state">
+            {competition.ownPrediction ? (
+              <BonusPredictionCard
+                bonusSlots={bonusSlots}
+                prediction={competition.ownPrediction}
+                subtitle="Ton podium bonus enregistré"
+                title="Ton podium"
+              />
+            ) : (
+              <p className="readonly-notice">
+                Tu n'as pas encore enregistré ton podium bonus.
+              </p>
+            )}
+            <p className="readonly-notice">
+              Le podium bonus des autres sera visible après le début de la competition.
+            </p>
+          </div>
         ) : (
           <div className="bonus-podium-list">
             {competition.predictions.length === 0 ? (
@@ -146,39 +222,13 @@ export default async function PodiumBonusPage({ params }: PodiumBonusPageProps) 
               </div>
             ) : (
               competition.predictions.map((prediction) => (
-                <article className="bonus-podium-card" key={prediction.id}>
-                  <div className="bonus-podium-card-head">
-                    <div className="bonus-podium-user">
-                      {prediction.user.image ? (
-                        <img alt="" className="bonus-podium-avatar" loading="lazy" src={prediction.user.image} />
-                      ) : (
-                        <span className="bonus-podium-avatar bonus-podium-avatar-fallback">
-                          {prediction.user.name.charAt(0).toUpperCase()}
-                        </span>
-                      )}
-                      <div>
-                        <strong>{prediction.user.name}</strong>
-                        {competition.result ? (
-                          <span>{prediction.points} pts</span>
-                        ) : (
-                          <span>Pronos bonus podium enregistré</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div
-                    className={`bonus-podium-grid${bonusSlots.length === 2 ? " bonus-podium-grid--two" : ""}`}
-                  >
-                    {bonusSlots.map((slot) => (
-                      <BonusTeamPill
-                        key={slot.key}
-                        label={slot.label}
-                        team={prediction[slot.key === "winnerTeamId" ? "winnerTeam" : slot.key === "secondTeamId" ? "secondTeam" : "thirdTeam"]}
-                      />
-                    ))}
-                  </div>
-                </article>
+                <BonusPredictionCard
+                  bonusSlots={bonusSlots}
+                  key={prediction.id}
+                  prediction={prediction}
+                  subtitle={competition.result ? `${prediction.points} pts` : "Pronos bonus podium enregistré"}
+                  title={prediction.user.name}
+                />
               ))
             )}
           </div>

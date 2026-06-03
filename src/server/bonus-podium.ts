@@ -36,6 +36,7 @@ export type BonusPodiumPageData = {
   predictionsVisible: boolean;
   teams: BonusTeam[];
   result: BonusPodiumPick | null;
+  ownPrediction: BonusPodiumPagePrediction | null;
   predictions: BonusPodiumPagePrediction[];
 };
 
@@ -183,6 +184,31 @@ export async function getBonusPodiumPageData(slug: string) {
         })
     : [];
 
+  const ownSourcePrediction =
+    competition.bonusPredictions.find(
+      (prediction) => prediction.user.id === currentUser.id,
+    ) ?? null;
+  const ownPrediction = ownSourcePrediction
+    ? {
+        id: ownSourcePrediction.id,
+        user: {
+          id: ownSourcePrediction.user.id,
+          name: getUserDisplayName(ownSourcePrediction.user),
+          image: ownSourcePrediction.user.image,
+        },
+        winnerTeam: ownSourcePrediction.winnerTeamId
+          ? teamById.get(ownSourcePrediction.winnerTeamId) ?? null
+          : null,
+        secondTeam: ownSourcePrediction.secondTeamId
+          ? teamById.get(ownSourcePrediction.secondTeamId) ?? null
+          : null,
+        thirdTeam: ownSourcePrediction.thirdTeamId
+          ? teamById.get(ownSourcePrediction.thirdTeamId) ?? null
+          : null,
+        points: pointsByUser.get(ownSourcePrediction.user.id) ?? 0,
+      }
+    : null;
+
   return {
     id: competition.id,
     name: competition.name,
@@ -193,6 +219,7 @@ export async function getBonusPodiumPageData(slug: string) {
     predictionsVisible,
     teams: competition.teams,
     result,
+    ownPrediction,
     predictions,
   } satisfies BonusPodiumPageData;
 }
