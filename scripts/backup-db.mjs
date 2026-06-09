@@ -16,6 +16,10 @@ function getDatabaseUrl() {
   );
 }
 
+function getPgDumpCommand() {
+  return process.env.PG_DUMP_BIN ?? "pg_dump";
+}
+
 function formatTimestamp(date) {
   return date.toISOString().replace(/[:.]/g, "-");
 }
@@ -51,6 +55,7 @@ function runCommand(command, args, env) {
 
 async function main() {
   const databaseUrl = getDatabaseUrl();
+  const pgDumpCommand = getPgDumpCommand();
 
   if (!databaseUrl) {
     throw new Error(
@@ -77,7 +82,7 @@ async function main() {
 
   try {
     await runCommand(
-      "pg_dump",
+      pgDumpCommand,
       [
         "--format=custom",
         "--no-owner",
