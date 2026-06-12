@@ -174,8 +174,12 @@ function HighlightSection({
   hrefBuilder?: (match: CompetitionHighlightMatch) => string;
   matches: CompetitionHighlightMatch[];
   title: string;
-  ctaLabel?: string;
+  ctaLabel?: string | ((match: CompetitionHighlightMatch) => string);
 }) {
+  function getCtaLabel(match: CompetitionHighlightMatch) {
+    return typeof ctaLabel === "function" ? ctaLabel(match) : ctaLabel ?? "Ouvrir";
+  }
+
   return (
     <section className="highlight-panel">
       <div className="section-heading">
@@ -191,14 +195,14 @@ function HighlightSection({
           {matches.map((match) => (
             hrefBuilder ? (
               <Link
-                aria-label={`${ctaLabel ?? "Ouvrir"} ${getTeamName(match, "home")} contre ${getTeamName(match, "away")}`}
+                aria-label={`${getCtaLabel(match)} ${getTeamName(match, "home")} contre ${getTeamName(match, "away")}`}
                 className="highlight-match-card highlight-match-card-link"
                 href={hrefBuilder(match)}
                 key={match.id}
               >
                 <MatchCard match={match} />
                 <div className="flex gap-2 py-2">
-                  <span className="highlight-match-card-cta">{ctaLabel}</span>
+                  <span className="highlight-match-card-cta">{getCtaLabel(match)}</span>
                   <span className="highlight-match-card-cta-icon" aria-hidden="true">
                     <ArrowRight size={18} strokeWidth={2.6} />
                   </span>
@@ -261,8 +265,15 @@ export function CompetitionHighlights({
         <>
           <HighlightSection
             emptyText="Aucun match aujourd'hui."
-            ctaLabel="Voir le classement live"
-            hrefBuilder={slug ? () => `/competitions/${slug}/classement?mode=live` : undefined}
+            ctaLabel={(match) => (match.status === "LIVE" ? "Voir le classement" : "Aller au prono")}
+            hrefBuilder={
+              slug
+                ? (match) =>
+                    match.status === "LIVE"
+                      ? `/competitions/${slug}/classement?mode=live`
+                      : `/competitions/${slug}/pronos#match-${match.id}`
+                : undefined
+            }
             matches={highlights.todayMatches}
             title="Matchs du jour"
           />
