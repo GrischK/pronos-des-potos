@@ -2884,7 +2884,7 @@
   }
 
   .bonus-podium-avatar-fallback {
-    @apply grid place-items-center text-sm font-black text-muted;
+    @apply grid place-items-center rounded-full bg-foreground text-sm font-black text-surface;
   }
 
   .bonus-podium-user strong,
