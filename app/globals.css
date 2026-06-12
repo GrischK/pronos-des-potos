@@ -2889,15 +2889,11 @@
 
   .bonus-podium-user strong,
   .bonus-podium-user span {
-    @apply block;
+    @apply flex items-center justify-center;
   }
 
   .bonus-podium-user strong {
     @apply min-w-0 truncate font-black text-foreground;
-  }
-
-  .bonus-podium-user span {
-    @apply text-sm font-bold text-muted;
   }
 
   .bonus-result-panel {
