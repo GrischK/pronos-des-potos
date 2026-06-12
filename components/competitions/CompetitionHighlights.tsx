@@ -265,11 +265,15 @@ export function CompetitionHighlights({
         <>
           <HighlightSection
             emptyText="Aucun match aujourd'hui."
-            ctaLabel={(match) => (match.status === "LIVE" ? "Voir le classement" : "Aller au prono")}
+            ctaLabel={(match) =>
+              match.status === "LIVE" || match.status === "FINISHED"
+                ? "Voir le classement"
+                : "Aller au prono"
+            }
             hrefBuilder={
               slug
                 ? (match) =>
-                    match.status === "LIVE"
+                    match.status === "LIVE" || match.status === "FINISHED"
                       ? `/competitions/${slug}/classement?mode=live`
                       : `/competitions/${slug}/pronos#match-${match.id}`
                 : undefined
