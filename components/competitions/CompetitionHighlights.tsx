@@ -70,7 +70,7 @@ function renderStatus(status: string, liveMinute: number | null) {
   return (
     <span className="match-status match-live-status">
       <span>{getMatchStatusLabel(status)}</span>
-      <span className="live-minute">{getLiveMatchStatusLabel(liveMinute)}</span>
+      {liveMinute !== null ? <span className="live-minute">{getLiveMatchStatusLabel(liveMinute)}</span> : null}
     </span>
   );
 }

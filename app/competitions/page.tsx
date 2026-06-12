@@ -135,7 +135,7 @@ function renderOwnPrediction(match: LiveMatchPreview | null) {
 }
 
 function renderLiveIndicator(liveMinute: number | null) {
-  return getLiveMatchStatusLabel(liveMinute);
+  return liveMinute !== null ? getLiveMatchStatusLabel(liveMinute) : null;
 }
 
 function MatchTeamsInline({ match }: { match: MatchPreview }) {
@@ -267,7 +267,11 @@ export default async function CompetitionsPage() {
                       </span>
                       <span className="match-status match-live-status">
                         <span>{getMatchStatusLabel("LIVE")}</span>
-                        <span className="live-minute">{renderLiveIndicator(competition.liveMatch.liveMinute)}</span>
+                        {renderLiveIndicator(competition.liveMatch.liveMinute) ? (
+                          <span className="live-minute">
+                            {renderLiveIndicator(competition.liveMatch.liveMinute)}
+                          </span>
+                        ) : null}
                       </span>
                     </div>
                     <small>{renderOwnPrediction(competition.liveMatch)}</small>
