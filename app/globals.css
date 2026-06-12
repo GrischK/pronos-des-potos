@@ -1783,7 +1783,7 @@
   }
 
   .highlight-panel {
-    @apply grid min-w-0 gap-4 rounded-lg border border-line bg-surface p-4;
+    @apply grid min-w-0 content-start gap-4 rounded-lg border border-line bg-surface p-4;
   }
 
   .highlight-match-list {
