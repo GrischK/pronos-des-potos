@@ -90,6 +90,10 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
   const statCards = [
     {
+      label: "Points officiel",
+      value: profile.stats.officialPoints,
+    },
+    {
       label: "Points live",
       value: profile.stats.points,
     },
@@ -100,6 +104,14 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     {
       label: "Rang live",
       value: profile.stats.liveRank ? `#${profile.stats.liveRank}` : "-",
+    },
+    {
+      label: "Meilleure place",
+      value: profile.stats.bestRank ? `#${profile.stats.bestRank}` : "-",
+    },
+    {
+      label: "Pire place",
+      value: profile.stats.worstRank ? `#${profile.stats.worstRank}` : "-",
     },
     ...(profile.stats.bonusResultKnown
       ? [
@@ -132,6 +144,22 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     {
       label: "Ratés",
       value: profile.stats.missed,
+    },
+    {
+      label: "Série exact unique",
+      value: profile.stats.bestExactUniqueStreak,
+    },
+    {
+      label: "Série score exact",
+      value: profile.stats.bestExactSharedStreak,
+    },
+    {
+      label: "Série bon résultat",
+      value: profile.stats.bestCorrectOutcomeStreak,
+    },
+    {
+      label: "Série ratés",
+      value: profile.stats.bestMissedStreak,
     },
   ];
 

@@ -6,7 +6,7 @@ import {
   getMatchResultForPoints,
 } from "@/src/domain/scoring";
 import { prisma } from "@/src/db/prisma";
-import { getLeaderboardData } from "@/src/server/leaderboard";
+import { getLeaderboardData, getLeaderboardProgressData } from "@/src/server/leaderboard";
 
 export type PlayerProfileMatch = {
   id: string;
@@ -47,6 +47,9 @@ export type PlayerProfileData = {
   stats: {
     officialRank: number | null;
     liveRank: number | null;
+    officialPoints: number;
+    bestRank: number | null;
+    worstRank: number | null;
     points: number;
     bonusPoints: number;
     bonusResultKnown: boolean;
@@ -55,6 +58,10 @@ export type PlayerProfileData = {
     exactShared: number;
     correctOutcome: number;
     missed: number;
+    bestExactUniqueStreak: number;
+    bestExactSharedStreak: number;
+    bestCorrectOutcomeStreak: number;
+    bestMissedStreak: number;
     scoredMatches: number;
     availableMatches: number;
     participationRate: number;
@@ -151,6 +158,7 @@ export async function getPlayerProfileData(
       },
     }),
   ]);
+  const leaderboardProgress = await getLeaderboardProgressData(slug);
 
   const player = competition?.players[0]?.user;
 
@@ -165,6 +173,14 @@ export async function getPlayerProfileData(
   let correctOutcome = 0;
   let missed = 0;
   let scoredMatches = 0;
+  let currentExactUniqueStreak = 0;
+  let currentExactSharedStreak = 0;
+  let currentCorrectOutcomeStreak = 0;
+  let currentMissedStreak = 0;
+  let bestExactUniqueStreak = 0;
+  let bestExactSharedStreak = 0;
+  let bestCorrectOutcomeStreak = 0;
+  let bestMissedStreak = 0;
   const availableMatches = competition.matches.filter(
     (match) =>
       match.status !== "CANCELLED" &&
@@ -211,12 +227,35 @@ export async function getPlayerProfileData(
 
           if (matchPoints === 4) {
             exactUnique += 1;
+            currentExactUniqueStreak += 1;
+            currentExactSharedStreak = 0;
+            currentCorrectOutcomeStreak = 0;
+            currentMissedStreak = 0;
+            bestExactUniqueStreak = Math.max(bestExactUniqueStreak, currentExactUniqueStreak);
           } else if (matchPoints === 3) {
             exactShared += 1;
+            currentExactUniqueStreak = 0;
+            currentExactSharedStreak += 1;
+            currentCorrectOutcomeStreak = 0;
+            currentMissedStreak = 0;
+            bestExactSharedStreak = Math.max(bestExactSharedStreak, currentExactSharedStreak);
           } else if (matchPoints === 1) {
             correctOutcome += 1;
+            currentExactUniqueStreak = 0;
+            currentExactSharedStreak = 0;
+            currentCorrectOutcomeStreak += 1;
+            currentMissedStreak = 0;
+            bestCorrectOutcomeStreak = Math.max(
+              bestCorrectOutcomeStreak,
+              currentCorrectOutcomeStreak,
+            );
           } else {
             missed += 1;
+            currentExactUniqueStreak = 0;
+            currentExactSharedStreak = 0;
+            currentCorrectOutcomeStreak = 0;
+            currentMissedStreak += 1;
+            bestMissedStreak = Math.max(bestMissedStreak, currentMissedStreak);
           }
         } else {
           predictedMatches += 1;
@@ -271,7 +310,17 @@ export async function getPlayerProfileData(
 
   const officialRank = leaderboard.official.rows.find((row) => row.userId === userId);
   const liveRank = leaderboard.live.rows.find((row) => row.userId === userId);
+  const progressPlayer = leaderboardProgress?.players.find((player) => player.userId === userId) ?? null;
+  const officialPoints = officialRank?.points ?? 0;
   const bonusPoints = officialRank?.bonusPoints ?? liveRank?.bonusPoints ?? 0;
+  const bestRank =
+    progressPlayer?.history.length
+      ? Math.min(...progressPlayer.history.map((point) => point.rank))
+      : null;
+  const worstRank =
+    progressPlayer?.history.length
+      ? Math.max(...progressPlayer.history.map((point) => point.rank))
+      : null;
 
   return {
     competition: {
@@ -289,6 +338,9 @@ export async function getPlayerProfileData(
     stats: {
       officialRank: officialRank?.rank ?? null,
       liveRank: liveRank?.rank ?? null,
+      officialPoints,
+      bestRank,
+      worstRank,
       points,
       bonusPoints,
       bonusResultKnown: leaderboard.bonusResultKnown,
@@ -297,6 +349,10 @@ export async function getPlayerProfileData(
       exactShared,
       correctOutcome,
       missed,
+      bestExactUniqueStreak,
+      bestExactSharedStreak,
+      bestCorrectOutcomeStreak,
+      bestMissedStreak,
       scoredMatches,
       availableMatches,
       participationRate: getParticipationRate(predictedMatches, availableMatches),
