@@ -41,6 +41,19 @@ function buildLinePath(points: { x: number; y: number }[]) {
     .join(" ");
 }
 
+function splitWorldCupLabel(label: string) {
+  const lastSpaceIndex = label.lastIndexOf(" ");
+
+  if (lastSpaceIndex === -1) {
+    return { phase: label, date: "" };
+  }
+
+  return {
+    phase: label.slice(0, lastSpaceIndex),
+    date: label.slice(lastSpaceIndex + 1),
+  };
+}
+
 function getInterpolatedY(
   points: { x: number; y: number }[],
   targetX: number,
@@ -102,18 +115,22 @@ export function LeaderboardProgressChart({
   const selectedPlayerIndex = selectedPlayer
     ? playersWithHistory.findIndex((player) => player.userId === selectedPlayer.userId)
     : -1;
-  const chartWidth = Math.max(520, data.sections.length * 84);
-  const chartHeight = Math.max(420, data.participantCount * 28);
   const padding = {
     top: 24,
     right: 108,
     bottom: 42,
     left: 34,
   };
+  const sectionStep = 132;
+  const chartWidth = Math.max(
+    360,
+    padding.left + padding.right + Math.max(0, data.sections.length - 1) * sectionStep,
+  );
+  const chartHeight = Math.max(420, data.participantCount * 28);
   const innerWidth = Math.max(1, chartWidth - padding.left - padding.right);
   const innerHeight = Math.max(1, chartHeight - padding.top - padding.bottom);
   const maxRank = Math.max(1, data.participantCount);
-  const xStep = data.sections.length > 1 ? innerWidth / (data.sections.length - 1) : 0;
+  const xStep = data.sections.length > 1 ? sectionStep : 0;
   const yStep = maxRank > 1 ? innerHeight / (maxRank - 1) : 0;
   const selectedPlayerPoints = selectedPlayer
     ? selectedPlayer.history.map((point, pointIndex) => ({
@@ -296,6 +313,18 @@ export function LeaderboardProgressChart({
 
               {data.sections.map((section, index) => {
                 const x = padding.left + index * xStep;
+                const isFirstSection = index === 0;
+                const isLastSection = index === data.sections.length - 1;
+                const textAnchor = isFirstSection
+                  ? "start"
+                  : isLastSection
+                    ? "end"
+                    : "middle";
+                const labelX = isFirstSection
+                  ? x + 4
+                  : isLastSection
+                    ? x - 4
+                    : x;
 
                 return (
                   <g key={section.id}>
@@ -308,11 +337,22 @@ export function LeaderboardProgressChart({
                     />
                     <text
                       className="leaderboard-progress-axis-label"
-                      textAnchor="middle"
-                      x={x}
+                      textAnchor={textAnchor}
+                      x={labelX}
                       y={chartHeight - 12}
                     >
-                      {section.label}
+                      {data.kind === "WORLD_CUP" ? (
+                        <>
+                          <tspan x={labelX} dy={0}>
+                            {splitWorldCupLabel(section.label).phase}
+                          </tspan>
+                          <tspan className="leaderboard-progress-axis-label-date" x={labelX} dy={12}>
+                            {splitWorldCupLabel(section.label).date}
+                          </tspan>
+                        </>
+                      ) : (
+                        section.label
+                      )}
                     </text>
                   </g>
                 );

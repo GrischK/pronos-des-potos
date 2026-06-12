@@ -2362,7 +2362,6 @@
 
   .leaderboard-progress-chart {
     @apply block;
-    min-width: 520px;
   }
 
   .leaderboard-progress-gridline {
@@ -2378,6 +2377,12 @@
     fill: var(--muted);
     font-size: 11px;
     font-weight: 800;
+  }
+
+  .leaderboard-progress-axis-label-date {
+    fill: color-mix(in srgb, var(--foreground) 72%, var(--muted));
+    font-size: 10px;
+    font-weight: 900;
   }
 
   .leaderboard-progress-line {

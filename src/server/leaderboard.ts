@@ -153,6 +153,12 @@ const sectionLabelFormatter = new Intl.DateTimeFormat("fr-FR", {
   timeZone: "Europe/Paris",
 });
 
+const worldCupProgressLabelFormatter = new Intl.DateTimeFormat("fr-FR", {
+  day: "2-digit",
+  month: "2-digit",
+  timeZone: "Europe/Paris",
+});
+
 function buildLeaderboardSnapshot(
   players: CompetitionPlayer[],
   matches: LeaderboardMatch[],
@@ -297,6 +303,90 @@ function getStageSectionMeta(stage: string) {
   };
 }
 
+function getWorldCupSectionMeta(stage: string) {
+  const phaseTitle = getCompetitionStageLabel(stage);
+  const phaseLabelMap: Record<string, string> = {
+    FINAL: "Finale",
+    GROUP_STAGE: "Groupe",
+    LAST_16: "8es",
+    LAST_32: "16es",
+    QUARTER_FINALS: "Quarts",
+    SEMI_FINALS: "Demi-finales",
+    THIRD_PLACE: "3e place",
+    PLAYOFFS: "Barrages",
+  };
+
+  return {
+    label: phaseLabelMap[stage] ?? phaseTitle,
+    title: phaseTitle,
+  };
+}
+
+function getProgressSectionMeta(
+  competitionKind: string,
+  match: LeaderboardMatch,
+) {
+  if (competitionKind === "WORLD_CUP") {
+    const kickoffAt = match.kickoffAt;
+
+    if (!kickoffAt || Number.isNaN(kickoffAt.getTime())) {
+      const stageSection = getWorldCupSectionMeta(match.stage ?? "");
+
+      return {
+        id: `stage-${match.stage}-unknown-date`,
+        label: stageSection.label,
+        title: stageSection.title,
+      };
+    }
+
+    const stageSection = getWorldCupSectionMeta(match.stage ?? "");
+    const dateLabel = worldCupProgressLabelFormatter.format(kickoffAt);
+    const isoDate = kickoffAt.toISOString().slice(0, 10);
+
+    return {
+      id: `stage-${match.stage}-day-${isoDate}`,
+      label: `${stageSection.label} ${dateLabel}`,
+      title: `${stageSection.title} - ${dateLabel}`,
+    };
+  }
+
+  if (match.stage === "LEAGUE_STAGE" && match.matchday !== null && match.matchday !== undefined) {
+    return {
+      id: `matchday-${match.matchday}`,
+      label: `J${match.matchday}`,
+      title: `Journée ${match.matchday}`,
+    };
+  }
+
+  if (match.stage) {
+    const stageSection = getStageSectionMeta(match.stage);
+
+    return {
+      id: `stage-${match.stage}`,
+      label: stageSection.label,
+      title: stageSection.title,
+    };
+  }
+
+  const kickoffAt = match.kickoffAt;
+
+  if (!kickoffAt || Number.isNaN(kickoffAt.getTime())) {
+    return {
+      id: `match-${match.id}`,
+      label: "?",
+      title: "Date à confirmer",
+    };
+  }
+
+  const isoDate = kickoffAt.toISOString().slice(0, 10);
+
+  return {
+    id: `day-${isoDate}`,
+    label: sectionLabelFormatter.format(kickoffAt),
+    title: sectionTitleFormatter.format(kickoffAt),
+  };
+}
+
 function getDateSectionKey(match: LeaderboardMatch) {
   if (match.stage === "LEAGUE_STAGE" && match.matchday !== null && match.matchday !== undefined) {
     return {
@@ -355,8 +445,8 @@ function buildLeaderboardProgressData(
   const finishedMatchesByStage = new Map<string, LeaderboardMatch[]>();
 
   for (const match of finishedMatches) {
-    if (match.stage === "LEAGUE_STAGE" && match.matchday !== null && match.matchday !== undefined) {
-      const section = getDateSectionKey(match);
+    if (competition.kind === "WORLD_CUP") {
+      const section = getProgressSectionMeta(competition.kind, match);
 
       if (!sectionMatches.has(section.id)) {
         sectionMatches.set(section.id, []);
@@ -386,7 +476,7 @@ function buildLeaderboardProgressData(
       continue;
     }
 
-    const section = getDateSectionKey(match);
+    const section = getProgressSectionMeta(competition.kind, match);
 
     if (!sectionMatches.has(section.id)) {
       sectionMatches.set(section.id, []);
@@ -407,7 +497,6 @@ function buildLeaderboardProgressData(
   }
 
   for (const [stage, stageMatches] of finishedMatchesByStage.entries()) {
-    const stageSection = getStageSectionMeta(stage);
     const orderedStageMatches = [...stageMatches].sort((a, b) => {
       const kickoffDiff = (a.kickoffAt?.getTime() ?? 0) - (b.kickoffAt?.getTime() ?? 0);
 
@@ -423,6 +512,7 @@ function buildLeaderboardProgressData(
       orderedStageMatches.length % 2 === 0;
 
     if (shouldSplitLegs) {
+      const stageSection = getStageSectionMeta(stage);
       const splitIndex = orderedStageMatches.length / 2;
       const allerMatches = orderedStageMatches.slice(0, splitIndex);
       const retourMatches = orderedStageMatches.slice(splitIndex);
@@ -454,11 +544,11 @@ function buildLeaderboardProgressData(
       continue;
     }
 
-    const sectionId = `stage-${stage}`;
+    const stageSection = getStageSectionMeta(stage);
 
-    sectionMatches.set(sectionId, orderedStageMatches);
+    sectionMatches.set(`stage-${stage}`, orderedStageMatches);
     sections.push({
-      id: sectionId,
+      id: `stage-${stage}`,
       label: stageSection.label,
       title: stageSection.title,
       matchCount: orderedStageMatches.length,
