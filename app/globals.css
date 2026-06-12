@@ -1783,11 +1783,11 @@
   }
 
   .highlight-match-card {
-    @apply grid gap-3 rounded-lg border border-line bg-white p-4;
+    @apply grid min-w-0 gap-3 rounded-lg border border-line bg-white p-4;
   }
 
   .highlight-match-card-link {
-    @apply relative block;
+    @apply relative block min-w-0;
     transition:
       border-color 160ms ease,
       box-shadow 160ms ease,
@@ -1812,11 +1812,11 @@
 
 
   .highlight-prono-line {
-    @apply flex items-center justify-between gap-3 rounded-lg bg-surface-alt px-3 py-2;
+    @apply flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-lg bg-surface-alt px-3 py-2;
   }
 
   .highlight-prono-line > span {
-    @apply text-sm font-bold text-muted;
+    @apply min-w-0 text-sm font-bold text-muted;
   }
 
   .highlight-prono-line > strong,
@@ -2794,7 +2794,7 @@
   }
 
   .public-predictions {
-    @apply grid gap-2 rounded-lg border border-line bg-surface-alt p-3;
+    @apply grid min-w-0 gap-2 rounded-lg border border-line bg-surface-alt p-3;
   }
 
   .public-predictions > p {
@@ -2802,7 +2802,7 @@
   }
 
   .public-prediction-row {
-    @apply flex items-center justify-between gap-3 rounded-lg bg-surface px-3 py-2;
+    @apply flex min-w-0 items-center justify-between gap-3 rounded-lg bg-surface px-3 py-2;
   }
 
   .public-prediction-row strong {
@@ -2810,7 +2810,7 @@
   }
 
   .public-prediction-meta {
-    @apply flex shrink-0 items-center gap-2;
+    @apply flex min-w-0 shrink-0 items-center gap-2;
   }
 
   .public-prediction-score {
