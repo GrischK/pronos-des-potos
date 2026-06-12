@@ -659,7 +659,7 @@ export async function getUrgentPendingPredictionCount(): Promise<number> {
   const { prisma } = await import("@/src/db/prisma");
   const now = new Date();
   const urgentPredictionWindowEnd = new Date(
-    now.getTime() + 10 * 24 * 60 * 60 * 1000,
+    now.getTime() + 10 * 24 * 60 * 60 * 7,
   );
 
   return prisma.match.count({
