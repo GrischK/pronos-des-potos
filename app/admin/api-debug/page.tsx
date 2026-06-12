@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
+import { ChevronDown } from "lucide-react";
 
 import { PageHeader } from "@/components/PageHeader";
+import { ApiDebugMatches } from "@/components/admin/ApiDebugMatches";
 import { getCurrentAdmin } from "@/src/auth/current-user";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +11,10 @@ type ApiDebugPageProps = {
   searchParams: Promise<{
     path?: string;
     params?: string;
+    status?: string;
+    date?: string;
+    group?: string;
+    country?: string;
   }>;
 };
 
@@ -17,6 +23,27 @@ type ApiResult = {
   statusText: string;
   url: string;
   body: unknown;
+};
+
+type DebugTeam = {
+  name?: string | null;
+  crest?: string | null;
+};
+
+type DebugMatch = {
+  id?: number | string;
+  utcDate?: string | null;
+  status?: string | null;
+  stage?: string | null;
+  matchday?: number | null;
+  homeTeam?: DebugTeam | null;
+  awayTeam?: DebugTeam | null;
+  score?: {
+    fullTime?: {
+      home?: number | null;
+      away?: number | null;
+    } | null;
+  } | null;
 };
 
 const DEFAULT_PATH = "competitions/WC/matches";
@@ -126,6 +153,9 @@ export default async function AdminApiDebugPage({ searchParams }: ApiDebugPagePr
     path !== null
       ? await fetchFootballData(path, params)
       : null;
+  const rawMatches = Array.isArray((result?.body as { matches?: unknown } | null)?.matches)
+    ? ((result?.body as { matches?: DebugMatch[] }).matches ?? [])
+    : [];
 
   return (
     <main className="page-shell">
@@ -183,14 +213,36 @@ export default async function AdminApiDebugPage({ searchParams }: ApiDebugPagePr
             Path invalide. Utilise uniquement des lettres, chiffres, slash, tiret ou underscore.
           </p>
         ) : result ? (
-          <div className="admin-api-debug-result">
-            <div className="admin-api-debug-meta">
-              <strong>
-                {result.status} {result.statusText}
-              </strong>
-              <span>{result.url}</span>
-            </div>
-            <pre>{JSON.stringify(result.body, null, 2)}</pre>
+          <div className="admin-api-debug-stack">
+            {rawMatches.length > 0 ? (
+              <ApiDebugMatches
+                initialFilters={{
+                  country: resolvedSearchParams.country ?? "",
+                  date: resolvedSearchParams.date ?? "",
+                  group: resolvedSearchParams.group ?? "all",
+                  status: resolvedSearchParams.status ?? "all",
+                }}
+                matches={rawMatches}
+              />
+            ) : null}
+
+            <details className="pending-predictions-panel admin-api-debug-response-panel">
+              <summary>
+                <span>
+                  <span className="badge badge-warning">Réponse brute</span>
+                  <strong>
+                    {result.status} {result.statusText}
+                  </strong>
+                </span>
+                <span aria-hidden="true" className="pending-predictions-summary-action">
+                  <ChevronDown size={18} strokeWidth={3} />
+                </span>
+              </summary>
+              <div className="admin-api-debug-response-body">
+                <p className="readonly-notice admin-api-debug-response-url">{result.url}</p>
+                <pre>{JSON.stringify(result.body, null, 2)}</pre>
+              </div>
+            </details>
           </div>
         ) : (
           <p className="readonly-notice">
