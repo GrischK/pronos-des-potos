@@ -74,6 +74,10 @@ function getParticipationRate(predictedMatches: number, availableMatches: number
   return Math.round((predictedMatches / availableMatches) * 100);
 }
 
+function isCompletedMatch(status: string) {
+  return ["FINISHED", "LIVE", "AWARDED"].includes(status);
+}
+
 export async function getPlayerProfileData(
   slug: string,
   userId: string,
@@ -247,9 +251,23 @@ export async function getPlayerProfileData(
       };
     })
     .filter((match): match is PlayerProfileMatch => match !== null)
-    .sort(
-      (a, b) => new Date(b.kickoffAt).getTime() - new Date(a.kickoffAt).getTime(),
-    );
+    .sort((left, right) => {
+      const leftCompleted = isCompletedMatch(left.status);
+      const rightCompleted = isCompletedMatch(right.status);
+
+      if (leftCompleted !== rightCompleted) {
+        return leftCompleted ? -1 : 1;
+      }
+
+      const leftKickoff = new Date(left.kickoffAt).getTime();
+      const rightKickoff = new Date(right.kickoffAt).getTime();
+
+      if (leftCompleted) {
+        return rightKickoff - leftKickoff;
+      }
+
+      return leftKickoff - rightKickoff;
+    });
 
   const officialRank = leaderboard.official.rows.find((row) => row.userId === userId);
   const liveRank = leaderboard.live.rows.find((row) => row.userId === userId);
