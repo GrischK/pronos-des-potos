@@ -1524,8 +1524,16 @@
     @apply min-w-0 text-base font-black leading-none text-foreground;
   }
 
-  .competition-card-stat--leader strong {
-    @apply text-sm leading-tight;
+  .competition-card-stat-leader {
+    @apply grid w-full min-w-0 gap-0 overflow-hidden text-sm leading-tight;
+  }
+
+  .competition-card-stat-leader-name {
+    @apply min-w-0 truncate;
+  }
+
+  .competition-card-stat-leader-points {
+    @apply block text-xs font-black text-muted;
   }
 
   .next-prediction-panel {
@@ -4240,6 +4248,10 @@
 
   .competition-card-stats > span strong {
     @apply text-[1.15rem] text-foreground;
+  }
+
+  .competition-card-stat--leader .competition-card-stat-leader {
+    @apply text-[0.95rem];
   }
 
   .next-prediction-panel {

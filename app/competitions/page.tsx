@@ -308,9 +308,18 @@ export default async function CompetitionsPage() {
                     Pronos à poser
                   </span>
                   <span className="competition-card-stat competition-card-stat--leader">
-                    <strong>
+                    <strong className="competition-card-stat-leader">
                       {competition.leader
-                        ? `${competition.leader.name} · ${competition.leader.points} pts`
+                        ? (
+                          <>
+                            <span className="competition-card-stat-leader-name">
+                              {competition.leader.name}
+                            </span>
+                            <span className="competition-card-stat-leader-points">
+                              {competition.leader.points} pts
+                            </span>
+                          </>
+                        )
                         : "-"}
                     </strong>
                     Leader
