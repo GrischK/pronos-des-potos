@@ -381,6 +381,8 @@ export function LeaderboardTabs({
         />
       </section>
 
+      {isLive ? <LiveMatchesPanel matches={leaderboard.liveMatches} /> : null}
+
       <div className="actions mb-4">
         <CompetitionActionCard
           description="Voir l'évolution du classement"
@@ -421,8 +423,6 @@ export function LeaderboardTabs({
       <section className="page-section">
         <LeaderboardRulesCard isLive={isLive} bonusEnabled={leaderboard.bonusEnabled} />
       </section>
-
-      {isLive ? <LiveMatchesPanel matches={leaderboard.liveMatches} /> : null}
     </>
   );
 }
