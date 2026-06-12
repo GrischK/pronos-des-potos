@@ -26,6 +26,18 @@ export default async function AdminPage() {
       />
 
       <section className="page-section">
+        <div className="admin-api-debug-link">
+          <div>
+            <strong>Debug API</strong>
+            <p>Ouvre une page réservée aux admins pour voir la réponse brute de football-data.org.</p>
+          </div>
+          <Link className="btn btn-primary" href="/admin/api-debug">
+            Ouvrir le debug
+          </Link>
+        </div>
+      </section>
+
+      <section className="page-section">
         <div className="admin-layout">
           <section className="card admin-panel">
             <p className="badge badge-live">football-data.org</p>

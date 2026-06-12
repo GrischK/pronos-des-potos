@@ -680,6 +680,43 @@
     @apply min-h-0;
   }
 
+  .admin-api-debug-link {
+    @apply flex items-center justify-between gap-4 rounded-lg border border-line bg-surface p-4;
+  }
+
+  .admin-api-debug-link strong {
+    @apply block text-lg font-black text-foreground;
+  }
+
+  .admin-api-debug-link p {
+    @apply m-0 mt-1 text-sm font-bold text-muted;
+  }
+
+  .admin-api-debug-presets {
+    @apply grid gap-3;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .admin-api-debug-preset {
+    @apply grid gap-1 rounded-lg border border-line bg-surface p-4 transition-colors;
+  }
+
+  .admin-api-debug-preset:hover {
+    @apply border-pitch bg-white;
+  }
+
+  .admin-api-debug-preset strong {
+    @apply text-base font-black text-foreground;
+  }
+
+  .admin-api-debug-preset span {
+    @apply text-sm font-bold text-muted;
+  }
+
+  .admin-api-debug-preset small {
+    @apply text-xs font-black text-pitch-strong;
+  }
+
   .admin-form {
     @apply mt-6 grid gap-4;
   }
@@ -927,6 +964,31 @@
 
   .admin-bonus-option-copy small {
     @apply block text-sm font-bold leading-tight text-muted;
+  }
+
+  .admin-api-debug-form {
+    @apply grid gap-3 rounded-lg border border-line bg-surface p-4;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  }
+
+  .admin-api-debug-result {
+    @apply grid gap-3 rounded-lg border border-line bg-surface p-4;
+  }
+
+  .admin-api-debug-meta {
+    @apply grid gap-1;
+  }
+
+  .admin-api-debug-meta strong {
+    @apply text-base font-black text-foreground;
+  }
+
+  .admin-api-debug-meta span {
+    @apply break-all text-sm font-bold text-muted;
+  }
+
+  .admin-api-debug-result pre {
+    @apply m-0 overflow-x-auto rounded-lg bg-surface-alt p-4 text-sm leading-[1.55] text-foreground;
   }
 
   .admin-item-actions {
@@ -2961,6 +3023,14 @@
     }
 
     .admin-rename-form {
+      grid-template-columns: 1fr;
+    }
+
+    .admin-api-debug-link {
+      @apply flex-col items-start;
+    }
+
+    .admin-api-debug-form {
       grid-template-columns: 1fr;
     }
 
