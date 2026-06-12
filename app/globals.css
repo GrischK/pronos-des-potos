@@ -2164,10 +2164,6 @@
     @apply grid gap-1 rounded-lg border border-line bg-surface p-4;
   }
 
-  .leaderboard-summary span {
-    @apply text-sm font-bold text-muted;
-  }
-
   .leaderboard-summary strong {
     @apply min-w-0 truncate text-2xl font-black text-foreground;
   }
@@ -2181,7 +2177,7 @@
   }
 
   .leaderboard-leader strong {
-    @apply min-w-0 truncate;
+    @apply min-w-0 truncate text-sm font-black text-foreground;
   }
 
   .leaderboard-rules {
@@ -2424,6 +2420,33 @@
 
   .leaderboard-table td {
     @apply border-b border-line px-3 py-3 font-bold;
+  }
+
+  .leaderboard-rank-cell {
+    @apply inline-flex items-center justify-center gap-1.5;
+  }
+
+  .leaderboard-rank-trend-wrap {
+    @apply inline-flex items-center justify-center;
+  }
+
+  .leaderboard-rank-trend {
+    @apply shrink-0;
+  }
+
+  .leaderboard-rank-trend-up {
+    color: var(--mint);
+  }
+
+  .leaderboard-rank-trend-down {
+    color: var(--coral);
+  }
+
+  .leaderboard-rank-trend-same {
+    color: var(--navy);
+    font-size: 0.9rem;
+    font-weight: 900;
+    line-height: 1;
   }
 
   .leaderboard-player {

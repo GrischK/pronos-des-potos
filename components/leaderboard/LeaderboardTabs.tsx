@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChartLine, ChevronDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ChartLine, ChevronDown } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { CompetitionActionCard } from "@/components/competitions/CompetitionActionCard";
@@ -12,6 +12,7 @@ import type { LeaderboardData, LeaderboardSnapshot } from "@/src/server/leaderbo
 import { useDismissibleLayer } from "@/src/lib/use-dismissible-layer";
 
 type LeaderboardMode = "official" | "live";
+type RankTrend = "up" | "down" | "same";
 
 type LeaderboardTabsProps = {
   initialMode?: LeaderboardMode;
@@ -24,6 +25,85 @@ function getInitial(name: string) {
 
 function formatRankLabel(rank: number) {
   return String(rank);
+}
+
+function getRankTrend(
+  liveRank: number,
+  officialRank: number | undefined,
+): RankTrend | null {
+  if (officialRank === undefined) {
+    return null;
+  }
+
+  if (liveRank < officialRank) {
+    return "up";
+  }
+
+  if (liveRank > officialRank) {
+    return "down";
+  }
+
+  return "same";
+}
+
+function getRankTrendLabel(trend: RankTrend) {
+  if (trend === "up") {
+    return "Places gagnées";
+  }
+
+  if (trend === "down") {
+    return "Places perdues";
+  }
+
+  return "Position stable";
+}
+
+function RankTrendIndicator({ trend }: { trend: RankTrend }) {
+  if (trend === "up") {
+    return (
+      <span
+        aria-label={getRankTrendLabel(trend)}
+        className="leaderboard-rank-trend-wrap"
+      >
+        <ArrowUp
+          aria-hidden="true"
+          className="leaderboard-rank-trend leaderboard-rank-trend-up"
+          size={14}
+          strokeWidth={2.8}
+        />
+      </span>
+    );
+  }
+
+  if (trend === "down") {
+    return (
+      <span
+        aria-label={getRankTrendLabel(trend)}
+        className="leaderboard-rank-trend-wrap"
+      >
+        <ArrowDown
+          aria-hidden="true"
+          className="leaderboard-rank-trend leaderboard-rank-trend-down"
+          size={14}
+          strokeWidth={2.8}
+        />
+      </span>
+    );
+  }
+
+  return (
+    <span
+      aria-label={getRankTrendLabel(trend)}
+      className="leaderboard-rank-trend-wrap"
+    >
+      <span
+        aria-hidden="true"
+        className="leaderboard-rank-trend leaderboard-rank-trend-same"
+      >
+        =
+      </span>
+    </span>
+  );
 }
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
@@ -91,12 +171,20 @@ function PlayerAvatar({
 function LeaderboardTable({
   slug,
   snapshot,
+  previousSnapshot,
+  showRankTrends,
   showBonusPoints,
 }: {
   slug: string;
   snapshot: LeaderboardSnapshot;
+  previousSnapshot?: LeaderboardSnapshot;
+  showRankTrends: boolean;
   showBonusPoints: boolean;
 }) {
+  const previousRankByUserId = new Map(
+    previousSnapshot?.rows.map((row) => [row.userId, row.rank] as const) ?? [],
+  );
+
   if (snapshot.rows.length === 0) {
     return (
       <p className="readonly-notice">
@@ -123,29 +211,40 @@ function LeaderboardTable({
           </tr>
         </thead>
         <tbody>
-          {snapshot.rows.map((row) => (
-            <tr key={row.userId}>
-              <td>{formatRankLabel(row.rank)}</td>
+          {snapshot.rows.map((row) => {
+            const trend = previousSnapshot
+              ? getRankTrend(row.rank, previousRankByUserId.get(row.userId))
+              : null;
+
+            return (
+              <tr key={row.userId}>
               <td>
-                <Link
-                  className="leaderboard-player"
-                  href={`/competitions/${slug}/joueurs/${row.userId}`}
-                >
-                  <PlayerAvatar image={row.image} name={row.name} />
-                  <strong>{row.name}</strong>
-                </Link>
+                <span className="leaderboard-rank-cell">
+                  <span>{formatRankLabel(row.rank)}</span>
+                  {showRankTrends && trend ? <RankTrendIndicator trend={trend} /> : null}
+                </span>
               </td>
-              <td>
-                <strong>{row.points}</strong>
-              </td>
-              {showBonusPoints ? <td>{row.bonusPoints}</td> : null}
-              <td>{row.predictedMatches}</td>
-              <td>{row.exactUnique}</td>
-              <td>{row.exactShared}</td>
-              <td>{row.correctOutcome}</td>
-              <td>{row.missed}</td>
-            </tr>
-          ))}
+                <td>
+                  <Link
+                    className="leaderboard-player"
+                    href={`/competitions/${slug}/joueurs/${row.userId}`}
+                  >
+                    <PlayerAvatar image={row.image} name={row.name} />
+                    <strong>{row.name}</strong>
+                  </Link>
+                </td>
+                <td>
+                  <strong>{row.points}</strong>
+                </td>
+                {showBonusPoints ? <td>{row.bonusPoints}</td> : null}
+                <td>{row.predictedMatches}</td>
+                <td>{row.exactUnique}</td>
+                <td>{row.exactShared}</td>
+                <td>{row.correctOutcome}</td>
+                <td>{row.missed}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -338,6 +437,7 @@ export function LeaderboardTabs({
   const [mode, setMode] = useState<LeaderboardMode>(initialMode);
   const snapshot = leaderboard[mode];
   const isLive = mode === "live";
+  const showRankTrends = isLive && snapshot.liveMatchCount > 0;
   const leader = snapshot.rows[0] ?? null;
 
   return (
@@ -377,6 +477,8 @@ export function LeaderboardTabs({
         <LeaderboardTable
           slug={leaderboard.slug}
           snapshot={snapshot}
+          previousSnapshot={isLive ? leaderboard.official : undefined}
+          showRankTrends={showRankTrends}
           showBonusPoints={leaderboard.bonusResultKnown}
         />
       </section>
