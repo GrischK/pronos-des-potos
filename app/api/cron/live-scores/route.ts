@@ -26,8 +26,22 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  console.log("[cron/live-scores] start");
+
   const result = await syncLiveScores();
   const scheduler = await stopLiveScoreCronIfIdle();
+
+  console.log("[cron/live-scores] done", {
+    checkedCount: result.checkedCount,
+    updatedCount: result.updatedCount,
+    preMatchSentCount: result.notifications.preMatchSentCount,
+    finishedMatchSentCount: result.notifications.finishedMatchSentCount,
+    errors: result.errors,
+    schedulerStopped: scheduler.stopped,
+    schedulerReason: scheduler.reason,
+    cronJobSkipped: scheduler.cronJob?.skipped ?? null,
+    cronJobReason: scheduler.cronJob?.reason ?? null,
+  });
 
   return NextResponse.json({
     ...result,
