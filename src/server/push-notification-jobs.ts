@@ -6,7 +6,10 @@ import {
   getMatchResultForPoints,
 } from "@/src/domain/scoring";
 import { prisma } from "@/src/db/prisma";
-import { sendPushNotificationToUser } from "@/src/server/push-notifications";
+import {
+  isPushNotificationConfigured,
+  sendPushNotificationToUser,
+} from "@/src/server/push-notifications";
 
 const PRE_MATCH_REMINDER_HOURS = 3;
 const PRE_MATCH_REMINDER_WINDOW_MINUTES = 10;
@@ -44,6 +47,13 @@ export function getPreMatchReminderLeadTimeMs() {
 }
 
 export async function processPreMatchReminderNotifications(now = new Date()) {
+  if (!isPushNotificationConfigured()) {
+    console.warn("[push/pre-match] skipped: push notifications not configured");
+    return {
+      sentCount: 0,
+    };
+  }
+
   const latestKickoffAt = new Date(now.getTime() + getPreMatchReminderLeadTimeMs());
   const earliestKickoffAt = new Date(
     latestKickoffAt.getTime() - PRE_MATCH_REMINDER_WINDOW_MINUTES * 60 * 1000,
@@ -141,19 +151,27 @@ export async function processPreMatchReminderNotifications(now = new Date()) {
         continue;
       }
 
-      const result = await sendPushNotificationToUser(player.userId, {
-        body: `${homeTeamName} - ${awayTeamName} commence à ${formatKickoffAt(match.kickoffAt)}. Tu n'as pas encore posé ton prono.`,
-        tag: `match-reminder-${match.id}`,
-        title: "Pense à ton prono",
-        url: `/competitions/${match.competition.slug}/pronos#match-${match.id}`,
-      });
+      try {
+        const result = await sendPushNotificationToUser(player.userId, {
+          body: `${homeTeamName} - ${awayTeamName} commence à ${formatKickoffAt(match.kickoffAt)}. Tu n'as pas encore posé ton prono.`,
+          tag: `match-reminder-${match.id}`,
+          title: "Pense à ton prono",
+          url: `/competitions/${match.competition.slug}/pronos#match-${match.id}`,
+        });
 
-      if (result.delivered > 0) {
-        deliveredRecords.push({
-          deliveryKey,
-          kind: "PRE_MATCH_REMINDER",
+        if (result.delivered > 0) {
+          deliveredRecords.push({
+            deliveryKey,
+            kind: "PRE_MATCH_REMINDER",
+            matchId: match.id,
+            userId: player.userId,
+          });
+        }
+      } catch (error) {
+        console.warn("[push/pre-match] failed", {
           matchId: match.id,
           userId: player.userId,
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -173,6 +191,13 @@ export async function processPreMatchReminderNotifications(now = new Date()) {
 
 export async function processFinishedMatchNotifications(finishedMatchIds: string[]) {
   if (finishedMatchIds.length === 0) {
+    return {
+      sentCount: 0,
+    };
+  }
+
+  if (!isPushNotificationConfigured()) {
+    console.warn("[push/finished] skipped: push notifications not configured");
     return {
       sentCount: 0,
     };
@@ -287,19 +312,27 @@ export async function processFinishedMatchNotifications(finishedMatchIds: string
 
       const scoreSummary = formatMatchScoreText(match).replace(/\n/g, " | ");
 
-      const notificationResult = await sendPushNotificationToUser(prediction.userId, {
-        body: `Résultat : ${scoreSummary}. Ton prono : ${prediction.homeScore} · ${prediction.awayScore}. Tu gagnes ${points} ${points > 1 ? "points" : "point"}.`,
-        tag: `match-result-${match.id}`,
-        title: `${homeTeamName} ${match.homeScore} · ${match.awayScore} ${awayTeamName}`,
-        url: `/competitions/${match.competition.slug}/classement?mode=live`,
-      });
+      try {
+        const notificationResult = await sendPushNotificationToUser(prediction.userId, {
+          body: `Résultat : ${scoreSummary}. Ton prono : ${prediction.homeScore} · ${prediction.awayScore}. Tu gagnes ${points} ${points > 1 ? "points" : "point"}.`,
+          tag: `match-result-${match.id}`,
+          title: `${homeTeamName} ${match.homeScore} · ${match.awayScore} ${awayTeamName}`,
+          url: `/competitions/${match.competition.slug}/classement?mode=live`,
+        });
 
-      if (notificationResult.delivered > 0) {
-        deliveredRecords.push({
-          deliveryKey,
-          kind: "MATCH_RESULT",
+        if (notificationResult.delivered > 0) {
+          deliveredRecords.push({
+            deliveryKey,
+            kind: "MATCH_RESULT",
+            matchId: match.id,
+            userId: prediction.userId,
+          });
+        }
+      } catch (error) {
+        console.warn("[push/finished] failed", {
           matchId: match.id,
           userId: prediction.userId,
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     }
