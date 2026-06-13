@@ -39,8 +39,6 @@ export async function GET(request: Request) {
     errors: result.errors,
     schedulerStopped: scheduler.stopped,
     schedulerReason: scheduler.reason,
-    cronJobSkipped: scheduler.cronJob?.skipped ?? null,
-    cronJobReason: scheduler.cronJob?.reason ?? null,
   });
 
   return NextResponse.json({

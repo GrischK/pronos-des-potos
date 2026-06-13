@@ -417,22 +417,8 @@ export async function stopLiveScoreCronIfIdle(now = new Date()) {
     };
   }
 
-  const nextSchedule = await prepareLiveScoreCron(now);
-
-  if (nextSchedule.hours.length > 0) {
-    return {
-      stopped: false,
-      reason: "Cron replanifié sur la prochaine fenêtre utile.",
-      cronJob: nextSchedule.cronJob,
-      hours: nextSchedule.hours,
-    };
-  }
-
-  const cronJob = await setLiveScoresCronEnabled(false);
-
   return {
-    stopped: !cronJob.skipped,
-    reason: cronJob.skipped ? cronJob.reason : "Aucun match a suivre.",
-    cronJob,
+    stopped: false,
+    reason: "Aucun match a suivre. La reprogrammation est gérée par /api/cron/live-scores/prepare.",
   };
 }
