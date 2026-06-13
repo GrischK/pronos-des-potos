@@ -22,6 +22,22 @@ type CronJobPatchResult = {
   reason?: string;
 };
 
+function describeCronJobPatch(job: CronJobPatch) {
+  if (job.schedule) {
+    return {
+      action: "schedule",
+      enabled: job.enabled ?? null,
+      timezone: job.schedule.timezone,
+      hours: job.schedule.hours,
+    };
+  }
+
+  return {
+    action: "enabled",
+    enabled: job.enabled ?? null,
+  };
+}
+
 function getCronJobOrgConfig() {
   const apiKey = process.env.CRON_JOB_ORG_API_KEY;
   const liveScoresJobId = process.env.CRON_JOB_ORG_LIVE_SCORES_JOB_ID;
@@ -60,7 +76,13 @@ async function patchCronJob(jobId: string, job: CronJobPatch) {
 
     if (response.status === 429) {
       console.warn(
-        `cron-job.org rate limited job ${jobId}: ${body || response.statusText}`,
+        "cron-job.org rate limited job",
+        {
+          jobId,
+          ...describeCronJobPatch(job),
+          status: response.status,
+          response: body || response.statusText,
+        },
       );
 
       return {
