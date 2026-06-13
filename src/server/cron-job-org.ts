@@ -17,6 +17,11 @@ type CronJobPatch = {
   schedule?: CronJobSchedule;
 };
 
+type CronJobPatchResult = {
+  skipped: boolean;
+  reason?: string;
+};
+
 function getCronJobOrgConfig() {
   const apiKey = process.env.CRON_JOB_ORG_API_KEY;
   const liveScoresJobId = process.env.CRON_JOB_ORG_LIVE_SCORES_JOB_ID;
@@ -52,6 +57,18 @@ async function patchCronJob(jobId: string, job: CronJobPatch) {
 
   if (!response.ok) {
     const body = await response.text();
+
+    if (response.status === 429) {
+      console.warn(
+        `cron-job.org rate limited job ${jobId}: ${body || response.statusText}`,
+      );
+
+      return {
+        skipped: true,
+        reason: "cron-job.org a repondu 429: Too Many Requests.",
+      } satisfies CronJobPatchResult;
+    }
+
     throw new Error(
       `cron-job.org a repondu ${response.status}: ${body || response.statusText}`,
     );
@@ -59,7 +76,7 @@ async function patchCronJob(jobId: string, job: CronJobPatch) {
 
   return {
     skipped: false,
-  };
+  } satisfies CronJobPatchResult;
 }
 
 export function setLiveScoresCronEnabled(enabled: boolean) {

@@ -450,6 +450,7 @@ export async function getCompetitionsOverview() {
       const leaderRows = new Map<
         string,
         {
+          userId: string;
           name: string;
           points: number;
           exactUnique: number;
@@ -460,6 +461,7 @@ export async function getCompetitionsOverview() {
 
       for (const player of competition.players) {
         leaderRows.set(player.user.id, {
+          userId: player.user.id,
           name: player.user.name?.trim() || player.user.email,
           points: 0,
           exactUnique: 0,
@@ -485,6 +487,7 @@ export async function getCompetitionsOverview() {
           const row =
             leaderRows.get(prediction.userId) ??
             {
+              userId: prediction.userId,
               name: prediction.user.name?.trim() || prediction.user.email,
               points: 0,
               exactUnique: 0,
@@ -538,6 +541,7 @@ export async function getCompetitionsOverview() {
         const row =
           leaderRows.get(userId) ??
           {
+            userId,
             name: userId,
             points: 0,
             exactUnique: 0,
@@ -619,6 +623,7 @@ export async function getCompetitionsOverview() {
         urgentPendingPredictionCount,
         leader: leader
           ? {
+              userId: leader.userId,
               name: leader.name,
               points: leader.points,
             }

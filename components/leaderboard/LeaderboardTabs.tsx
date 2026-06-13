@@ -499,10 +499,16 @@ export function LeaderboardTabs({
       <section className="page-section">
         <div className="leaderboard-summary">
           <div>
-            <span>{isLive ? "Leader live" : "Leader"}</span>
+            <span>Leader du classement</span>
             {leader ? (
               <span className="leaderboard-leader">
-                <PlayerAvatar image={leader.image} name={leader.name} />
+                <Link
+                  aria-label={`Voir la fiche de ${leader.name}`}
+                  className="leaderboard-leader-link"
+                  href={`/competitions/${leaderboard.slug}/joueurs/${leader.userId}`}
+                >
+                  <PlayerAvatar image={leader.image} name={leader.name} />
+                </Link>
                 <strong>{leader.name}</strong>
               </span>
             ) : (
