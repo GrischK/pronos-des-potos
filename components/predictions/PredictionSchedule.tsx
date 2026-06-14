@@ -17,6 +17,7 @@ type PredictionScheduleProps = {
   competitionKind: CompetitionKind;
   matches: PredictionMatch[];
   slug: string;
+  targetMatchId?: string | null;
 };
 
 export type ScheduleMatch = {
@@ -39,6 +40,7 @@ type PredictionScheduleBrowserProps<TMatch extends ScheduleMatch> = {
   groupHeading: string;
   matches: TMatch[];
   phaseHeading: string;
+  targetMatchId?: string | null;
   renderMatch: (match: TMatch) => ReactNode;
 };
 
@@ -294,6 +296,7 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
   groupHeading,
   matches,
   phaseHeading,
+  targetMatchId,
   renderMatch,
 }: PredictionScheduleBrowserProps<TMatch>) {
   const dayNavRef = useRef<HTMLElement>(null);
@@ -384,6 +387,47 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
     chronologicalSections[0];
   const previousStage = stages[activeStageIndex - 1];
   const nextStage = stages[activeStageIndex + 1];
+  const matchById = useMemo(() => new Map(matches.map((match) => [match.id, match])), [matches]);
+
+  useEffect(() => {
+    const targetMatch = targetMatchId ? matchById.get(targetMatchId) ?? null : null;
+
+    if (!targetMatch) {
+      return;
+    }
+
+    const targetDay = chronologicalSections.find((section) =>
+      section.matches.some((match) => match.id === targetMatch.id),
+    );
+
+    if (targetDay) {
+      setView("chronology");
+      setActiveDayId(targetDay.id);
+    }
+  }, [chronologicalSections, matchById, targetMatchId]);
+
+  useEffect(() => {
+    if (view !== "chronology" || !targetMatchId) {
+      return;
+    }
+
+    const targetElement = document.getElementById(`match-${targetMatchId}`);
+
+    if (!targetElement) {
+      return;
+    }
+
+    const frame = requestAnimationFrame(() => {
+      targetElement.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [activeDayId, targetMatchId, view]);
 
   useEffect(() => {
     if (activeDayId && chronologicalSections.some((section) => section.id === activeDayId)) {
@@ -678,6 +722,7 @@ export function PredictionSchedule({
   competitionKind,
   matches,
   slug,
+  targetMatchId = null,
 }: PredictionScheduleProps) {
   return (
     <>
@@ -687,6 +732,7 @@ export function PredictionSchedule({
         groupHeading="Mes scores"
         matches={matches}
         phaseHeading="Mes scores"
+        targetMatchId={targetMatchId}
         renderMatch={(match) => (
           <PredictionMatchForm
             anchorId={`match-${match.id}`}

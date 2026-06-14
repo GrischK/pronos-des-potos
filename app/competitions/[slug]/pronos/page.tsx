@@ -14,10 +14,17 @@ type PronosticsPageProps = {
   params: Promise<{
     slug: string;
   }>;
+  searchParams?: Promise<{
+    match?: string;
+  }>;
 };
 
-export default async function PronosticsPage({ params }: PronosticsPageProps) {
+export default async function PronosticsPage({
+  params,
+  searchParams,
+}: PronosticsPageProps) {
   const { slug } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const competition = await getPredictionPageData(slug);
 
   if (!competition) {
@@ -68,6 +75,7 @@ export default async function PronosticsPage({ params }: PronosticsPageProps) {
         <PredictionSchedule
           competitionKind={competition.kind}
           matches={competition.matches}
+          targetMatchId={resolvedSearchParams?.match ?? null}
           slug={competition.slug}
         />
       </section>

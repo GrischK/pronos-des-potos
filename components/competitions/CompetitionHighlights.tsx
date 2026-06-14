@@ -275,7 +275,7 @@ export function CompetitionHighlights({
                 ? (match) =>
                     match.status === "LIVE" || match.status === "FINISHED"
                       ? `/competitions/${slug}/classement?mode=live`
-                      : `/competitions/${slug}/pronos#match-${match.id}`
+                      : `/competitions/${slug}/pronos?match=${match.id}#match-${match.id}`
                 : undefined
             }
             matches={highlights.todayMatches}
@@ -284,7 +284,11 @@ export function CompetitionHighlights({
           <HighlightSection
             emptyText="Aucun prochain match programmé."
             ctaLabel="Aller au prono"
-            hrefBuilder={slug ? (match) => `/competitions/${slug}/pronos#match-${match.id}` : undefined}
+            hrefBuilder={
+              slug
+                ? (match) => `/competitions/${slug}/pronos?match=${match.id}#match-${match.id}`
+                : undefined
+            }
             matches={highlights.nextMatches}
             title={highlights.nextTitle ?? "Prochains matchs"}
           />
