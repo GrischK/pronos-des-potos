@@ -98,6 +98,7 @@ export type LeaderboardLiveMatch = {
     id: string;
     homeScore: number;
     awayScore: number;
+    points: number | null;
     user: {
       id: string;
       name: string;
@@ -794,15 +795,41 @@ export async function getLeaderboardData(
       homeTeam: match.homeTeam,
       awayTeam: match.awayTeam,
       predictions: match.predictions
-        .map((prediction) => ({
-          id: prediction.id,
-          homeScore: prediction.homeScore,
-          awayScore: prediction.awayScore,
-          user: {
-            id: prediction.user.id,
-            name: getUserDisplayName(prediction.user),
-          },
-        }))
+        .map((prediction) => {
+          let points: number | null = null;
+
+          if (match.status === "FINISHED" || match.status === "LIVE") {
+            const result = getMatchResultForPoints(match);
+
+            if (result !== null) {
+              const exactScorePredictionCount = match.predictions.filter(
+                (matchPrediction) =>
+                  matchPrediction.homeScore === result.homeScore &&
+                  matchPrediction.awayScore === result.awayScore,
+              ).length;
+
+              points = computePredictionPoints({
+                prediction: {
+                  homeScore: prediction.homeScore,
+                  awayScore: prediction.awayScore,
+                },
+                result,
+                exactScorePredictionCount,
+              });
+            }
+          }
+
+          return {
+            id: prediction.id,
+            homeScore: prediction.homeScore,
+            awayScore: prediction.awayScore,
+            points,
+            user: {
+              id: prediction.user.id,
+              name: getUserDisplayName(prediction.user),
+            },
+          };
+        })
         .sort((a, b) => a.user.name.localeCompare(b.user.name, "fr")),
     }));
 

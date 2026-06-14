@@ -5,6 +5,7 @@ import { ArrowDown, ArrowUp, ChartLine, ChevronDown } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { CompetitionActionCard } from "@/components/competitions/CompetitionActionCard";
+import { PlayerPointsBadge } from "@/components/player/PlayerPointsBadge";
 import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
 import { formatMatchScoreText } from "@/src/domain/scoring";
 import { getLiveMatchStatusLabel, getMatchStatusLabel } from "@/src/domain/match-status";
@@ -415,9 +416,18 @@ function LiveMatchesPanel({
                   match.predictions.map((prediction) => (
                     <div className="public-prediction-row" key={prediction.id}>
                       <strong>{prediction.user.name}</strong>
-                      <span>
-                        {prediction.homeScore} · {prediction.awayScore}
-                      </span>
+                      <div className="public-prediction-meta">
+                        {prediction.points !== null ? (
+                          <PlayerPointsBadge
+                            points={prediction.points}
+                            label="Pts"
+                            className="public-prediction-points"
+                          />
+                        ) : null}
+                        <span className="public-prediction-score">
+                          {prediction.homeScore} · {prediction.awayScore}
+                        </span>
+                      </div>
                     </div>
                   ))
                 )}
@@ -499,7 +509,7 @@ export function LeaderboardTabs({
       <section className="page-section">
         <div className="leaderboard-summary">
           <div>
-            <span>Leader du classement</span>
+            <strong>Leader du classement</strong>
             {leader ? (
               <span className="leaderboard-leader">
                 <Link
@@ -516,11 +526,11 @@ export function LeaderboardTabs({
             )}
           </div>
           <div>
-            <span>{isLive ? "Matchs comptés" : "Matchs terminés"}</span>
+            <strong>{isLive ? "Matchs comptés" : "Matchs terminés"}</strong>
             <strong>{snapshot.matchCount}</strong>
           </div>
           <div>
-            <span>{isLive ? "Matchs en cours" : "Participants"}</span>
+            <strong>{isLive ? "Matchs en cours" : "Participants"}</strong>
             <strong>
               {isLive ? snapshot.liveMatchCount : leaderboard.participantCount}
             </strong>
