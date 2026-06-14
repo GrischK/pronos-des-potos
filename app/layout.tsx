@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 
 import { PwaLaunchScreen } from "@/components/PwaLaunchScreen";
 import { PushServiceWorkerRegistrar } from "@/components/PushServiceWorkerRegistrar";
@@ -83,7 +84,11 @@ export default function RootLayout({
       </head>
       <body>
         <div dangerouslySetInnerHTML={{ __html: pwaBootScreenMarkup }} />
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <Script
+          id="theme-script"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: themeScript }}
+        />
         <PushServiceWorkerRegistrar />
         <PwaLaunchScreen />
         {children}

@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import type { SyntheticEvent } from "react";
 
 import { PlayerPointsBadge } from "@/components/player/PlayerPointsBadge";
 import type {
@@ -7,7 +10,7 @@ import type {
 } from "@/src/server/competition-highlights";
 import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
 import { formatMatchScoreText } from "@/src/domain/scoring";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { getLiveMatchStatusLabel, getMatchStatusLabel } from "@/src/domain/match-status";
 
 type CompetitionHighlightsProps = {
@@ -75,6 +78,10 @@ function renderStatus(status: string, liveMinute: number | null) {
   );
 }
 
+function stopCardNavigation(event: SyntheticEvent) {
+  event.stopPropagation();
+}
+
 function MatchCard({ match }: { match: CompetitionHighlightMatch }) {
   return (
     <>
@@ -135,29 +142,50 @@ function MatchCard({ match }: { match: CompetitionHighlightMatch }) {
       </div>
 
       {match.canRevealPredictions ? (
-        <div className="public-predictions">
-          {match.predictions.length === 0 ? (
-            <p>Aucun prono enregistré pour ce match.</p>
-          ) : (
-            match.predictions.map((prediction) => (
-              <div className="public-prediction-row" key={prediction.id}>
-                <strong>{prediction.user.name}</strong>
-                <div className="public-prediction-meta">
-                  <span className="public-prediction-score">
-                    {prediction.homeScore} · {prediction.awayScore}
-                  </span>
-                  {prediction.points !== null ? (
-                    <PlayerPointsBadge
-                      points={prediction.points}
-                      label="Pts"
-                      className="public-prediction-points"
-                    />
-                  ) : null}
+        <details
+          className="live-match-predictions-panel"
+          onClick={stopCardNavigation}
+        >
+          <summary onClick={stopCardNavigation}>
+            <span>
+              <span className="badge badge-warning">Pronos</span>
+              <strong>
+                {match.predictions.length} participant
+                {match.predictions.length > 1 ? "s" : ""}
+              </strong>
+            </span>
+            <span
+              aria-hidden="true"
+              className="pending-predictions-summary-action"
+            >
+              <ChevronDown size={18} strokeWidth={3} />
+            </span>
+          </summary>
+
+          <div className="public-predictions">
+            {match.predictions.length === 0 ? (
+              <p>Aucun prono enregistré pour ce match.</p>
+            ) : (
+              match.predictions.map((prediction) => (
+                <div className="public-prediction-row" key={prediction.id}>
+                  <strong>{prediction.user.name}</strong>
+                  <div className="public-prediction-meta">
+                    {prediction.points !== null ? (
+                      <PlayerPointsBadge
+                        points={prediction.points}
+                        label="Pts"
+                        className="public-prediction-points"
+                      />
+                    ) : null}
+                    <span className="public-prediction-score">
+                      {prediction.homeScore} · {prediction.awayScore}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))
-          )}
-        </div>
+              ))
+            )}
+          </div>
+        </details>
       ) : null}
     </>
   );
