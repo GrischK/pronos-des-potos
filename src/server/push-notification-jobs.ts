@@ -156,7 +156,7 @@ export async function processPreMatchReminderNotifications(now = new Date()) {
           body: `${homeTeamName} - ${awayTeamName} commence à ${formatKickoffAt(match.kickoffAt)}. Tu n'as pas encore posé ton prono.`,
           tag: `match-reminder-${match.id}`,
           title: "Pense à ton prono",
-          url: `/competitions/${match.competition.slug}/pronos#match-${match.id}`,
+          url: `/competitions/${match.competition.slug}/pronos?match=${match.id}#match-${match.id}`,
         });
 
         if (result.delivered > 0) {
