@@ -150,7 +150,9 @@ function renderStatus(status: string, liveMinute: number | null) {
   return (
     <>
       <span>{getMatchStatusLabel(status)}</span>
-      <span className="live-minute">{getLiveMatchStatusLabel(liveMinute)}</span>
+      {liveMinute !== null ? (
+        <span className="live-minute">{getLiveMatchStatusLabel(liveMinute)}</span>
+      ) : null}
     </>
   );
 }
@@ -345,7 +347,6 @@ function LiveMatchesPanel({
       <div className="section-heading">
         <div>
           <p className="badge badge-warning">En direct</p>
-          <h2>Matchs en cours</h2>
         </div>
         <p>Les scores live qui alimentent le classement provisoire.</p>
       </div>

@@ -134,7 +134,7 @@ function renderOwnPrediction(match: LiveMatchPreview | null) {
   return `Ton prono : ${match.ownPrediction.homeScore} · ${match.ownPrediction.awayScore}`;
 }
 
-export function renderLiveIndicator(liveMinute: number | null) {
+function renderLiveIndicator(liveMinute: number | null) {
   return liveMinute !== null ? getLiveMatchStatusLabel(liveMinute) : null;
 }
 
