@@ -57,6 +57,7 @@
   html {
     @apply h-full;
     overflow-x: clip;
+    scroll-behavior: smooth;
   }
 
   body {

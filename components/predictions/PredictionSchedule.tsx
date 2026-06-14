@@ -4,6 +4,7 @@ import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { CompetitionKind } from "@prisma/client";
+import { useSearchParams } from "next/navigation";
 
 import { PredictionMatchForm } from "@/components/predictions/PredictionMatchForm";
 import {
@@ -244,6 +245,28 @@ function getPriorityMatch<TMatch extends ScheduleMatch>(matches: TMatch[]) {
   );
 }
 
+function scrollNavButtonIntoView(
+  nav: HTMLElement | null,
+  button: HTMLButtonElement | null,
+) {
+  if (!nav || !button) {
+    return;
+  }
+
+  const navRect = nav.getBoundingClientRect();
+  const buttonRect = button.getBoundingClientRect();
+  const delta =
+    buttonRect.left -
+    navRect.left -
+    nav.clientWidth / 2 +
+    buttonRect.width / 2;
+
+  nav.scrollTo({
+    left: nav.scrollLeft + delta,
+    behavior: "smooth",
+  });
+}
+
 function PendingPredictionPanel({
   matches,
   slug,
@@ -379,6 +402,7 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
     groupSections[0]?.id ?? "",
   );
   const [activeDayId, setActiveDayId] = useState(defaultDayId);
+  const targetScrollRetryRef = useRef<number | null>(null);
   const activeStage = stages[activeStageIndex] ?? stages[0];
   const activeGroup =
     groupSections.find((section) => section.id === activeGroupId) ?? groupSections[0];
@@ -411,21 +435,38 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
       return;
     }
 
-    const targetElement = document.getElementById(`match-${targetMatchId}`);
-
-    if (!targetElement) {
-      return;
+    if (targetScrollRetryRef.current !== null) {
+      window.clearTimeout(targetScrollRetryRef.current);
+      targetScrollRetryRef.current = null;
     }
 
-    const frame = requestAnimationFrame(() => {
-      targetElement.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    });
+    let attempts = 0;
+    const scrollToTarget = () => {
+      const targetElement = document.getElementById(`match-${targetMatchId}`);
+
+      if (targetElement) {
+        targetElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+        targetScrollRetryRef.current = null;
+        return;
+      }
+
+      attempts += 1;
+
+      if (attempts < 10) {
+        targetScrollRetryRef.current = window.setTimeout(scrollToTarget, 60);
+      }
+    };
+
+    targetScrollRetryRef.current = window.setTimeout(scrollToTarget, 0);
 
     return () => {
-      cancelAnimationFrame(frame);
+      if (targetScrollRetryRef.current !== null) {
+        window.clearTimeout(targetScrollRetryRef.current);
+        targetScrollRetryRef.current = null;
+      }
     };
   }, [activeDayId, targetMatchId, view]);
 
@@ -466,11 +507,7 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
       return;
     }
 
-    dayButtonRefs.current[activeDayId]?.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-      inline: "center",
-    });
+    scrollNavButtonIntoView(dayNavRef.current, dayButtonRefs.current[activeDayId] ?? null);
 
     const nav = dayNavRef.current;
 
@@ -494,11 +531,7 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
       return;
     }
 
-    groupButtonRefs.current[activeGroupId]?.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-      inline: "nearest",
-    });
+    scrollNavButtonIntoView(groupNavRef.current, groupButtonRefs.current[activeGroupId] ?? null);
   }, [activeGroupId, view]);
 
   useEffect(() => {
@@ -722,8 +755,11 @@ export function PredictionSchedule({
   competitionKind,
   matches,
   slug,
-  targetMatchId = null,
+  targetMatchId: targetMatchIdProp = null,
 }: PredictionScheduleProps) {
+  const searchParams = useSearchParams();
+  const targetMatchId = targetMatchIdProp ?? searchParams.get("match");
+
   return (
     <>
       <PendingPredictionPanel matches={matches} slug={slug} />
