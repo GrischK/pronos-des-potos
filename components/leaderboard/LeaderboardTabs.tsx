@@ -181,12 +181,16 @@ function LeaderboardTable({
   previousSnapshot,
   showRankTrends,
   showBonusPoints,
+  selectedUserId,
+  onSelectUser,
 }: {
   slug: string;
   snapshot: LeaderboardSnapshot;
   previousSnapshot?: LeaderboardSnapshot;
   showRankTrends: boolean;
   showBonusPoints: boolean;
+  selectedUserId: string | null;
+  onSelectUser: (userId: string) => void;
 }) {
   const previousRankByUserId = new Map(
     previousSnapshot?.rows.map((row) => [row.userId, row.rank] as const) ?? [],
@@ -224,13 +228,28 @@ function LeaderboardTable({
               : null;
 
             return (
-              <tr key={row.userId}>
-              <td>
-                <span className="leaderboard-rank-cell">
-                  <span>{formatRankLabel(row.rank)}</span>
-                  {showRankTrends && trend ? <RankTrendIndicator trend={trend} /> : null}
-                </span>
-              </td>
+              <tr
+                aria-selected={selectedUserId === row.userId}
+                className="leaderboard-table-row"
+                data-selected={selectedUserId === row.userId}
+                key={row.userId}
+                onClick={() => {
+                  onSelectUser(row.userId);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    onSelectUser(row.userId);
+                  }
+                }}
+                tabIndex={0}
+              >
+                <td>
+                  <span className="leaderboard-rank-cell">
+                    <span>{formatRankLabel(row.rank)}</span>
+                    {showRankTrends && trend ? <RankTrendIndicator trend={trend} /> : null}
+                  </span>
+                </td>
                 <td>
                   <Link
                     className="leaderboard-player"
@@ -557,6 +576,7 @@ export function LeaderboardTabs({
   leaderboard,
 }: LeaderboardTabsProps) {
   const [mode, setMode] = useState<LeaderboardMode>(initialMode);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const snapshot = leaderboard[mode];
   const isLive = mode === "live";
   const showRankTrends = isLive && snapshot.liveMatchCount > 0;
@@ -597,11 +617,13 @@ export function LeaderboardTabs({
           </p>
         </div>
         <LeaderboardTable
+          selectedUserId={selectedUserId}
           slug={leaderboard.slug}
           snapshot={snapshot}
           previousSnapshot={isLive ? leaderboard.official : undefined}
           showRankTrends={showRankTrends}
           showBonusPoints={leaderboard.bonusResultKnown}
+          onSelectUser={setSelectedUserId}
         />
       </section>
 

@@ -2748,6 +2748,38 @@
     @apply border-b border-line px-3 py-3 font-bold;
   }
 
+  .leaderboard-table-row {
+    transition:
+      background-color 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+
+  .leaderboard-table-row td {
+    transition:
+      background-color 160ms ease,
+      color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .leaderboard-table-row:hover td {
+    background: color-mix(in srgb, var(--pitch) 5%, white);
+  }
+
+  .leaderboard-table-row:focus-visible {
+    outline: none;
+  }
+
+  .leaderboard-table-row:focus-visible td,
+  .leaderboard-table-row[data-selected="true"] td {
+    background: color-mix(in srgb, var(--pitch) 10%, white);
+  }
+
+  .leaderboard-table-row:focus-visible td:first-child,
+  .leaderboard-table-row[data-selected="true"] td:first-child {
+    box-shadow: inset 4px 0 0 var(--pitch);
+  }
+
   .leaderboard-rank-cell {
     @apply inline-flex items-center justify-center gap-1.5;
   }
@@ -4200,6 +4232,15 @@
 
   :root[data-theme="dark"] .leaderboard-rule span {
     color: var(--muted);
+  }
+
+  :root[data-theme="dark"] .leaderboard-table-row:hover td {
+    background: color-mix(in srgb, var(--pitch) 12%, var(--surface-alt));
+  }
+
+  :root[data-theme="dark"] .leaderboard-table-row:focus-visible td,
+  :root[data-theme="dark"] .leaderboard-table-row[data-selected="true"] td {
+    background: color-mix(in srgb, var(--pitch) 18%, var(--surface-alt));
   }
 
   :root[data-theme="dark"] .leaderboard-stat-card {
