@@ -97,6 +97,7 @@ export function LeaderboardProgressChart({
   currentUserId,
   data,
 }: LeaderboardProgressChartProps) {
+  const chartScrollPadding = 12;
   const playersWithHistory = useMemo(
     () => data.players.filter((player) => player.history.length > 0),
     [data.players],
@@ -259,6 +260,25 @@ export function LeaderboardProgressChart({
         </div>
 
         <div className="leaderboard-progress-chart-shell">
+          <div className="leaderboard-progress-rank-axis" aria-hidden="true">
+            {Array.from({ length: maxRank }, (_, index) => {
+              const rank = index + 1;
+              const y = padding.top + index * yStep;
+
+              return (
+                <span
+                  className="leaderboard-progress-rank-axis-label"
+                  key={rank}
+                  style={{
+                    top: chartScrollPadding + y,
+                  }}
+                >
+                  {rank}
+                </span>
+              );
+            })}
+          </div>
+
           {selectedPlayer && selectedPlayerOverlayY !== null ? (
             <div
               className="leaderboard-progress-overlay-label"
@@ -303,14 +323,6 @@ export function LeaderboardProgressChart({
                       y1={y}
                       y2={y}
                     />
-                    <text
-                      className="leaderboard-progress-axis-label"
-                      textAnchor="end"
-                      x={padding.left - 10}
-                      y={y + 4}
-                    >
-                      {rank}
-                    </text>
                   </g>
                 );
               })}

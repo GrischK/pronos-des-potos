@@ -2583,6 +2583,20 @@
     @apply relative overflow-hidden rounded-lg border border-line bg-surface;
   }
 
+  .leaderboard-progress-rank-axis {
+    @apply pointer-events-none absolute bottom-3 left-0 top-3 z-10 w-11;
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--surface) 96%, transparent),
+      color-mix(in srgb, var(--surface) 88%, transparent) 72%,
+      transparent
+    );
+  }
+
+  .leaderboard-progress-rank-axis-label {
+    @apply absolute left-3 -translate-y-1/2 text-[11px] font-extrabold text-muted;
+  }
+
   .leaderboard-progress-chart-scroll {
     @apply overflow-x-auto p-3;
   }
