@@ -153,9 +153,10 @@ export function LeaderboardProgressChart({
   const xStep = data.sections.length > 1 ? sectionStep : 0;
   const yStep = maxRank > 1 ? innerHeight / (maxRank - 1) : 0;
   const overlayAnchorOffset = Math.min(72, Math.max(36, viewportWidth * 0.22));
+  const mobileTrailingBuffer = viewportWidth > 0 && viewportWidth <= 760 ? 72 : 0;
   const trailingScrollSpace = Math.max(
     0,
-    viewportWidth - overlayAnchorOffset - padding.left - padding.right,
+    viewportWidth - overlayAnchorOffset - padding.left - padding.right + mobileTrailingBuffer,
   );
   const selectedPlayerPoints = selectedPlayer
     ? selectedPlayer.history.map((point, pointIndex) => ({
