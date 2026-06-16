@@ -16,6 +16,7 @@ import {
   processFinishedMatchNotifications,
   processPreMatchReminderNotifications,
 } from "@/src/server/push-notification-jobs";
+import { getLiveTrackingWindowStart } from "@/src/server/live-score-sync-window";
 
 const LIVE_TRACKING_WINDOW_HOURS = 4;
 const LIVE_SCORE_LOOKAHEAD_HOURS = 26;
@@ -143,11 +144,9 @@ export async function syncLiveScores(now = new Date()) {
 }
 
 async function getLiveScoreCandidateMatches(now: Date) {
-  const trackingWindowStart = new Date(
-    now.getTime() - LIVE_TRACKING_WINDOW_HOURS * 60 * 60 * 1000,
-  );
-  const scheduledGraceStart = new Date(
-    now.getTime() - SCHEDULED_START_GRACE_MINUTES * 60 * 1000,
+  const trackingWindowStart = getLiveTrackingWindowStart(
+    now,
+    LIVE_TRACKING_WINDOW_HOURS,
   );
 
   return prisma.match.findMany({
@@ -157,17 +156,12 @@ async function getLiveScoreCandidateMatches(now: Date) {
       },
       OR: [
         {
-          status: "LIVE",
+          status: {
+            in: ["LIVE", "SCHEDULED"],
+          },
           kickoffAt: {
             lte: now,
             gte: trackingWindowStart,
-          },
-        },
-        {
-          status: "SCHEDULED",
-          kickoffAt: {
-            lte: now,
-            gte: scheduledGraceStart,
           },
         },
       ],
