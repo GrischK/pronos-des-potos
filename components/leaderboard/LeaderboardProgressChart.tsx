@@ -436,7 +436,10 @@ export function LeaderboardProgressChart({
             }}
             ref={scrollRef}
           >
-            <div className="leaderboard-progress-chart-track">
+            <div
+              className="leaderboard-progress-chart-track"
+              style={{ width: chartWidth + trailingScrollSpace }}
+            >
               <svg
                 aria-label="Évolution du classement"
                 className="leaderboard-progress-chart"
@@ -552,10 +555,6 @@ export function LeaderboardProgressChart({
                   );
                 })}
               </svg>
-              <div
-                aria-hidden="true"
-                style={{ flex: `0 0 ${trailingScrollSpace}px` }}
-              />
             </div>
           </div>
         </div>

@@ -2602,7 +2602,7 @@
   }
 
   .leaderboard-progress-chart-track {
-    @apply flex w-max items-start;
+    @apply flex items-start;
   }
 
   .leaderboard-progress-chart {
