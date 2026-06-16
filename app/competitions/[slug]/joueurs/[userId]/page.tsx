@@ -17,6 +17,9 @@ type PlayerPageProps = {
     slug: string;
     userId: string;
   }>;
+  searchParams: Promise<{
+    from?: string;
+  }>;
 };
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
@@ -80,13 +83,21 @@ function PlayerMatchRow({ match }: { match: PlayerProfileMatch }) {
   );
 }
 
-export default async function PlayerPage({ params }: PlayerPageProps) {
-  const { slug, userId } = await params;
+export default async function PlayerPage({ params, searchParams }: PlayerPageProps) {
+  const [{ slug, userId }, { from }] = await Promise.all([params, searchParams]);
   const profile = await getPlayerProfileData(slug, userId);
 
   if (!profile) {
     notFound();
   }
+
+  const cameFromGraph = from === "graph";
+  const backHref = cameFromGraph
+    ? `/competitions/${profile.competition.slug}/classement/evolution`
+    : `/competitions/${profile.competition.slug}/classement`;
+  const backLabel = cameFromGraph
+    ? "Retour au graphique du classement"
+    : "Retour au classement";
 
   const statCards = [
     {
@@ -177,9 +188,9 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         <div className="actions">
           <Link
             className="btn btn-primary competition-back-button"
-            href={`/competitions/${profile.competition.slug}/classement`}
+            href={backHref}
           >
-            Retour au classement
+            {backLabel}
           </Link>
         </div>
       </section>

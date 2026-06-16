@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { LeaderboardProgressData } from "@/src/server/leaderboard";
@@ -190,7 +191,10 @@ export function LeaderboardProgressChart({
         <div className="leaderboard-progress-summary">
           {selectedPlayer ? (
             <>
-              <div className="leaderboard-progress-active">
+              <Link
+                className="leaderboard-progress-active"
+                href={`/competitions/${data.slug}/joueurs/${selectedPlayer.userId}?from=graph`}
+              >
                 <span
                   className="leaderboard-progress-avatar"
                   style={{ backgroundColor: getPlayerColor(selectedPlayerIndex) }}
@@ -204,7 +208,7 @@ export function LeaderboardProgressChart({
                 <div>
                   <strong>{selectedPlayer.name}</strong>
                 </div>
-              </div>
+              </Link>
 
               <div className="leaderboard-progress-metrics">
                 <div>
