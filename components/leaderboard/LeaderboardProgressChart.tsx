@@ -155,8 +155,8 @@ export function LeaderboardProgressChart({
   const xStep = data.sections.length > 1 ? sectionStep : 0;
   const yStep = maxRank > 1 ? innerHeight / (maxRank - 1) : 0;
   const overlayAnchorOffset = Math.min(72, Math.max(36, viewportWidth * 0.22));
-  const mobileTrailingBuffer = viewportWidth > 0 && viewportWidth <= 760 ? 72 : 0;
-  const standaloneTrailingBuffer = isStandalone ? 56 : 0;
+  const mobileTrailingBuffer = 0;
+  const standaloneTrailingBuffer = 0;
   const trailingScrollSpace = Math.max(
     0,
     viewportWidth -
