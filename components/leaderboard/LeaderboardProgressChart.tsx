@@ -124,6 +124,7 @@ export function LeaderboardProgressChart({
     playersWithHistory[0]?.userId ??
     null;
   const [selectedUserId, setSelectedUserId] = useState(defaultPlayerId);
+  const [showAllOverlayLabels, setShowAllOverlayLabels] = useState(false);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [viewportWidth, setViewportWidth] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -151,16 +152,21 @@ export function LeaderboardProgressChart({
   const maxRank = Math.max(1, data.participantCount);
   const xStep = data.sections.length > 1 ? sectionStep : 0;
   const yStep = maxRank > 1 ? innerHeight / (maxRank - 1) : 0;
+  const overlayAnchorOffset = Math.min(72, Math.max(36, viewportWidth * 0.22));
+  const trailingScrollSpace = Math.max(
+    0,
+    viewportWidth - overlayAnchorOffset - padding.left - padding.right,
+  );
   const selectedPlayerPoints = selectedPlayer
     ? selectedPlayer.history.map((point, pointIndex) => ({
         x: padding.left + pointIndex * xStep,
         y: padding.top + (point.rank - 1) * yStep,
       }))
     : [];
-  const trackedViewportX = padding.left + scrollLeft + Math.min(72, Math.max(36, viewportWidth * 0.22));
+  const overlayTrackedViewportX = padding.left + scrollLeft + overlayAnchorOffset;
   const selectedPlayerReachedHistoryIndex = getReachedHistoryIndex(
     selectedPlayerPoints,
-    trackedViewportX,
+    overlayTrackedViewportX,
   );
   const selectedPlayerReachedHistoryPoint =
     selectedPlayer && selectedPlayerReachedHistoryIndex !== null
@@ -168,9 +174,37 @@ export function LeaderboardProgressChart({
       : null;
   const selectedPlayerOverlayY = getInterpolatedY(
     selectedPlayerPoints,
-    trackedViewportX,
+    overlayTrackedViewportX,
   );
   const selectedPlayerColor = getPlayerColor(selectedPlayerIndex);
+  const secondaryOverlayLabels = playersWithHistory
+    .map((player, index) => {
+      if (player.userId === selectedPlayer?.userId) {
+        return null;
+      }
+
+      const points = player.history.map((point, pointIndex) => ({
+        x: padding.left + pointIndex * xStep,
+        y: padding.top + (point.rank - 1) * yStep,
+      }));
+      const reachedHistoryIndex = getReachedHistoryIndex(points, overlayTrackedViewportX);
+      const reachedHistoryPoint =
+        reachedHistoryIndex !== null ? player.history[reachedHistoryIndex] ?? null : null;
+      const overlayY = getInterpolatedY(points, overlayTrackedViewportX);
+
+      if (!reachedHistoryPoint || overlayY === null) {
+        return null;
+      }
+
+      return {
+        color: getPlayerColor(index),
+        name: player.name,
+        points: reachedHistoryPoint.points,
+        userId: player.userId,
+        y: overlayY,
+      };
+    })
+    .filter((label) => label !== null);
 
   useEffect(() => {
     const element = scrollRef.current;
@@ -196,6 +230,10 @@ export function LeaderboardProgressChart({
       resizeObserver.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    setShowAllOverlayLabels(false);
+  }, [selectedUserId]);
 
   if (data.sections.length === 0 || playersWithHistory.length === 0) {
     return (
@@ -321,10 +359,47 @@ export function LeaderboardProgressChart({
               />
               <strong>{selectedPlayer.name}</strong>
               {selectedPlayerReachedHistoryPoint ? (
-                <span>{selectedPlayerReachedHistoryPoint.points} pts</span>
+                <span className="leaderboard-progress-overlay-points">
+                  {selectedPlayerReachedHistoryPoint.points} pts
+                </span>
               ) : null}
+              <button
+                aria-expanded={showAllOverlayLabels}
+                aria-label={
+                  showAllOverlayLabels
+                    ? "Masquer les labels des autres joueurs"
+                    : "Afficher les labels des autres joueurs"
+                }
+                className="leaderboard-progress-overlay-toggle"
+                onClick={() => setShowAllOverlayLabels((visible) => !visible)}
+                type="button"
+              >
+                +
+              </button>
             </div>
           ) : null}
+
+          {showAllOverlayLabels
+            ? secondaryOverlayLabels.map((label) => (
+                <div
+                  className="leaderboard-progress-overlay-label leaderboard-progress-overlay-label-secondary"
+                  key={label.userId}
+                  style={{
+                    borderColor: label.color,
+                    top: Math.max(10, label.y - 30),
+                  }}
+                >
+                  <span
+                    className="leaderboard-progress-overlay-dot"
+                    style={{ backgroundColor: label.color }}
+                  />
+                  <strong>{label.name}</strong>
+                  <span className="leaderboard-progress-overlay-points">
+                    {label.points} pts
+                  </span>
+                </div>
+              ))
+            : null}
 
           <div
             className="leaderboard-progress-chart-scroll"
@@ -333,121 +408,127 @@ export function LeaderboardProgressChart({
             }}
             ref={scrollRef}
           >
-            <svg
-              aria-label="Évolution du classement"
-              className="leaderboard-progress-chart"
-              height={chartHeight}
-              role="img"
-              viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-              width={chartWidth}
-            >
-              {Array.from({ length: maxRank }, (_, index) => {
-                const rank = index + 1;
-                const y = padding.top + index * yStep;
+            <div className="leaderboard-progress-chart-track">
+              <svg
+                aria-label="Évolution du classement"
+                className="leaderboard-progress-chart"
+                height={chartHeight}
+                role="img"
+                viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+                width={chartWidth}
+              >
+                {Array.from({ length: maxRank }, (_, index) => {
+                  const rank = index + 1;
+                  const y = padding.top + index * yStep;
 
-                return (
-                  <g key={rank}>
-                    <line
-                      className="leaderboard-progress-gridline"
-                      x1={padding.left}
-                      x2={chartWidth - padding.right}
-                      y1={y}
-                      y2={y}
-                    />
-                  </g>
-                );
-              })}
+                  return (
+                    <g key={rank}>
+                      <line
+                        className="leaderboard-progress-gridline"
+                        x1={padding.left}
+                        x2={chartWidth - padding.right}
+                        y1={y}
+                        y2={y}
+                      />
+                    </g>
+                  );
+                })}
 
-              {data.sections.map((section, index) => {
-                const x = padding.left + index * xStep;
-                const isFirstSection = index === 0;
-                const isLastSection = index === data.sections.length - 1;
-                const textAnchor = isFirstSection
-                  ? "start"
-                  : isLastSection
-                    ? "end"
-                    : "middle";
-                const labelX = isFirstSection
-                  ? x + 4
-                  : isLastSection
-                    ? x - 4
-                    : x;
+                {data.sections.map((section, index) => {
+                  const x = padding.left + index * xStep;
+                  const isFirstSection = index === 0;
+                  const isLastSection = index === data.sections.length - 1;
+                  const textAnchor = isFirstSection
+                    ? "start"
+                    : isLastSection
+                      ? "end"
+                      : "middle";
+                  const labelX = isFirstSection
+                    ? x + 4
+                    : isLastSection
+                      ? x - 4
+                      : x;
 
-                return (
-                  <g key={section.id}>
-                    <line
-                      className="leaderboard-progress-gridline is-vertical"
-                      x1={x}
-                      x2={x}
-                      y1={padding.top}
-                      y2={chartHeight - padding.bottom}
-                    />
-                    <text
-                      className="leaderboard-progress-axis-label"
-                      textAnchor={textAnchor}
-                      x={labelX}
-                      y={chartHeight - 12}
-                    >
-                      {data.kind === "WORLD_CUP" ? (
+                  return (
+                    <g key={section.id}>
+                      <line
+                        className="leaderboard-progress-gridline is-vertical"
+                        x1={x}
+                        x2={x}
+                        y1={padding.top}
+                        y2={chartHeight - padding.bottom}
+                      />
+                      <text
+                        className="leaderboard-progress-axis-label"
+                        textAnchor={textAnchor}
+                        x={labelX}
+                        y={chartHeight - 12}
+                      >
+                        {data.kind === "WORLD_CUP" ? (
+                          <>
+                            <tspan x={labelX} dy={0}>
+                              {splitWorldCupLabel(section.label).phase}
+                            </tspan>
+                            <tspan className="leaderboard-progress-axis-label-date" x={labelX} dy={12}>
+                              {splitWorldCupLabel(section.label).date}
+                            </tspan>
+                          </>
+                        ) : (
+                          section.label
+                        )}
+                      </text>
+                    </g>
+                  );
+                })}
+
+                {playersWithHistory.map((player, index) => {
+                  const points = player.history.map((point, pointIndex) => ({
+                    x: padding.left + pointIndex * xStep,
+                    y: padding.top + (point.rank - 1) * yStep,
+                  }));
+                  const isSelected = player.userId === selectedPlayer?.userId;
+                  const color = getPlayerColor(index);
+                  const lastPoint = points[points.length - 1];
+
+                  return (
+                    <g key={player.userId}>
+                      <path
+                        className="leaderboard-progress-line-hitbox"
+                        d={buildLinePath(points)}
+                        onClick={() => setSelectedUserId(player.userId)}
+                        stroke="transparent"
+                        strokeWidth={16}
+                      />
+                      <path
+                        className="leaderboard-progress-line"
+                        d={buildLinePath(points)}
+                        onClick={() => setSelectedUserId(player.userId)}
+                        stroke={color}
+                        strokeWidth={isSelected ? 4 : 1.6}
+                        style={{ opacity: isSelected ? 1 : 0.22 }}
+                      />
+                      {lastPoint ? (
                         <>
-                          <tspan x={labelX} dy={0}>
-                            {splitWorldCupLabel(section.label).phase}
-                          </tspan>
-                          <tspan className="leaderboard-progress-axis-label-date" x={labelX} dy={12}>
-                            {splitWorldCupLabel(section.label).date}
-                          </tspan>
+                          <circle
+                            className="leaderboard-progress-endpoint"
+                            cx={lastPoint.x}
+                            cy={lastPoint.y}
+                            fill={color}
+                            onClick={() => setSelectedUserId(player.userId)}
+                            r={isSelected ? 5.5 : 3}
+                            style={{ opacity: isSelected ? 1 : 0.34 }}
+                          />
                         </>
-                      ) : (
-                        section.label
-                      )}
-                    </text>
-                  </g>
-                );
-              })}
-
-              {playersWithHistory.map((player, index) => {
-                const points = player.history.map((point, pointIndex) => ({
-                  x: padding.left + pointIndex * xStep,
-                  y: padding.top + (point.rank - 1) * yStep,
-                }));
-                const isSelected = player.userId === selectedPlayer?.userId;
-                const color = getPlayerColor(index);
-                const lastPoint = points[points.length - 1];
-
-                return (
-                  <g key={player.userId}>
-                    <path
-                      className="leaderboard-progress-line-hitbox"
-                      d={buildLinePath(points)}
-                      onClick={() => setSelectedUserId(player.userId)}
-                      stroke="transparent"
-                      strokeWidth={16}
-                    />
-                    <path
-                      className="leaderboard-progress-line"
-                      d={buildLinePath(points)}
-                      onClick={() => setSelectedUserId(player.userId)}
-                      stroke={color}
-                      strokeWidth={isSelected ? 4 : 1.6}
-                      style={{ opacity: isSelected ? 1 : 0.22 }}
-                    />
-                    {lastPoint ? (
-                      <>
-                        <circle
-                          className="leaderboard-progress-endpoint"
-                          cx={lastPoint.x}
-                          cy={lastPoint.y}
-                          fill={color}
-                          onClick={() => setSelectedUserId(player.userId)}
-                          r={isSelected ? 5.5 : 3}
-                          style={{ opacity: isSelected ? 1 : 0.34 }}
-                        />
-                      </>
-                    ) : null}
-                  </g>
-                );
-              })}
-            </svg>
+                      ) : null}
+                    </g>
+                  );
+                })}
+              </svg>
+              <div
+                aria-hidden="true"
+                style={{ flex: `0 0 ${trailingScrollSpace}px` }}
+              />
+            </div>
           </div>
         </div>
       </div>

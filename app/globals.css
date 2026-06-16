@@ -2601,6 +2601,10 @@
     @apply overflow-x-auto p-3;
   }
 
+  .leaderboard-progress-chart-track {
+    @apply flex w-max items-start;
+  }
+
   .leaderboard-progress-chart {
     @apply block;
   }
@@ -2647,6 +2651,10 @@
     box-shadow: 0 10px 24px color-mix(in srgb, var(--foreground) 10%, transparent);
   }
 
+  .leaderboard-progress-overlay-label-secondary {
+    @apply left-14 z-[9] opacity-90;
+  }
+
   .leaderboard-progress-overlay-dot {
     @apply h-2.5 w-2.5 shrink-0 rounded-full;
   }
@@ -2655,8 +2663,12 @@
     @apply text-xs font-black text-foreground;
   }
 
-  .leaderboard-progress-overlay-label span:last-child {
+  .leaderboard-progress-overlay-points {
     @apply text-[11px] font-extrabold text-muted;
+  }
+
+  .leaderboard-progress-overlay-toggle {
+    @apply pointer-events-auto inline-flex h-5 w-5 items-center justify-center rounded-full border border-line bg-surface-alt text-xs font-black text-foreground;
   }
 
   .leaderboard-table {
