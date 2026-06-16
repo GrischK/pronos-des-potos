@@ -2655,6 +2655,10 @@
     @apply text-xs font-black text-foreground;
   }
 
+  .leaderboard-progress-overlay-label span:last-child {
+    @apply text-[11px] font-extrabold text-muted;
+  }
+
   .leaderboard-table {
     @apply w-full border-collapse text-left text-sm;
   }

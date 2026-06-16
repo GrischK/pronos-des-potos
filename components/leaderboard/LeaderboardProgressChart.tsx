@@ -55,6 +55,23 @@ function splitWorldCupLabel(label: string) {
   };
 }
 
+function getReachedHistoryIndex(
+  points: { x: number; y: number }[],
+  targetX: number,
+) {
+  if (points.length === 0) {
+    return null;
+  }
+
+  for (let index = points.length - 1; index >= 0; index -= 1) {
+    if (targetX >= points[index].x) {
+      return index;
+    }
+  }
+
+  return 0;
+}
+
 function getInterpolatedY(
   points: { x: number; y: number }[],
   targetX: number,
@@ -141,7 +158,18 @@ export function LeaderboardProgressChart({
       }))
     : [];
   const trackedViewportX = padding.left + scrollLeft + Math.min(72, Math.max(36, viewportWidth * 0.22));
-  const selectedPlayerOverlayY = getInterpolatedY(selectedPlayerPoints, trackedViewportX);
+  const selectedPlayerReachedHistoryIndex = getReachedHistoryIndex(
+    selectedPlayerPoints,
+    trackedViewportX,
+  );
+  const selectedPlayerReachedHistoryPoint =
+    selectedPlayer && selectedPlayerReachedHistoryIndex !== null
+      ? selectedPlayer.history[selectedPlayerReachedHistoryIndex] ?? null
+      : null;
+  const selectedPlayerOverlayY = getInterpolatedY(
+    selectedPlayerPoints,
+    trackedViewportX,
+  );
   const selectedPlayerColor = getPlayerColor(selectedPlayerIndex);
 
   useEffect(() => {
@@ -292,6 +320,9 @@ export function LeaderboardProgressChart({
                 style={{ backgroundColor: selectedPlayerColor }}
               />
               <strong>{selectedPlayer.name}</strong>
+              {selectedPlayerReachedHistoryPoint ? (
+                <span>{selectedPlayerReachedHistoryPoint.points} pts</span>
+              ) : null}
             </div>
           ) : null}
 
