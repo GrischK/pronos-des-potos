@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CompetitionKind } from "@prisma/client";
 
@@ -20,6 +20,12 @@ type CompetitionGroupsProps = {
   competitionKind: CompetitionKind;
   groups: CompetitionGroup[];
   phases: CompetitionPhase[];
+};
+
+type TeamFilterOption = {
+  id: string;
+  name: string;
+  flagUrl: string | null;
 };
 
 type ChronologicalSection = {
@@ -81,6 +87,109 @@ function sortMatchesByKickoff(matches: CompetitionScheduleMatch[]) {
   return [...matches].sort(
     (a, b) => new Date(a.kickoffAt).getTime() - new Date(b.kickoffAt).getTime(),
   );
+}
+
+function getInitial(name: string) {
+  return name.trim().slice(0, 1).toUpperCase();
+}
+
+function TeamFilterLogo({ team }: { team: TeamFilterOption }) {
+  if (team.flagUrl) {
+    return <img alt="" className="team-flag" loading="lazy" src={team.flagUrl} />;
+  }
+
+  return <span className="bonus-team-fallback">{getInitial(team.name)}</span>;
+}
+
+function TeamFilterPicker({
+  onPick,
+  options,
+  value,
+}: {
+  onPick: (value: string) => void;
+  options: TeamFilterOption[];
+  value: string;
+}) {
+  const pickerRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const selectedTeam = options.find((team) => team.id === value) ?? null;
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!pickerRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [isOpen]);
+
+  return (
+    <div className="bonus-team-picker w-fit min-w-[220px]" ref={pickerRef}>
+      <span className="bonus-team-picker-label">Filtrer par pays</span>
+      <button
+        aria-expanded={isOpen}
+        className="bonus-team-picker-trigger min-w-[220px]"
+        onClick={() => setIsOpen((open) => !open)}
+        type="button"
+      >
+        <span className="bonus-team-picker-value">
+          {selectedTeam ? <TeamFilterLogo team={selectedTeam} /> : null}
+          <span>{selectedTeam?.name ?? "Tous les pays"}</span>
+        </span>
+        <ChevronDown aria-hidden="true" size={18} strokeWidth={3} />
+      </button>
+
+      {isOpen ? (
+        <div className="bonus-team-picker-menu w-full" role="listbox">
+          <button
+            aria-selected={value === ""}
+            className="bonus-team-picker-option bonus-team-picker-option-clear"
+            onClick={() => {
+              onPick("");
+              setIsOpen(false);
+            }}
+            role="option"
+            type="button"
+          >
+            <span>Tous les pays</span>
+          </button>
+          {options.map((team) => (
+            <button
+              aria-selected={team.id === value}
+              className="bonus-team-picker-option"
+              key={team.id}
+              onClick={() => {
+                onPick(team.id);
+                setIsOpen(false);
+              }}
+              role="option"
+              type="button"
+            >
+              <TeamFilterLogo team={team} />
+              <span>{team.name}</span>
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function matchIncludesTeam(match: CompetitionScheduleMatch, teamId: string) {
+  if (!teamId) {
+    return true;
+  }
+
+  return match.homeTeam?.name === teamId || match.awayTeam?.name === teamId;
 }
 
 function getDayKey(value: string) {
@@ -288,9 +397,53 @@ export function CompetitionGroups({
   const dayButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [dayNavCanScrollLeft, setDayNavCanScrollLeft] = useState(false);
   const [dayNavCanScrollRight, setDayNavCanScrollRight] = useState(false);
+  const teamOptions = useMemo(() => {
+    const options = new Map<string, TeamFilterOption>();
+
+    for (const match of [...groups.flatMap((group) => group.matches), ...phases.flatMap((phase) => phase.matches)]) {
+      if (match.homeTeam?.name) {
+        options.set(match.homeTeam.name, {
+          id: match.homeTeam.name,
+          flagUrl: match.homeTeam.flagUrl ?? null,
+          name: match.homeTeam.name,
+        });
+      }
+
+      if (match.awayTeam?.name) {
+        options.set(match.awayTeam.name, {
+          id: match.awayTeam.name,
+          flagUrl: match.awayTeam.flagUrl ?? null,
+          name: match.awayTeam.name,
+        });
+      }
+    }
+
+    return Array.from(options.values()).sort((a, b) => a.name.localeCompare(b.name, "fr"));
+  }, [groups, phases]);
+  const [selectedTeamId, setSelectedTeamId] = useState("");
+  const filteredGroups = useMemo(
+    () =>
+      groups
+        .map((group) => ({
+          ...group,
+          matches: group.matches.filter((match) => matchIncludesTeam(match, selectedTeamId)),
+        }))
+        .filter((group) => group.matches.length > 0 || !selectedTeamId),
+    [groups, selectedTeamId],
+  );
+  const filteredPhases = useMemo(
+    () =>
+      phases
+        .map((phase) => ({
+          ...phase,
+          matches: phase.matches.filter((match) => matchIncludesTeam(match, selectedTeamId)),
+        }))
+        .filter((phase) => phase.matches.length > 0),
+    [phases, selectedTeamId],
+  );
   const stages = useMemo(
     () => [
-      ...(groups.length > 0
+      ...(filteredGroups.length > 0
         ? [
             {
               id: "GROUPS",
@@ -300,7 +453,7 @@ export function CompetitionGroups({
             },
           ]
         : []),
-      ...phases.map((phase) => ({
+      ...filteredPhases.map((phase) => ({
         id: phase.name,
         label: phase.name,
         title: phase.name,
@@ -308,11 +461,11 @@ export function CompetitionGroups({
         phase,
       })),
     ],
-    [groups.length, phases],
+    [filteredGroups.length, filteredPhases],
   );
   const allMatches = useMemo(
-    () => sortMatchesByKickoff([...groups.flatMap((group) => group.matches), ...phases.flatMap((phase) => phase.matches)]),
-    [groups, phases],
+    () => sortMatchesByKickoff([...filteredGroups.flatMap((group) => group.matches), ...filteredPhases.flatMap((phase) => phase.matches)]),
+    [filteredGroups, filteredPhases],
   );
   const chronologicalSections = useMemo(
     () => getChronologicalSections(allMatches),
@@ -324,16 +477,32 @@ export function CompetitionGroups({
   );
   const [view, setView] = useState<ScheduleView>("chronology");
   const [activeStageIndex, setActiveStageIndex] = useState(0);
-  const [activeGroupName, setActiveGroupName] = useState(groups[0]?.name ?? "");
+  const [activeGroupName, setActiveGroupName] = useState(filteredGroups[0]?.name ?? "");
   const [activeDayId, setActiveDayId] = useState(defaultDayId);
   const activeStage = stages[activeStageIndex] ?? stages[0];
   const activeGroup =
-    groups.find((group) => group.name === activeGroupName) ?? groups[0];
+    filteredGroups.find((group) => group.name === activeGroupName) ?? filteredGroups[0];
   const activeDay =
     chronologicalSections.find((section) => section.id === activeDayId) ??
     chronologicalSections[0];
   const previousStage = stages[activeStageIndex - 1];
   const nextStage = stages[activeStageIndex + 1];
+
+  useEffect(() => {
+    if (activeStageIndex < stages.length) {
+      return;
+    }
+
+    setActiveStageIndex(0);
+  }, [activeStageIndex, stages.length]);
+
+  useEffect(() => {
+    if (activeGroupName && filteredGroups.some((group) => group.name === activeGroupName)) {
+      return;
+    }
+
+    setActiveGroupName(filteredGroups[0]?.name ?? "");
+  }, [activeGroupName, filteredGroups]);
 
   useEffect(() => {
     if (activeDayId && chronologicalSections.some((section) => section.id === activeDayId)) {
@@ -397,6 +566,12 @@ export function CompetitionGroups({
 
   return (
     <div className="schedule-browser">
+      <TeamFilterPicker
+        onPick={setSelectedTeamId}
+        options={teamOptions}
+        value={selectedTeamId}
+      />
+
       <div className="schedule-view-switch" aria-label="Vue des matchs">
         <button
           aria-pressed={view === "structure"}
@@ -467,6 +642,10 @@ export function CompetitionGroups({
         </div>
       ) : null}
 
+      {view === "chronology" && !activeDay ? (
+        <p>Aucun match pour ce pays.</p>
+      ) : null}
+
       {view === "structure" ? (
         <div className="phase-pager">
           <button
@@ -496,10 +675,10 @@ export function CompetitionGroups({
         </div>
       ) : null}
 
-      {view === "structure" && activeStage.kind === "groups" && activeGroup ? (
+      {view === "structure" && activeStage?.kind === "groups" && activeGroup ? (
         <div className="group-browser">
           <nav aria-label="Groupes" className="group-nav">
-            {groups.map((group) => (
+            {filteredGroups.map((group) => (
               <button
                 aria-pressed={group.name === activeGroup.name}
                 className="group-nav-button"
@@ -565,7 +744,7 @@ export function CompetitionGroups({
         </div>
       ) : null}
 
-      {view === "structure" && activeStage.kind === "phase" ? (
+      {view === "structure" && activeStage?.kind === "phase" ? (
         <div className="phase-panel">
           <div className="section-heading">
             <div>
@@ -582,6 +761,10 @@ export function CompetitionGroups({
             </div>
           ))}
         </div>
+      ) : null}
+
+      {view === "structure" && !activeStage ? (
+        <p>Aucun match pour ce pays.</p>
       ) : null}
     </div>
   );
