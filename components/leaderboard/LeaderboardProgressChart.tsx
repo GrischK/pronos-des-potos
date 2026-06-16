@@ -115,6 +115,7 @@ export function LeaderboardProgressChart({
   data,
 }: LeaderboardProgressChartProps) {
   const chartScrollPadding = 12;
+  const rankAxisOverlayWidth = 44;
   const playersWithHistory = useMemo(
     () => data.players.filter((player) => player.history.length > 0),
     [data.players],
@@ -125,6 +126,7 @@ export function LeaderboardProgressChart({
     null;
   const [selectedUserId, setSelectedUserId] = useState(defaultPlayerId);
   const [showAllOverlayLabels, setShowAllOverlayLabels] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [viewportWidth, setViewportWidth] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -154,9 +156,16 @@ export function LeaderboardProgressChart({
   const yStep = maxRank > 1 ? innerHeight / (maxRank - 1) : 0;
   const overlayAnchorOffset = Math.min(72, Math.max(36, viewportWidth * 0.22));
   const mobileTrailingBuffer = viewportWidth > 0 && viewportWidth <= 760 ? 72 : 0;
+  const standaloneTrailingBuffer = isStandalone ? 56 : 0;
   const trailingScrollSpace = Math.max(
     0,
-    viewportWidth - overlayAnchorOffset - padding.left - padding.right + mobileTrailingBuffer,
+    viewportWidth -
+      overlayAnchorOffset -
+      padding.left -
+      padding.right +
+      rankAxisOverlayWidth +
+      mobileTrailingBuffer +
+      standaloneTrailingBuffer,
   );
   const selectedPlayerPoints = selectedPlayer
     ? selectedPlayer.history.map((point, pointIndex) => ({
@@ -229,6 +238,25 @@ export function LeaderboardProgressChart({
 
     return () => {
       resizeObserver.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(display-mode: standalone)");
+    const syncStandaloneState = () => {
+      setIsStandalone(
+        mediaQuery.matches ||
+          (typeof navigator !== "undefined" &&
+            "standalone" in navigator &&
+            Boolean((navigator as Navigator & { standalone?: boolean }).standalone)),
+      );
+    };
+
+    syncStandaloneState();
+    mediaQuery.addEventListener("change", syncStandaloneState);
+
+    return () => {
+      mediaQuery.removeEventListener("change", syncStandaloneState);
     };
   }, []);
 
