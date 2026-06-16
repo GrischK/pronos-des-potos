@@ -424,6 +424,13 @@ export async function getCompetitionsOverview() {
       );
       const liveMatch = liveMatches[0] ?? null;
       const nextMatch = futureMatches[0] ?? null;
+      const hasFinishedMatches = competition.matches.some(
+        (match) => match.status === "FINISHED",
+      );
+      const isEffectivelyFinished =
+        liveMatches.length === 0 &&
+        futureMatches.length === 0 &&
+        hasFinishedMatches;
       const missingPredictionCount =
         competition.status === "OPEN" && user
           ? futureMatches.filter(
@@ -568,6 +575,7 @@ export async function getCompetitionsOverview() {
         slug: competition.slug,
         kind: competition.kind,
         status: competition.status,
+        isEffectivelyFinished,
         bonusEnabled: competition.bonusEnabled,
         emblemUrl: competition.emblemUrl,
         matchCount: competition._count.matches,

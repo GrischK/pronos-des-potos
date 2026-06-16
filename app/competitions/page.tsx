@@ -236,8 +236,16 @@ export default async function CompetitionsPage() {
                   <p className="badge competition-kind-badge">
                     {competitionKindLabels[competition.kind]}
                   </p>
-                  <p className={statusBadgeClasses[competition.status]}>
-                    {statusLabels[competition.status]}
+                  <p
+                    className={
+                      competition.isEffectivelyFinished
+                        ? statusBadgeClasses.FINISHED
+                        : statusBadgeClasses[competition.status]
+                    }
+                  >
+                    {competition.isEffectivelyFinished
+                      ? statusLabels.FINISHED
+                      : statusLabels[competition.status]}
                   </p>
                 </div>
                 <div className="competition-card-summary">
@@ -278,16 +286,28 @@ export default async function CompetitionsPage() {
                   </div>
                 ) : null}
 
-                <div className="competition-card-next">
-                  <span>Prochain match</span>
-                  {competition.nextMatch ? (
+                <div
+                  className={
+                    competition.isEffectivelyFinished
+                      ? "competition-card-next competition-card-next--finished"
+                      : "competition-card-next"
+                  }
+                >
+                  <span>
+                    {competition.isEffectivelyFinished
+                      ? "Statut"
+                      : "Prochain match"}
+                  </span>
+                  {competition.isEffectivelyFinished ? (
+                    <strong>Compétition terminée</strong>
+                  ) : competition.nextMatch ? (
                     <strong>
                       <MatchTeamsInline match={competition.nextMatch} />
                     </strong>
                   ) : (
                     <strong>Aucun match à venir</strong>
                   )}
-                  {competition.nextMatch ? (
+                  {competition.nextMatch && !competition.isEffectivelyFinished ? (
                     <small>{formatKickoffAt(competition.nextMatch.kickoffAt)}</small>
                   ) : null}
                 </div>
