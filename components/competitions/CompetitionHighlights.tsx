@@ -3,11 +3,8 @@
 import Link from "next/link";
 import type { SyntheticEvent } from "react";
 
-import { PlayerPointsBadge } from "@/components/player/PlayerPointsBadge";
-import type {
-  CompetitionHighlightMatch,
-  CompetitionHighlightsData,
-} from "@/src/server/competition-highlights";
+import { getPlayerPointsToneClass, PlayerPointsBadge, } from "@/components/player/PlayerPointsBadge";
+import type { CompetitionHighlightMatch, CompetitionHighlightsData, } from "@/src/server/competition-highlights";
 import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
 import { formatMatchScoreText } from "@/src/domain/scoring";
 import { ArrowRight, ChevronDown } from "lucide-react";
@@ -52,9 +49,9 @@ function getInitial(name: string) {
 }
 
 function ChampionAvatar({
-  image,
-  name,
-}: {
+                          image,
+                          name,
+                        }: {
   image: string | null;
   name: string;
 }) {
@@ -80,6 +77,14 @@ function renderStatus(status: string, liveMinute: number | null) {
 
 function stopCardNavigation(event: SyntheticEvent) {
   event.stopPropagation();
+}
+
+function getPredictionBadgeClass(points: number | null, status: string) {
+  if (status !== "LIVE" && status !== "FINISHED") {
+    return "public-prediction-score";
+  }
+
+  return `public-prediction-score public-prediction-score--toned ${getPlayerPointsToneClass(points)}`;
 }
 
 function MatchCard({ match }: { match: CompetitionHighlightMatch }) {
@@ -125,7 +130,12 @@ function MatchCard({ match }: { match: CompetitionHighlightMatch }) {
         <span>Ton prono</span>
         {match.ownPrediction ? (
           <div className="public-prediction-meta">
-            <strong className="public-prediction-score">
+            <strong
+              className={getPredictionBadgeClass(
+                match.ownPrediction.points,
+                match.status,
+              )}
+            >
               {match.ownPrediction.homeScore} · {match.ownPrediction.awayScore}
             </strong>
             {match.ownPrediction.points !== null ? (
@@ -170,6 +180,14 @@ function MatchCard({ match }: { match: CompetitionHighlightMatch }) {
                 <div className="public-prediction-row" key={prediction.id}>
                   <strong>{prediction.user.name}</strong>
                   <div className="public-prediction-meta">
+                    <span
+                      className={getPredictionBadgeClass(
+                        prediction.points,
+                        match.status,
+                      )}
+                    >
+                      {prediction.homeScore} · {prediction.awayScore}
+                    </span>
                     {prediction.points !== null ? (
                       <PlayerPointsBadge
                         points={prediction.points}
@@ -177,9 +195,6 @@ function MatchCard({ match }: { match: CompetitionHighlightMatch }) {
                         className="public-prediction-points"
                       />
                     ) : null}
-                    <span className="public-prediction-score">
-                      {prediction.homeScore} · {prediction.awayScore}
-                    </span>
                   </div>
                 </div>
               ))
@@ -249,9 +264,9 @@ function HighlightSection({
 }
 
 export function CompetitionFinishedBanner({
-  champion,
-  href,
-}: {
+                                            champion,
+                                            href,
+                                          }: {
   champion: NonNullable<CompetitionHighlightsData["champion"]>;
   href: string;
 }) {
@@ -301,9 +316,9 @@ export function CompetitionHighlights({
             hrefBuilder={
               slug
                 ? (match) =>
-                    match.status === "LIVE" || match.status === "FINISHED"
-                      ? `/competitions/${slug}/classement?mode=live`
-                      : `/competitions/${slug}/pronos?match=${match.id}#match-${match.id}`
+                  match.status === "LIVE" || match.status === "FINISHED"
+                    ? `/competitions/${slug}/classement?mode=live`
+                    : `/competitions/${slug}/pronos?match=${match.id}#match-${match.id}`
                 : undefined
             }
             matches={highlights.todayMatches}
