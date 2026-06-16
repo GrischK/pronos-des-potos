@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/PageHeader";
 import {
   getPlayerPointsLabel,
+  getPlayerPointsToneClass,
   PlayerPointsBadge,
 } from "@/components/player/PlayerPointsBadge";
 import { PlayerProfileAvatar } from "@/components/player/PlayerProfileAvatar";
@@ -55,6 +56,7 @@ function renderScore(homeScore: number | null, awayScore: number | null) {
 
 function PlayerMatchRow({ match }: { match: PlayerProfileMatch }) {
   const points = match.prediction?.points ?? null;
+  const predictionToneClass = getPlayerPointsToneClass(points);
 
   return (
     <article className="player-match-row">
@@ -66,11 +68,13 @@ function PlayerMatchRow({ match }: { match: PlayerProfileMatch }) {
       </div>
       <span className="player-score-cell">
         <span className="player-score-label">Résultat match</span>
-        <strong className="player-score-result">{formatMatchScoreText(match)}</strong>
+        <strong className="match-score player-score-result">
+          {formatMatchScoreText(match)}
+        </strong>
       </span>
-      <span className="player-score-cell">
+      <span className={`player-score-cell ${predictionToneClass}`.trim()}>
         <span className="player-score-label">Prono</span>
-        <strong>
+        <strong className="player-prediction-badge">
           {match.canRevealPrediction
             ? match.prediction
               ? renderScore(match.prediction.homeScore, match.prediction.awayScore)

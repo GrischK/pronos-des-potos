@@ -6,7 +6,7 @@ export function getPlayerPointsLabel(points: number | null) {
   return `${points} pt${points > 1 ? "s" : ""}`;
 }
 
-function getPointsToneClass(points: number | null) {
+export function getPlayerPointsToneClass(points: number | null) {
   if (points === null || points === 0) {
     return "player-points-neutral";
   }
@@ -38,7 +38,7 @@ export function PlayerPointsBadge({
   className = "",
 }: PlayerPointsBadgeProps) {
   return (
-    <strong className={`player-points-cell ${getPointsToneClass(points)} ${className}`.trim()}>
+    <strong className={`player-points-cell ${getPlayerPointsToneClass(points)} ${className}`.trim()}>
       <span className="player-score-label">{label}</span>
       <span className="player-points-badge">{getPlayerPointsLabel(points)}</span>
     </strong>

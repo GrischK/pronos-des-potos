@@ -2865,8 +2865,16 @@
   }
 
   .player-score-result {
-    display: block;
+    @apply inline-block;
     white-space: pre-line;
+  }
+
+  .player-score-result.match-score {
+    color: white;
+  }
+
+  .player-prediction-badge {
+    @apply inline-flex min-h-[1.9rem] items-center justify-center rounded-lg px-2.5 py-1 text-sm font-black;
   }
 
   .player-points-badge {
@@ -2874,22 +2882,26 @@
     min-height: 1.9rem;
   }
 
-  .player-points-neutral .player-points-badge {
+  .player-points-neutral .player-points-badge,
+  .player-points-neutral .player-prediction-badge {
     background: color-mix(in srgb, var(--surface-alt) 88%, white);
     color: var(--muted);
   }
 
-  .player-points-outcome .player-points-badge {
+  .player-points-outcome .player-points-badge,
+  .player-points-outcome .player-prediction-badge {
     background: color-mix(in srgb, var(--navy) 12%, white);
     color: var(--navy);
   }
 
-  .player-points-exact .player-points-badge {
+  .player-points-exact .player-points-badge,
+  .player-points-exact .player-prediction-badge {
     background: color-mix(in srgb, var(--mint) 28%, white);
     color: var(--pitch-strong);
   }
 
-  .player-points-unique .player-points-badge {
+  .player-points-unique .player-points-badge,
+  .player-points-unique .player-prediction-badge {
     background: color-mix(in srgb, var(--coral) 14%, white);
     color: var(--coral);
   }
