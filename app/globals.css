@@ -2606,7 +2606,7 @@
   }
 
   .leaderboard-progress-chart {
-    @apply block;
+    @apply block shrink-0;
   }
 
   .leaderboard-progress-gridline {
