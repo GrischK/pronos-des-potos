@@ -2652,7 +2652,7 @@
   }
 
   .leaderboard-progress-overlay-label-secondary {
-    @apply left-14 z-[9] opacity-90;
+    @apply pointer-events-auto left-14 z-[9] opacity-90 text-left;
   }
 
   .leaderboard-progress-overlay-dot {

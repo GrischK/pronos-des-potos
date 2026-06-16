@@ -231,10 +231,6 @@ export function LeaderboardProgressChart({
     };
   }, []);
 
-  useEffect(() => {
-    setShowAllOverlayLabels(false);
-  }, [selectedUserId]);
-
   if (data.sections.length === 0 || playersWithHistory.length === 0) {
     return (
       <p className="readonly-notice">
@@ -374,20 +370,23 @@ export function LeaderboardProgressChart({
                 onClick={() => setShowAllOverlayLabels((visible) => !visible)}
                 type="button"
               >
-                +
+                {showAllOverlayLabels ? "-" : "+"}
               </button>
             </div>
           ) : null}
 
           {showAllOverlayLabels
             ? secondaryOverlayLabels.map((label) => (
-                <div
+                <button
+                  aria-label={`Sélectionner ${label.name}`}
                   className="leaderboard-progress-overlay-label leaderboard-progress-overlay-label-secondary"
                   key={label.userId}
+                  onClick={() => setSelectedUserId(label.userId)}
                   style={{
                     borderColor: label.color,
                     top: Math.max(10, label.y - 30),
                   }}
+                  type="button"
                 >
                   <span
                     className="leaderboard-progress-overlay-dot"
@@ -397,7 +396,7 @@ export function LeaderboardProgressChart({
                   <span className="leaderboard-progress-overlay-points">
                     {label.points} pts
                   </span>
-                </div>
+                </button>
               ))
             : null}
 
