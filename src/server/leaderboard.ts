@@ -39,6 +39,18 @@ export type LeaderboardData = {
   official: LeaderboardSnapshot;
   live: LeaderboardSnapshot;
   liveMatches: LeaderboardLiveMatch[];
+  tournamentStats: LeaderboardTournamentStat[];
+};
+
+export type LeaderboardTournamentStat = {
+  key: string;
+  title: string;
+  tooltip: string | null;
+  value: string;
+  leaders: {
+    userId: string;
+    name: string;
+  }[];
 };
 
 export type LeaderboardProgressData = {
@@ -76,6 +88,11 @@ export type LeaderboardSnapshot = {
   rows: LeaderboardRow[];
   matchCount: number;
   liveMatchCount: number;
+};
+
+type LeaderboardProgressSnapshot = {
+  section: LeaderboardProgressData["sections"][number];
+  snapshot: LeaderboardSnapshot;
 };
 
 export type LeaderboardLiveMatch = {
@@ -429,6 +446,91 @@ function buildLeaderboardProgressData(
   },
   bonusPointsByUser: Map<string, number>,
 ): LeaderboardProgressData {
+  const snapshots = buildLeaderboardProgressSnapshots(competition, bonusPointsByUser);
+  const sections = snapshots.map(({ section }) => section);
+  const players = competition.players
+    .map((player) => {
+      const history = snapshots
+        .map(({ section, snapshot }) => {
+          const row = snapshot.rows.find((item) => item.userId === player.user.id);
+
+          if (!row) {
+            return null;
+          }
+
+          return {
+            sectionId: section.id,
+            label: section.label,
+            title: section.title,
+            points: row.points,
+            rank: row.rank,
+          };
+        })
+        .filter(
+          (
+            point,
+          ): point is {
+            sectionId: string;
+            label: string;
+            title: string;
+            points: number;
+            rank: number;
+          } => point !== null,
+        );
+      const current = history[history.length - 1] ?? null;
+
+      return {
+        userId: player.user.id,
+        name: getUserDisplayName(player.user),
+        image: player.user.image,
+        bestRank: history.length > 0 ? Math.min(...history.map((point) => point.rank)) : null,
+        currentPoints: current?.points ?? 0,
+        currentRank: current?.rank ?? null,
+        history,
+      };
+    })
+    .sort((a, b) => {
+      if (a.currentRank === null && b.currentRank === null) {
+        return a.name.localeCompare(b.name, "fr");
+      }
+
+      if (a.currentRank === null) {
+        return 1;
+      }
+
+      if (b.currentRank === null) {
+        return -1;
+      }
+
+      return a.currentRank - b.currentRank || a.name.localeCompare(b.name, "fr");
+    });
+
+  return {
+    id: competition.id,
+    name: competition.name,
+    slug: competition.slug,
+    kind: competition.kind,
+    emblemUrl: competition.emblemUrl,
+    bonusEnabled: competition.bonusEnabled,
+    participantCount: competition.players.length,
+    sections,
+    players,
+  };
+}
+
+function buildLeaderboardProgressSnapshots(
+  competition: {
+    id: string;
+    name: string;
+    slug: string;
+    kind: string;
+    emblemUrl: string | null;
+    bonusEnabled: boolean;
+    players: CompetitionPlayer[];
+    matches: LeaderboardMatch[];
+  },
+  bonusPointsByUser: Map<string, number>,
+): LeaderboardProgressSnapshot[] {
   const finishedMatches = [...competition.matches]
     .filter((match) => match.status === "FINISHED")
     .sort((a, b) => {
@@ -571,75 +673,520 @@ function buildLeaderboardProgressData(
       ),
     };
   });
+  return snapshots;
+}
 
-  const players = competition.players
-    .map((player) => {
-      const history = snapshots
-        .map(({ section, snapshot }) => {
-          const row = snapshot.rows.find((item) => item.userId === player.user.id);
-
-          if (!row) {
-            return null;
-          }
-
-          return {
-            sectionId: section.id,
-            label: section.label,
-            title: section.title,
-            points: row.points,
-            rank: row.rank,
-          };
-        })
-        .filter(
-          (
-            point,
-          ): point is {
-            sectionId: string;
-            label: string;
-            title: string;
-            points: number;
-            rank: number;
-          } => point !== null,
-        );
-      const current = history[history.length - 1] ?? null;
-
-      return {
-        userId: player.user.id,
-        name: getUserDisplayName(player.user),
-        image: player.user.image,
-        bestRank: history.length > 0 ? Math.min(...history.map((point) => point.rank)) : null,
-        currentPoints: current?.points ?? 0,
-        currentRank: current?.rank ?? null,
-        history,
-      };
-    })
+function getOrderedFinishedMatches(matches: LeaderboardMatch[]) {
+  return [...matches]
+    .filter((match) => match.status === "FINISHED")
     .sort((a, b) => {
-      if (a.currentRank === null && b.currentRank === null) {
-        return a.name.localeCompare(b.name, "fr");
+      const kickoffDiff = (a.kickoffAt?.getTime() ?? 0) - (b.kickoffAt?.getTime() ?? 0);
+
+      if (kickoffDiff !== 0) {
+        return kickoffDiff;
       }
 
-      if (a.currentRank === null) {
-        return 1;
-      }
-
-      if (b.currentRank === null) {
-        return -1;
-      }
-
-      return a.currentRank - b.currentRank || a.name.localeCompare(b.name, "fr");
+      return a.id.localeCompare(b.id, "fr");
     });
+}
+
+function formatAverageValue(value: number) {
+  return new Intl.NumberFormat("fr-FR", {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: value % 1 === 0 ? 0 : 1,
+  }).format(value);
+}
+
+function getLongestMatchingStreak(values: boolean[]) {
+  let best = 0;
+  let current = 0;
+
+  for (const value of values) {
+    if (value) {
+      current += 1;
+      best = Math.max(best, current);
+    } else {
+      current = 0;
+    }
+  }
+
+  return best;
+}
+
+function getLongestPointsStreak(values: Array<number | null>, targetPoints: number) {
+  let best = 0;
+  let current = 0;
+
+  for (const value of values) {
+    if (value === targetPoints) {
+      current += 1;
+      best = Math.max(best, current);
+    } else {
+      current = 0;
+    }
+  }
+
+  return best;
+}
+
+function buildLeaderboardTournamentStat(
+  key: string,
+  title: string,
+  tooltip: string | null,
+  candidates: Array<{
+    userId: string;
+    name: string;
+    score: number;
+  }>,
+  formatter: (score: number) => string,
+): LeaderboardTournamentStat {
+  const bestScore = Math.max(...candidates.map((candidate) => candidate.score));
+  const leaders = candidates
+    .filter((candidate) => candidate.score === bestScore)
+    .sort((a, b) => a.name.localeCompare(b.name, "fr"))
+    .map((candidate) => ({
+      userId: candidate.userId,
+      name: candidate.name,
+    }));
 
   return {
-    id: competition.id,
-    name: competition.name,
-    slug: competition.slug,
-    kind: competition.kind,
-    emblemUrl: competition.emblemUrl,
-    bonusEnabled: competition.bonusEnabled,
-    participantCount: competition.players.length,
-    sections,
-    players,
+    key,
+    title,
+    tooltip,
+    value: formatter(bestScore),
+    leaders,
   };
+}
+
+function buildParticipationPerfectStat(
+  snapshot: LeaderboardSnapshot,
+  availableMatchCount: number,
+): LeaderboardTournamentStat {
+  const leaders = snapshot.rows
+    .filter((row) => row.predictedMatches === availableMatchCount)
+    .sort((a, b) => a.name.localeCompare(b.name, "fr"))
+    .map((row) => ({
+      userId: row.userId,
+      name: row.name,
+    }));
+
+  return {
+    key: "perfect-participation",
+    title: "Participation parfaite",
+    tooltip: "Joueurs ayant pronostiqué tous les matchs déjà comptés dans le classement officiel.",
+    value: leaders.length > 0
+      ? `${availableMatchCount} match${availableMatchCount > 1 ? "s" : ""}`
+      : "Aucune",
+    leaders,
+  };
+}
+
+function buildLeaderboardTournamentStats(
+  competition: {
+    id: string;
+    name: string;
+    slug: string;
+    kind: string;
+    emblemUrl: string | null;
+    bonusEnabled: boolean;
+    players: CompetitionPlayer[];
+    matches: LeaderboardMatch[];
+  },
+  officialSnapshot: LeaderboardSnapshot,
+  bonusPointsByUser: Map<string, number>,
+): LeaderboardTournamentStat[] {
+  const finishedMatches = getOrderedFinishedMatches(competition.matches);
+  const progressSnapshots = buildLeaderboardProgressSnapshots(
+    {
+      ...competition,
+      matches: finishedMatches,
+    },
+    bonusPointsByUser,
+  );
+  const players = competition.players.map((player) => ({
+    userId: player.user.id,
+    name: getUserDisplayName(player.user),
+  }));
+  const perUserPoints = new Map<string, Array<number | null>>(
+    players.map((player) => [player.userId, []]),
+  );
+
+  for (const match of finishedMatches) {
+    const result = getMatchResultForPoints(match);
+
+    if (result === null) {
+      continue;
+    }
+
+    const exactScorePredictionCount = match.predictions.filter(
+      (prediction) =>
+        prediction.homeScore === result.homeScore &&
+        prediction.awayScore === result.awayScore,
+    ).length;
+    const predictionByUserId = new Map(
+      match.predictions.map((prediction) => [prediction.userId, prediction] as const),
+    );
+
+    for (const player of players) {
+      const prediction = predictionByUserId.get(player.userId);
+
+      if (!prediction) {
+        perUserPoints.get(player.userId)?.push(null);
+        continue;
+      }
+
+      perUserPoints.get(player.userId)?.push(
+        computePredictionPoints({
+          prediction: {
+            homeScore: prediction.homeScore,
+            awayScore: prediction.awayScore,
+          },
+          result,
+          exactScorePredictionCount,
+        }),
+      );
+    }
+  }
+
+  const rowByUserId = new Map(officialSnapshot.rows.map((row) => [row.userId, row] as const));
+  const sectionRowsByUserId = new Map<
+    string,
+    Array<{
+      rank: number;
+      points: number;
+      predictedMatches: number;
+      exactUnique: number;
+      exactShared: number;
+      correctOutcome: number;
+      missed: number;
+      maxRank: number;
+    }>
+  >(
+    players.map((player) => [player.userId, []]),
+  );
+
+  for (const { snapshot } of progressSnapshots) {
+    const maxRank = snapshot.rows[snapshot.rows.length - 1]?.rank ?? 0;
+
+    for (const player of players) {
+      const row = snapshot.rows.find((item) => item.userId === player.userId);
+
+      if (!row) {
+        continue;
+      }
+
+      sectionRowsByUserId.get(player.userId)?.push({
+        rank: row.rank,
+        points: row.points,
+        predictedMatches: row.predictedMatches,
+        exactUnique: row.exactUnique,
+        exactShared: row.exactShared,
+        correctOutcome: row.correctOutcome,
+        missed: row.missed,
+        maxRank,
+      });
+    }
+  }
+
+  const stats: LeaderboardTournamentStat[] = [];
+
+  stats.push(
+    buildLeaderboardTournamentStat(
+      "longest-podium",
+      "Plus long podium",
+      null,
+      players.map((player) => ({
+        userId: player.userId,
+        name: player.name,
+        score: getLongestMatchingStreak(
+          (sectionRowsByUserId.get(player.userId) ?? []).map((row) => row.rank === 1),
+        ),
+      })),
+      (score) => `${score} journée${score > 1 ? "s" : ""}`,
+    ),
+  );
+  stats.push(
+    buildLeaderboardTournamentStat(
+      "longest-slump",
+      "Plus longue galère",
+      "Plus longue série consécutive terminée à la dernière place à la fin d'une journée.",
+      players.map((player) => ({
+        userId: player.userId,
+        name: player.name,
+        score: getLongestMatchingStreak(
+          (sectionRowsByUserId.get(player.userId) ?? []).map(
+            (row) => row.maxRank > 0 && row.rank === row.maxRank,
+          ),
+        ),
+      })),
+      (score) => `${score} journée${score > 1 ? "s" : ""}`,
+    ),
+  );
+  stats.push(
+    buildLeaderboardTournamentStat(
+      "best-unique-exact-total",
+      "Meilleur score exact unique",
+      null,
+      players.map((player) => ({
+        userId: player.userId,
+        name: player.name,
+        score: rowByUserId.get(player.userId)?.exactUnique ?? 0,
+      })),
+      (score) => `${score}`,
+    ),
+  );
+  stats.push(
+    buildLeaderboardTournamentStat(
+      "best-exact-total",
+      "Meilleur score exact",
+      null,
+      players.map((player) => ({
+        userId: player.userId,
+        name: player.name,
+        score: rowByUserId.get(player.userId)?.exactShared ?? 0,
+      })),
+      (score) => `${score}`,
+    ),
+  );
+  stats.push(
+    buildLeaderboardTournamentStat(
+      "best-outcome-total",
+      "Meilleur résultat",
+      "Plus grand nombre de pronos à 1 point.",
+      players.map((player) => ({
+        userId: player.userId,
+        name: player.name,
+        score: rowByUserId.get(player.userId)?.correctOutcome ?? 0,
+      })),
+      (score) => `${score}`,
+    ),
+  );
+  stats.push(
+    buildLeaderboardTournamentStat(
+      "most-missed-total",
+      "Plus de ratés",
+      "Plus grand nombre de pronos à 0 point.",
+      players.map((player) => ({
+        userId: player.userId,
+        name: player.name,
+        score: rowByUserId.get(player.userId)?.missed ?? 0,
+      })),
+      (score) => `${score}`,
+    ),
+  );
+  stats.push(
+    buildLeaderboardTournamentStat(
+      "best-unique-exact-streak",
+      "Meilleure série score exact unique",
+      "Plus longue série de matchs consécutifs terminés à 4 points.",
+      players.map((player) => ({
+        userId: player.userId,
+        name: player.name,
+        score: getLongestPointsStreak(perUserPoints.get(player.userId) ?? [], 4),
+      })),
+      (score) => `${score} match${score > 1 ? "s" : ""}`,
+    ),
+  );
+  stats.push(
+    buildLeaderboardTournamentStat(
+      "best-exact-streak",
+      "Meilleure série score exact",
+      "Plus longue série de matchs consécutifs terminés à 3 points.",
+      players.map((player) => ({
+        userId: player.userId,
+        name: player.name,
+        score: getLongestPointsStreak(perUserPoints.get(player.userId) ?? [], 3),
+      })),
+      (score) => `${score} match${score > 1 ? "s" : ""}`,
+    ),
+  );
+  stats.push(
+    buildLeaderboardTournamentStat(
+      "best-outcome-streak",
+      "Meilleure série bon résultat",
+      "Plus longue série de matchs consécutifs terminés à 1 point.",
+      players.map((player) => ({
+        userId: player.userId,
+        name: player.name,
+        score: getLongestPointsStreak(perUserPoints.get(player.userId) ?? [], 1),
+      })),
+      (score) => `${score} match${score > 1 ? "s" : ""}`,
+    ),
+  );
+  stats.push(
+    buildLeaderboardTournamentStat(
+      "worst-missed-streak",
+      "Pire série ratés",
+      "Plus longue série de matchs consécutifs terminés à 0 point.",
+      players.map((player) => ({
+        userId: player.userId,
+        name: player.name,
+        score: getLongestPointsStreak(perUserPoints.get(player.userId) ?? [], 0),
+      })),
+      (score) => `${score} match${score > 1 ? "s" : ""}`,
+    ),
+  );
+  stats.push(
+    buildLeaderboardTournamentStat(
+      "biggest-climb",
+      "Plus forte remontée",
+      "Meilleur gain de places entre deux journées du classement.",
+      players.map((player) => {
+        const rows = sectionRowsByUserId.get(player.userId) ?? [];
+        let best = 0;
+
+        for (let index = 1; index < rows.length; index += 1) {
+          best = Math.max(best, rows[index - 1].rank - rows[index].rank);
+        }
+
+        return {
+          userId: player.userId,
+          name: player.name,
+          score: best,
+        };
+      }),
+      (score) => `${score} place${score > 1 ? "s" : ""}`,
+    ),
+  );
+  stats.push(
+    buildLeaderboardTournamentStat(
+      "biggest-drop",
+      "Plus grosse chute",
+      "Plus forte perte de places entre deux journées du classement.",
+      players.map((player) => {
+        const rows = sectionRowsByUserId.get(player.userId) ?? [];
+        let worst = 0;
+
+        for (let index = 1; index < rows.length; index += 1) {
+          worst = Math.max(worst, rows[index].rank - rows[index - 1].rank);
+        }
+
+        return {
+          userId: player.userId,
+          name: player.name,
+          score: worst,
+        };
+      }),
+      (score) => `${score} place${score > 1 ? "s" : ""}`,
+    ),
+  );
+  stats.push(
+    buildLeaderboardTournamentStat(
+      "most-frequent-leader",
+      "Leader le plus fréquent",
+      "Joueur ayant fini le plus de journées à la première place.",
+      players.map((player) => ({
+        userId: player.userId,
+        name: player.name,
+        score: (sectionRowsByUserId.get(player.userId) ?? []).filter((row) => row.rank === 1).length,
+      })),
+      (score) => `${score} journée${score > 1 ? "s" : ""}`,
+    ),
+  );
+  stats.push(
+    buildLeaderboardTournamentStat(
+      "most-frequent-last",
+      "Dernier le plus fréquent",
+      "Joueur ayant fini le plus de journées à la dernière place.",
+      players.map((player) => ({
+        userId: player.userId,
+        name: player.name,
+        score: (sectionRowsByUserId.get(player.userId) ?? []).filter(
+          (row) => row.maxRank > 0 && row.rank === row.maxRank,
+        ).length,
+      })),
+      (score) => `${score} journée${score > 1 ? "s" : ""}`,
+    ),
+  );
+  stats.push(
+    buildLeaderboardTournamentStat(
+      "best-finish",
+      "Meilleur finish",
+      "Joueur ayant marqué le plus de points sur les 3 dernières journées du classement.",
+      players.map((player) => {
+        const rows = sectionRowsByUserId.get(player.userId) ?? [];
+
+        if (rows.length === 0) {
+          return {
+            userId: player.userId,
+            name: player.name,
+            score: 0,
+          };
+        }
+
+        const lastIndex = rows.length - 1;
+        const baselineIndex = rows.length - 4;
+        const baselinePoints = baselineIndex >= 0 ? rows[baselineIndex].points : 0;
+
+        return {
+          userId: player.userId,
+          name: player.name,
+          score: rows[lastIndex].points - baselinePoints,
+        };
+      }),
+      (score) => `${score} pt${score > 1 ? "s" : ""}`,
+    ),
+  );
+  stats.push(
+    buildLeaderboardTournamentStat(
+      "perfect-day",
+      "Journée parfaite",
+      "Plus grand nombre de journées sans aucun raté parmi les matchs pronostiqués ce jour-là.",
+      players.map((player) => {
+        const rows = sectionRowsByUserId.get(player.userId) ?? [];
+        let count = 0;
+
+        for (let index = 0; index < rows.length; index += 1) {
+          const previous = rows[index - 1];
+          const predictedDelta = rows[index].predictedMatches - (previous?.predictedMatches ?? 0);
+          const missedDelta = rows[index].missed - (previous?.missed ?? 0);
+
+          if (predictedDelta > 0 && missedDelta === 0) {
+            count += 1;
+          }
+        }
+
+        return {
+          userId: player.userId,
+          name: player.name,
+          score: count,
+        };
+      }),
+      (score) => `${score} journée${score > 1 ? "s" : ""}`,
+    ),
+  );
+  stats.push(
+    buildLeaderboardTournamentStat(
+      "regularity",
+      "Régularité",
+      "Meilleure moyenne de points par journée jouée.",
+      players.map((player) => {
+        const rows = sectionRowsByUserId.get(player.userId) ?? [];
+        let playedSections = 0;
+
+        for (let index = 0; index < rows.length; index += 1) {
+          const previous = rows[index - 1];
+          const predictedDelta = rows[index].predictedMatches - (previous?.predictedMatches ?? 0);
+
+          if (predictedDelta > 0) {
+            playedSections += 1;
+          }
+        }
+
+        const totalPoints = rowByUserId.get(player.userId)?.points ?? 0;
+
+        return {
+          userId: player.userId,
+          name: player.name,
+          score: playedSections > 0 ? totalPoints / playedSections : 0,
+        };
+      }),
+      (score) => `${formatAverageValue(score)} pt/j`,
+    ),
+  );
+  stats.push(buildParticipationPerfectStat(officialSnapshot, officialSnapshot.matchCount));
+
+  return stats;
 }
 
 export async function getLeaderboardData(
@@ -774,6 +1321,16 @@ export async function getLeaderboardData(
   const liveMatches = competition.matches.filter(
     (match) => match.status === "FINISHED" || match.status === "LIVE",
   );
+  const officialSnapshot = buildLeaderboardSnapshot(
+    competition.players,
+    officialMatches,
+    bonusPointsByUser,
+  );
+  const liveSnapshot = buildLeaderboardSnapshot(
+    competition.players,
+    liveMatches,
+    bonusPointsByUser,
+  );
   const liveMatchCards = competition.matches
     .filter((match) => match.status === "LIVE")
     .map((match) => ({
@@ -842,17 +1399,14 @@ export async function getLeaderboardData(
     bonusEnabled: competition.bonusEnabled,
     bonusResultKnown,
     participantCount: competition.players.length,
-    official: buildLeaderboardSnapshot(
-      competition.players,
-      officialMatches,
-      bonusPointsByUser,
-    ),
-    live: buildLeaderboardSnapshot(
-      competition.players,
-      liveMatches,
-      bonusPointsByUser,
-    ),
+    official: officialSnapshot,
+    live: liveSnapshot,
     liveMatches: liveMatchCards,
+    tournamentStats: buildLeaderboardTournamentStats(
+      competition,
+      officialSnapshot,
+      bonusPointsByUser,
+    ),
   };
 }
 

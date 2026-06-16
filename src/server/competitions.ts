@@ -424,6 +424,15 @@ export async function getCompetitionsOverview() {
       );
       const liveMatch = liveMatches[0] ?? null;
       const nextMatch = futureMatches[0] ?? null;
+      const liveMatchResult = liveMatch ? getMatchResultForPoints(liveMatch) : null;
+      const liveMatchExactScorePredictionCount =
+        liveMatchResult && liveMatch
+          ? liveMatch.predictions.filter(
+              (prediction) =>
+                prediction.homeScore === liveMatchResult.homeScore &&
+                prediction.awayScore === liveMatchResult.awayScore,
+            ).length
+          : 0;
       const hasFinishedMatches = competition.matches.some(
         (match) => match.status === "FINISHED",
       );
@@ -610,6 +619,17 @@ export async function getCompetitionsOverview() {
                       ? {
                           homeScore: ownPrediction.homeScore,
                           awayScore: ownPrediction.awayScore,
+                          points:
+                            liveMatchResult !== null
+                              ? computePredictionPoints({
+                                  prediction: {
+                                    homeScore: ownPrediction.homeScore,
+                                    awayScore: ownPrediction.awayScore,
+                                  },
+                                  result: liveMatchResult,
+                                  exactScorePredictionCount: liveMatchExactScorePredictionCount,
+                                })
+                              : null,
                         }
                       : null;
                   })()

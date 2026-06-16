@@ -4,6 +4,10 @@ import { ArrowRight, Shirt } from "lucide-react";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
+import {
+  getPlayerPointsToneClass,
+  PlayerPointsBadge,
+} from "@/components/player/PlayerPointsBadge";
 import { UrgentPredictionBadge } from "@/components/competitions/UrgentPredictionBadge";
 import { competitionKindLabels } from "@/src/domain/competition-kind";
 import { formatMatchScoreText } from "@/src/domain/scoring";
@@ -71,6 +75,7 @@ type LiveMatchPreview = MatchPreview & {
   ownPrediction: {
     homeScore: number;
     awayScore: number;
+    points: number | null;
   } | null;
 };
 
@@ -128,10 +133,29 @@ function formatKickoffCountdown(value: string) {
 
 function renderOwnPrediction(match: LiveMatchPreview | null) {
   if (!match?.ownPrediction) {
-    return "Ton prono : aucun";
+    return <strong>Aucun prono</strong>;
   }
 
-  return `Ton prono : ${match.ownPrediction.homeScore} · ${match.ownPrediction.awayScore}`;
+  return (
+    <div className="public-prediction-meta">
+      <strong
+        className={`public-prediction-score${
+          match.ownPrediction.points !== null
+            ? ` public-prediction-score--toned ${getPlayerPointsToneClass(match.ownPrediction.points)}`
+            : ""
+        }`}
+      >
+        {match.ownPrediction.homeScore} · {match.ownPrediction.awayScore}
+      </strong>
+      {match.ownPrediction.points !== null ? (
+        <PlayerPointsBadge
+          className="public-prediction-points"
+          label="Pts"
+          points={match.ownPrediction.points}
+        />
+      ) : null}
+    </div>
+  );
 }
 
 function renderLiveIndicator(liveMinute: number | null) {
@@ -282,7 +306,10 @@ export default async function CompetitionsPage() {
                         ) : null}
                       </span>
                     </div>
-                    <small>{renderOwnPrediction(competition.liveMatch)}</small>
+                    <div className="highlight-prono-line competition-card-own-prediction">
+                      <span>Ton prono</span>
+                      {renderOwnPrediction(competition.liveMatch)}
+                    </div>
                   </div>
                 ) : null}
 

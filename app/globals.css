@@ -2504,6 +2504,57 @@
     @apply text-sm font-bold text-muted;
   }
 
+  .leaderboard-stats-grid {
+    @apply grid gap-3;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .leaderboard-stat-card {
+    @apply relative grid gap-3 rounded-lg border border-line bg-surface p-4;
+    background:
+      linear-gradient(145deg, color-mix(in srgb, var(--card) 14%, white), white 54%),
+      var(--surface);
+    box-shadow: 0 14px 34px color-mix(in srgb, var(--foreground) 7%, transparent);
+  }
+
+  .leaderboard-stat-card-header {
+    @apply flex items-start justify-between gap-2;
+  }
+
+  .leaderboard-stat-card-header strong {
+    @apply text-sm font-black leading-tight text-foreground;
+  }
+
+  .leaderboard-stat-tooltip {
+    @apply relative inline-flex shrink-0;
+  }
+
+  .leaderboard-stat-info-button {
+    @apply h-6 w-6 text-xs;
+  }
+
+  .leaderboard-stat-popover {
+    @apply bottom-auto left-auto right-0 top-full mt-2 min-w-[220px];
+  }
+
+  .leaderboard-stat-value {
+    color: var(--pitch-strong);
+    @apply text-2xl font-black leading-none;
+  }
+
+  .leaderboard-stat-meta {
+    @apply text-sm font-bold leading-[1.5] text-muted;
+  }
+
+  .leaderboard-stat-meta a {
+    color: var(--navy);
+    @apply font-black no-underline;
+  }
+
+  .leaderboard-stat-meta a:hover {
+    color: var(--pitch-strong);
+  }
+
   .leaderboard-table-wrap {
     @apply overflow-x-auto rounded-lg border border-line bg-surface;
   }
@@ -3268,6 +3319,10 @@
     }
 
     .leaderboard-rules {
+      grid-template-columns: 1fr;
+    }
+
+    .leaderboard-stats-grid {
       grid-template-columns: 1fr;
     }
 
@@ -4039,6 +4094,7 @@
   :root[data-theme="dark"] .competition-card-live,
   :root[data-theme="dark"] .highlight-prono-line,
   :root[data-theme="dark"] .leaderboard-rules,
+  :root[data-theme="dark"] .leaderboard-stat-card,
   :root[data-theme="dark"] .leaderboard-rule,
   :root[data-theme="dark"] .day-nav-button,
   :root[data-theme="dark"] .day-nav-chevrons,
@@ -4144,6 +4200,18 @@
 
   :root[data-theme="dark"] .leaderboard-rule span {
     color: var(--muted);
+  }
+
+  :root[data-theme="dark"] .leaderboard-stat-card {
+    box-shadow: none;
+  }
+
+  :root[data-theme="dark"] .leaderboard-stat-meta a {
+    color: #a8c8ff;
+  }
+
+  :root[data-theme="dark"] .leaderboard-stat-meta a:hover {
+    color: #c9f5d8;
   }
 
   :root[data-theme="dark"] .leaderboard-progress-summary,
