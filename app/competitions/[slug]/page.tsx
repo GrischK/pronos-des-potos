@@ -1,4 +1,4 @@
-import { CalendarDays, PencilLine, Trophy, UsersRound } from "lucide-react";
+import { CalendarDays, PencilLine, Star, Trophy, UsersRound } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { AutoRefresh } from "@/components/AutoRefresh";
@@ -109,6 +109,15 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
             title="Pronos des potos"
             tone="navy"
           />
+          {competition.bonusEnabled ? (
+            <CompetitionActionCard
+              description="Voir les pronos bonus des potos"
+              href={`/competitions/${competition.slug}/tous-les-pronos/podium-bonus`}
+              icon={<Star aria-hidden="true" size={20} strokeWidth={2.8} />}
+              title="Points bonus"
+              tone="bonus"
+            />
+          ) : null}
           <CompetitionActionCard
             description="Voir les matchs et horaires"
             href={`/competitions/${competition.slug}/calendrier`}

@@ -6,7 +6,7 @@ import { cn } from "@/src/lib/cn";
 
 import { UrgentPredictionBadge } from "./UrgentPredictionBadge";
 
-type CompetitionActionTone = "pitch" | "coral" | "navy" | "card";
+type CompetitionActionTone = "pitch" | "coral" | "navy" | "card" | "bonus";
 type CompetitionActionWidth = "fill" | "inline";
 
 type CompetitionActionCardProps = {
@@ -25,6 +25,7 @@ const toneClassNames: Record<CompetitionActionTone, string> = {
   coral: "competition-action--coral",
   navy: "competition-action--navy",
   card: "competition-action--card",
+  bonus: "competition-action--bonus",
 };
 
 export function CompetitionActionCard({

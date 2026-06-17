@@ -1,9 +1,7 @@
 import Link from "next/link";
-import {Star} from "lucide-react";
 import { notFound } from "next/navigation";
 
 import {AutoRefresh} from "@/components/AutoRefresh";
-import { CompetitionActionCard } from "@/components/competitions/CompetitionActionCard";
 import {PageHeader} from "@/components/PageHeader";
 import {AllPredictionsSchedule} from "@/components/predictions/AllPredictionsSchedule";
 import {getCompetitionKindLabel} from "@/src/domain/competition-kind";
@@ -49,36 +47,6 @@ export default async function TousLesPronosPage({
           </Link>
         </div>
       </section>
-      <div>
-        {competition.bonusEnabled ? (
-          competition.hasBonusPrediction ? (
-            <CompetitionActionCard
-              className="my-4"
-              description="Voir les pronos bonus des potos"
-              href={`/competitions/${slug}/tous-les-pronos/podium-bonus`}
-              icon={<Star aria-hidden="true" size={20} strokeWidth={2.8} />}
-              title="Points bonus"
-              tone="navy"
-              width="inline"
-            />
-          ) : (
-            <div className="bonus-pronos-gate competition-back-button" aria-live="polite">
-              <button
-                className="btn btn-secondary competition-back-button"
-                disabled
-                aria-describedby="bonus-pronos-tooltip"
-                title="Le podium bonus des autres est visible après le début de la compétition."
-                type="button"
-              >
-                Voir les pronos bonus
-              </button>
-              <span className="bonus-pronos-tooltip" id="bonus-pronos-tooltip" role="tooltip">
-                Visible après le début de la compétition.
-              </span>
-            </div>
-          )
-        ) : null}
-      </div>
 
       <section className="page-section">
         <AllPredictionsSchedule

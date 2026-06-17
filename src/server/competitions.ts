@@ -813,6 +813,7 @@ export async function getCompetitionBySlug(slug: string) {
       slug: true,
       kind: true,
       emblemUrl: true,
+      bonusEnabled: true,
       externalProvider: true,
       externalCompetitionId: true,
       externalSeason: true,
