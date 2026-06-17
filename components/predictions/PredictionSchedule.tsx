@@ -8,6 +8,11 @@ import { useSearchParams } from "next/navigation";
 
 import { PredictionMatchForm } from "@/components/predictions/PredictionMatchForm";
 import {
+  CountryFilterPicker,
+  buildCountryFilterOptions,
+  filterMatchesByCountry,
+} from "@/components/predictions/CountryFilter";
+import {
   competitionStageOrder,
   getCompetitionStageLabel,
   isTwoLeggedCompetitionStage,
@@ -30,9 +35,11 @@ export type ScheduleMatch = {
   liveMinute?: number | null;
   homeTeam: {
     name: string;
+    flagUrl?: string | null;
   } | null;
   awayTeam: {
     name: string;
+    flagUrl?: string | null;
   } | null;
 };
 
@@ -759,25 +766,44 @@ export function PredictionSchedule({
 }: PredictionScheduleProps) {
   const searchParams = useSearchParams();
   const targetMatchId = targetMatchIdProp ?? searchParams.get("match");
+  const countryOptions = useMemo(() => buildCountryFilterOptions(matches), [matches]);
+  const [selectedCountryId, setSelectedCountryId] = useState("");
+  const filteredMatches = useMemo(
+    () => filterMatchesByCountry(matches, selectedCountryId),
+    [matches, selectedCountryId],
+  );
 
   return (
     <>
-      <PendingPredictionPanel matches={matches} slug={slug} />
-      <PredictionScheduleBrowser
-        competitionKind={competitionKind}
-        groupHeading="Mes scores"
-        matches={matches}
-        phaseHeading="Mes scores"
-        targetMatchId={targetMatchId}
-        renderMatch={(match) => (
-          <PredictionMatchForm
-            anchorId={`match-${match.id}`}
-            key={match.id}
-            match={match}
-            slug={slug}
-          />
-        )}
+      <PendingPredictionPanel matches={filteredMatches} slug={slug} />
+
+      <CountryFilterPicker
+        onPick={setSelectedCountryId}
+        options={countryOptions}
+        value={selectedCountryId}
       />
+
+      {filteredMatches.length === 0 ? (
+        <p>Aucun match pour ce pays.</p>
+      ) : (
+        <>
+          <PredictionScheduleBrowser
+            competitionKind={competitionKind}
+            groupHeading="Mes scores"
+            matches={filteredMatches}
+            phaseHeading="Mes scores"
+            targetMatchId={targetMatchId}
+            renderMatch={(match) => (
+              <PredictionMatchForm
+                anchorId={`match-${match.id}`}
+                key={match.id}
+                match={match}
+                slug={slug}
+              />
+            )}
+          />
+        </>
+      )}
     </>
   );
 }

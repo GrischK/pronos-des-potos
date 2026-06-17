@@ -1,8 +1,14 @@
 "use client";
 
 import type { CompetitionKind } from "@prisma/client";
+import { useMemo, useState } from "react";
 
 import { PlayerPointsBadge } from "@/components/player/PlayerPointsBadge";
+import {
+  CountryFilterPicker,
+  buildCountryFilterOptions,
+  filterMatchesByCountry,
+} from "@/components/predictions/CountryFilter";
 import { PredictionScheduleBrowser } from "@/components/predictions/PredictionSchedule";
 import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
 import { formatMatchScoreText } from "@/src/domain/scoring";
@@ -149,15 +155,34 @@ export function AllPredictionsSchedule({
   competitionKind,
   matches,
 }: AllPredictionsScheduleProps) {
+  const countryOptions = useMemo(() => buildCountryFilterOptions(matches), [matches]);
+  const [selectedCountryId, setSelectedCountryId] = useState("");
+  const filteredMatches = useMemo(
+    () => filterMatchesByCountry(matches, selectedCountryId),
+    [matches, selectedCountryId],
+  );
+
   return (
-    <PredictionScheduleBrowser
-      competitionKind={competitionKind}
-      groupHeading="Les pronos"
-      matches={matches}
-      phaseHeading="Les pronos"
-      renderMatch={(match) => (
-        <AllPredictionsMatchCard key={match.id} match={match} />
+    <>
+      <CountryFilterPicker
+        onPick={setSelectedCountryId}
+        options={countryOptions}
+        value={selectedCountryId}
+      />
+
+      {filteredMatches.length === 0 ? (
+        <p>Aucun match pour ce pays.</p>
+      ) : (
+        <PredictionScheduleBrowser
+          competitionKind={competitionKind}
+          groupHeading="Les pronos"
+          matches={filteredMatches}
+          phaseHeading="Les pronos"
+          renderMatch={(match) => (
+            <AllPredictionsMatchCard key={match.id} match={match} />
+          )}
+        />
       )}
-    />
+    </>
   );
 }

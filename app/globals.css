@@ -3115,7 +3115,7 @@
   }
 
   .bonus-team-picker {
-    @apply relative grid gap-2;
+    @apply relative grid gap-2 mb-6;
   }
 
   .bonus-team-picker-label {
