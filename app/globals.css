@@ -3490,7 +3490,7 @@
     }
 
     .competition-actions-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
     .competition-actions-grid > .competition-action:nth-child(-n + 3) {
@@ -3498,33 +3498,57 @@
     }
 
     .competition-action {
-      @apply min-h-[72px];
+      @apply min-h-[68px];
     }
 
     .competition-actions-grid > .competition-action:nth-child(n + 4) {
       grid-template-columns: 1fr;
       justify-items: center;
       text-align: center;
-      gap: 0.55rem;
-      padding: 0.9rem 0.75rem;
+      gap: 0.3rem;
+      padding: 0.7rem 0.35rem;
+      min-height: 0;
     }
 
     .competition-actions-grid > .competition-action:nth-child(n + 4) .competition-action-icon {
-      width: 3rem;
-      height: 3rem;
+      width: 2.35rem;
+      height: 2.35rem;
     }
 
     .competition-actions-grid > .competition-action:nth-child(n + 4) > span {
       width: 100%;
+      min-width: 0;
     }
 
     .competition-actions-grid > .competition-action:nth-child(n + 4) strong {
-      font-size: 0.95rem;
-      line-height: 1.1;
+      font-size: 0.68rem;
+      line-height: 1.02;
+      text-wrap: balance;
+      word-break: break-word;
+    }
+
+    .competition-action-title-mobile {
+      display: none;
+    }
+
+    .competition-action-title-desktop {
+      display: inline;
+    }
+
+    .competition-actions-grid > .competition-action:nth-child(n + 4) .competition-action-title-mobile {
+      display: inline;
+    }
+
+    .competition-actions-grid > .competition-action:nth-child(n + 4) .competition-action-title-desktop {
+      display: none;
     }
 
     .competition-actions-grid > .competition-action:nth-child(n + 4) small {
       display: none;
+    }
+
+    .competition-actions-grid > .competition-action:nth-child(n + 4) .competition-action-arrow {
+      justify-self: center;
     }
 
     .prediction-grid {

@@ -122,6 +122,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
             href={`/competitions/${competition.slug}/calendrier`}
             icon={<CalendarDays aria-hidden="true" size={20} strokeWidth={2.8} />}
             title="Calendrier des matchs"
+            mobileTitle="Calendrier"
             tone="card"
           />
           <CompetitionActionCard
@@ -129,6 +130,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
             href={`/competitions/${competition.slug}/graph`}
             icon={<ChartLine aria-hidden="true" size={20} strokeWidth={2.8} />}
             title="Graphique"
+            mobileTitle="Graph"
             tone="graph"
           />
           <CompetitionActionCard

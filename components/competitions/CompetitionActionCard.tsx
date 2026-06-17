@@ -21,6 +21,7 @@ type CompetitionActionCardProps = {
   icon: ReactNode;
   title: string;
   description: string;
+  mobileTitle?: string;
   tone?: CompetitionActionTone;
   width?: CompetitionActionWidth;
   className?: string;
@@ -42,6 +43,7 @@ export function CompetitionActionCard({
   icon,
   title,
   description,
+  mobileTitle,
   tone = "pitch",
   width = "fill",
   className,
@@ -56,11 +58,20 @@ export function CompetitionActionCard({
         className,
       )}
       href={href}
-    >
+      >
       {urgentLabel ? <UrgentPredictionBadge label={urgentLabel} /> : null}
       <span className="competition-action-icon">{icon}</span>
       <span>
-        <strong>{title}</strong>
+        {mobileTitle ? (
+          <strong>
+            <span className="competition-action-title-desktop">{title}</span>
+            <span className="competition-action-title-mobile">
+              {mobileTitle}
+            </span>
+          </strong>
+        ) : (
+          <strong>{title}</strong>
+        )}
         <small>{description}</small>
       </span>
       <ChevronRight
