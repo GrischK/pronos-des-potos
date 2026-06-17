@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/src/auth/current-user";
 import { computeBonusPoints, type BonusPodiumPick } from "@/src/domain/bonus-scoring";
 import { prisma } from "@/src/db/prisma";
 import { resolveBonusResult } from "@/src/server/bonus";
+import type { PredictionBonusData } from "@/src/server/predictions";
 
 type BonusTeam = {
   id: string;
@@ -33,6 +34,7 @@ export type BonusPodiumPageData = {
   kind: string;
   emblemUrl: string | null;
   bonusEnabled: boolean;
+  bonus: PredictionBonusData;
   predictionsVisible: boolean;
   teams: BonusTeam[];
   result: BonusPodiumPick | null;
@@ -59,8 +61,10 @@ export async function getBonusPodiumPageData(slug: string) {
       slug: true,
       kind: true,
       emblemUrl: true,
+      status: true,
       startsAt: true,
       bonusEnabled: true,
+      bonusLateEntriesEnabled: true,
       bonusWinnerTeamId: true,
       bonusSecondTeamId: true,
       bonusThirdTeamId: true,
@@ -216,6 +220,25 @@ export async function getBonusPodiumPageData(slug: string) {
     kind: competition.kind,
     emblemUrl: competition.emblemUrl,
     bonusEnabled: competition.bonusEnabled,
+    bonus: {
+      enabled: competition.bonusEnabled,
+      allowLateEntries: competition.bonusLateEntriesEnabled,
+      canPredict:
+        competition.status === "OPEN" &&
+        competition.bonusEnabled &&
+        (competition.bonusLateEntriesEnabled ||
+          (competition.startsAt !== null &&
+            competition.startsAt.getTime() > Date.now())),
+      teams: competition.teams,
+      prediction: ownSourcePrediction
+        ? {
+            winnerTeamId: ownSourcePrediction.winnerTeamId,
+            secondTeamId: ownSourcePrediction.secondTeamId,
+            thirdTeamId: ownSourcePrediction.thirdTeamId,
+          }
+        : null,
+      result,
+    },
     predictionsVisible,
     teams: competition.teams,
     result,

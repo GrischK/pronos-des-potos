@@ -112,7 +112,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
           {competition.bonusEnabled ? (
             <CompetitionActionCard
               description="Voir les pronos bonus des potos"
-              href={`/competitions/${competition.slug}/tous-les-pronos/podium-bonus`}
+              href={`/competitions/${competition.slug}/points-bonus`}
               icon={<Star aria-hidden="true" size={20} strokeWidth={2.8} />}
               title="Points bonus"
               tone="bonus"
