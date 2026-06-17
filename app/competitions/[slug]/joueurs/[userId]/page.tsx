@@ -97,7 +97,7 @@ export default async function PlayerPage({ params, searchParams }: PlayerPagePro
 
   const cameFromGraph = from === "graph";
   const backHref = cameFromGraph
-    ? `/competitions/${profile.competition.slug}/classement/evolution`
+    ? `/competitions/${profile.competition.slug}/graph`
     : `/competitions/${profile.competition.slug}/classement`;
   const backLabel = cameFromGraph
     ? "Retour au graphique du classement"

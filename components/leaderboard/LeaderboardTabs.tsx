@@ -1,19 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowDown, ArrowUp, ChartLine, ChevronDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronDown } from "lucide-react";
 import { useRef, useState } from "react";
 
-import { CompetitionActionCard } from "@/components/competitions/CompetitionActionCard";
 import { LeaderboardLiveMatchesPanel } from "@/components/leaderboard/LeaderboardLiveMatchesPanel";
-import { PlayerPointsBadge } from "@/components/player/PlayerPointsBadge";
-import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
-import { formatMatchScoreText } from "@/src/domain/scoring";
-import { getLiveMatchStatusLabel, getMatchStatusLabel } from "@/src/domain/match-status";
 import type {
   LeaderboardData,
   LeaderboardSnapshot,
-  LeaderboardTournamentStat,
 } from "@/src/server/leaderboard";
 import { useDismissibleLayer } from "@/src/lib/use-dismissible-layer";
 
@@ -109,56 +103,6 @@ function RankTrendIndicator({ trend }: { trend: RankTrend }) {
         =
       </span>
     </span>
-  );
-}
-
-const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "Europe/Paris",
-});
-
-function formatKickoffAt(value: string) {
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return "Date à confirmer";
-  }
-
-  return dateFormatter.format(date);
-}
-
-function getTeamName(
-  match: LeaderboardData["liveMatches"][number],
-  side: "home" | "away",
-) {
-  const team = side === "home" ? match.homeTeam : match.awayTeam;
-  const placeholder = side === "home" ? match.homePlaceholder : match.awayPlaceholder;
-
-  return team?.name ?? placeholder ?? "À déterminer";
-}
-
-function getTeamFlag(
-  match: LeaderboardData["liveMatches"][number],
-  side: "home" | "away",
-) {
-  const team = side === "home" ? match.homeTeam : match.awayTeam;
-
-  return team?.flagUrl ?? null;
-}
-
-function renderStatus(status: string, liveMinute: number | null) {
-  if (status !== "LIVE") {
-    return getMatchStatusLabel(status);
-  }
-
-  return (
-    <>
-      <span>{getMatchStatusLabel(status)}</span>
-      {liveMinute !== null ? (
-        <span className="live-minute">{getLiveMatchStatusLabel(liveMinute)}</span>
-      ) : null}
-    </>
   );
 }
 
@@ -357,113 +301,6 @@ function LeaderboardRulesCard({
   );
 }
 
-function LeaderboardStatTooltip({
-  title,
-  content,
-}: {
-  title: string;
-  content: string;
-}) {
-  const infoButtonRef = useRef<HTMLButtonElement>(null);
-  const infoPopoverRef = useRef<HTMLDivElement>(null);
-  const [isInfoOpen, setIsInfoOpen] = useState(false);
-
-  useDismissibleLayer({
-    active: isInfoOpen,
-    ignoreRefs: [infoButtonRef],
-    layerRef: infoPopoverRef,
-    onDismiss: () => {
-      setIsInfoOpen(false);
-    },
-  });
-
-  return (
-    <span className="leaderboard-stat-tooltip">
-      <button
-        aria-expanded={isInfoOpen}
-        aria-label={`Afficher l'aide pour ${title}`}
-        className="leaderboard-info-button leaderboard-stat-info-button"
-        onClick={() => {
-          setIsInfoOpen((current) => !current);
-        }}
-        ref={infoButtonRef}
-        type="button"
-      >
-        ?
-      </button>
-      {isInfoOpen ? (
-        <div className="leaderboard-info-popover leaderboard-stat-popover" ref={infoPopoverRef}>
-          <strong>{title}</strong>
-          <p>{content}</p>
-        </div>
-      ) : null}
-    </span>
-  );
-}
-
-function LeaderboardStatLeaders({
-  slug,
-  leaders,
-}: {
-  slug: string;
-  leaders: LeaderboardTournamentStat["leaders"];
-}) {
-  if (leaders.length === 0) {
-    return <span className="leaderboard-stat-meta">Aucun joueur</span>;
-  }
-
-  return (
-    <span className="leaderboard-stat-meta">
-      {leaders.map((leader, index) => (
-        <span key={leader.userId}>
-          {index > 0 ? ", " : ""}
-          <Link href={`/competitions/${slug}/joueurs/${leader.userId}`}>
-            {leader.name}
-          </Link>
-        </span>
-      ))}
-    </span>
-  );
-}
-
-function LeaderboardTournamentStatsSection({
-  slug,
-  stats,
-}: {
-  slug: string;
-  stats: LeaderboardTournamentStat[];
-}) {
-  if (stats.length === 0) {
-    return null;
-  }
-
-  return (
-    <section className="page-section">
-      <div className="section-heading">
-        <div>
-          <p className="badge badge-live">Stats tournoi</p>
-        </div>
-        <p>Les tendances marquantes du classement sur toute la compétition.</p>
-      </div>
-
-      <div className="leaderboard-stats-grid">
-        {stats.map((stat) => (
-          <article className="leaderboard-stat-card" key={stat.key}>
-            <div className="leaderboard-stat-card-header">
-              <strong>{stat.title}</strong>
-              {stat.tooltip ? (
-                <LeaderboardStatTooltip content={stat.tooltip} title={stat.title} />
-              ) : null}
-            </div>
-            <span className="leaderboard-stat-value">{stat.value}</span>
-            <LeaderboardStatLeaders leaders={stat.leaders} slug={slug} />
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 export function LeaderboardTabs({
   initialMode = "official",
   leaderboard,
@@ -522,17 +359,6 @@ export function LeaderboardTabs({
 
       {isLive ? <LeaderboardLiveMatchesPanel matches={leaderboard.liveMatches} /> : null}
 
-      <div className="actions mb-4">
-        <CompetitionActionCard
-          description="Voir l'évolution du classement"
-          href={`/competitions/${leaderboard.slug}/classement/evolution`}
-          icon={<ChartLine aria-hidden="true" size={20} strokeWidth={2.8} />}
-          title="Graphique du classement"
-          tone="coral"
-          width="inline"
-        />
-      </div>
-
       <section className="page-section">
         <div className="leaderboard-summary">
           <div>
@@ -564,11 +390,6 @@ export function LeaderboardTabs({
           </div>
         </div>
       </section>
-
-      <LeaderboardTournamentStatsSection
-        slug={leaderboard.slug}
-        stats={leaderboard.tournamentStats}
-      />
 
       <section className="page-section">
         <LeaderboardRulesCard isLive={isLive} bonusEnabled={leaderboard.bonusEnabled} />

@@ -1,4 +1,12 @@
-import { CalendarDays, PencilLine, Star, Trophy, UsersRound } from "lucide-react";
+import {
+  BarChart3,
+  CalendarDays,
+  ChartLine,
+  PencilLine,
+  Star,
+  Trophy,
+  UsersRound,
+} from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { AutoRefresh } from "@/components/AutoRefresh";
@@ -101,6 +109,20 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
             icon={<Trophy aria-hidden="true" size={20} strokeWidth={2.8} />}
             title="Classement"
             tone="coral"
+          />
+          <CompetitionActionCard
+            description="Voir l'évolution du classement"
+            href={`/competitions/${competition.slug}/graph`}
+            icon={<ChartLine aria-hidden="true" size={20} strokeWidth={2.8} />}
+            title="Graphique"
+            tone="navy"
+          />
+          <CompetitionActionCard
+            description="Voir toutes les stats de la compétition"
+            href={`/competitions/${competition.slug}/stats`}
+            icon={<BarChart3 aria-hidden="true" size={20} strokeWidth={2.8} />}
+            title="Stats"
+            tone="card"
           />
           <CompetitionActionCard
             description="Comparer les scores"
