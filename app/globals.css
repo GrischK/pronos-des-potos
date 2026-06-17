@@ -1963,22 +1963,28 @@
   }
 
   .competition-action--bonus {
-    --competition-action-accent: var(--mint);
-    --competition-action-border: color-mix(in srgb, var(--mint) 34%, var(--line));
-    --competition-action-hover-border: color-mix(in srgb, var(--mint) 40%, var(--line));
+    --competition-action-accent: #f59e0b;
+    --competition-action-border: color-mix(in srgb, #f59e0b 46%, var(--line));
+    --competition-action-hover-border: color-mix(in srgb, #fbbf24 60%, var(--line));
     --competition-action-background:
       linear-gradient(
         135deg,
-        color-mix(in srgb, var(--mint) 18%, var(--surface)),
-        color-mix(in srgb, var(--sky) 16%, var(--surface)) 58%,
-        var(--surface)
+        color-mix(in srgb, #e0f2fe 78%, white),
+        color-mix(in srgb, #fde68a 28%, var(--surface)) 42%,
+        color-mix(in srgb, #dbeafe 18%, var(--surface)) 74%,
+        color-mix(in srgb, #fff7ed 82%, white)
       );
     --competition-action-icon-background:
       linear-gradient(
         135deg,
-        var(--mint) 0 50%,
-        var(--sky) 50% 100%
+        #1d4ed8 0 48%,
+        #f59e0b 48% 100%
       );
+    --competition-action-icon-color: #f8fafc;
+    box-shadow:
+      inset 4px 0 0 #f59e0b,
+      inset 0 1px 0 color-mix(in srgb, white 72%, transparent),
+      0 14px 30px color-mix(in srgb, #1d4ed8 10%, transparent);
   }
 
   .competition-action-icon {
@@ -4109,21 +4115,23 @@
   }
 
   :root[data-theme="dark"] .competition-action--bonus {
-    --competition-action-border: color-mix(in srgb, var(--mint) 46%, var(--line));
-    --competition-action-hover-border: color-mix(in srgb, var(--mint) 50%, var(--line));
+    --competition-action-border: color-mix(in srgb, #f59e0b 52%, var(--line));
+    --competition-action-hover-border: color-mix(in srgb, #fbbf24 64%, var(--line));
     --competition-action-background:
       linear-gradient(
         135deg,
-        color-mix(in srgb, var(--mint) 20%, var(--surface-alt)),
-        color-mix(in srgb, var(--sky) 10%, var(--surface-alt)) 58%,
+        color-mix(in srgb, #1e3a8a 26%, var(--surface-alt)),
+        color-mix(in srgb, #f59e0b 12%, var(--surface-alt)) 42%,
+        color-mix(in srgb, #0f172a 14%, var(--surface-alt)) 74%,
         color-mix(in srgb, var(--surface) 92%, black)
       );
     --competition-action-icon-background:
       linear-gradient(
         135deg,
-        color-mix(in srgb, var(--mint) 86%, white) 0 50%,
-        color-mix(in srgb, var(--sky) 78%, white) 50% 100%
+        #1d4ed8 0 48%,
+        #f59e0b 48% 100%
       );
+    --competition-action-icon-color: #f8fafc;
   }
 
   :root[data-theme="dark"] .competition-action-alert {
