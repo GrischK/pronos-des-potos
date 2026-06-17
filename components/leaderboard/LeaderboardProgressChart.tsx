@@ -3,11 +3,17 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import type { LeaderboardProgressData } from "@/src/server/leaderboard";
+import { LeaderboardLiveMatchesPanel } from "@/components/leaderboard/LeaderboardLiveMatchesPanel";
+import type {
+  LeaderboardProgressBundle,
+} from "@/src/server/leaderboard";
+
+type LeaderboardProgressMode = "official" | "live";
 
 type LeaderboardProgressChartProps = {
   currentUserId: string | null;
-  data: LeaderboardProgressData;
+  data: LeaderboardProgressBundle;
+  initialMode?: LeaderboardProgressMode;
 };
 
 const chartPalette = [
@@ -113,12 +119,18 @@ function getInterpolatedY(
 export function LeaderboardProgressChart({
   currentUserId,
   data,
+  initialMode = "official",
 }: LeaderboardProgressChartProps) {
+  const hasLiveMatches = data.liveMatches.length > 0;
+  const [mode, setMode] = useState<LeaderboardProgressMode>(
+    hasLiveMatches && initialMode === "live" ? "live" : "official",
+  );
   const chartScrollPadding = 12;
   const rankAxisOverlayWidth = 44;
+  const snapshot = data[mode];
   const playersWithHistory = useMemo(
-    () => data.players.filter((player) => player.history.length > 0),
-    [data.players],
+    () => snapshot.players.filter((player) => player.history.length > 0),
+    [snapshot.players],
   );
   const defaultPlayerId =
     playersWithHistory.find((player) => player.userId === currentUserId)?.userId ??
@@ -146,13 +158,13 @@ export function LeaderboardProgressChart({
   const sectionStep = 132;
   const chartWidth = Math.max(
     360,
-    padding.left + padding.right + Math.max(0, data.sections.length - 1) * sectionStep,
+    padding.left + padding.right + Math.max(0, snapshot.sections.length - 1) * sectionStep,
   );
-  const chartHeight = Math.max(420, data.participantCount * 28);
+  const chartHeight = Math.max(420, snapshot.participantCount * 28);
   const innerWidth = Math.max(1, chartWidth - padding.left - padding.right);
   const innerHeight = Math.max(1, chartHeight - padding.top - padding.bottom);
-  const maxRank = Math.max(1, data.participantCount);
-  const xStep = data.sections.length > 1 ? sectionStep : 0;
+  const maxRank = Math.max(1, snapshot.participantCount);
+  const xStep = snapshot.sections.length > 1 ? sectionStep : 0;
   const yStep = maxRank > 1 ? innerHeight / (maxRank - 1) : 0;
   const overlayAnchorOffset = Math.min(72, Math.max(36, viewportWidth * 0.22));
   const mobileTrailingBuffer = 0;
@@ -260,10 +272,31 @@ export function LeaderboardProgressChart({
     };
   }, []);
 
-  if (data.sections.length === 0 || playersWithHistory.length === 0) {
+  useEffect(() => {
+    if (
+      selectedUserId &&
+      playersWithHistory.some((player) => player.userId === selectedUserId)
+    ) {
+      return;
+    }
+
+    setSelectedUserId(defaultPlayerId);
+  }, [defaultPlayerId, playersWithHistory, selectedUserId]);
+
+  useEffect(() => {
+    if (hasLiveMatches || mode !== "live") {
+      return;
+    }
+
+    setMode("official");
+  }, [hasLiveMatches, mode]);
+
+  if (snapshot.sections.length === 0 || playersWithHistory.length === 0) {
     return (
       <p className="readonly-notice">
-        L&apos;évolution apparaîtra dès que des matchs terminés alimenteront le classement.
+        {mode === "live"
+          ? "Le graphique live apparaîtra dès qu'un match sera en cours."
+          : "L&apos;évolution apparaîtra dès que des matchs terminés alimenteront le classement."}
       </p>
     );
   }
@@ -272,12 +305,33 @@ export function LeaderboardProgressChart({
     <section className="page-section">
       <div className="section-heading">
         <div>
-          <p className="badge badge-live">Évolution officielle</p>
+          <p className={mode === "live" ? "badge badge-warning" : "badge badge-live"}>
+            {mode === "live" ? "Évolution live" : "Évolution officielle"}
+          </p>
         </div>
         <p>
           Choisis un participant pour le mettre en avant.
         </p>
       </div>
+
+      {hasLiveMatches ? (
+        <div className="schedule-view-switch" aria-label="Mode du graphique">
+          <button
+            aria-pressed={mode === "official"}
+            onClick={() => setMode("official")}
+            type="button"
+          >
+            Officiel
+          </button>
+          <button
+            aria-pressed={mode === "live"}
+            onClick={() => setMode("live")}
+            type="button"
+          >
+            Live
+          </button>
+        </div>
+      ) : null}
 
       <div className="leaderboard-progress-layout">
         <div className="leaderboard-progress-summary">
@@ -285,7 +339,7 @@ export function LeaderboardProgressChart({
             <>
               <Link
                 className="leaderboard-progress-active"
-                href={`/competitions/${data.slug}/joueurs/${selectedPlayer.userId}?from=graph`}
+                href={`/competitions/${snapshot.slug}/joueurs/${selectedPlayer.userId}?from=graph`}
               >
                 <span
                   className="leaderboard-progress-avatar"
@@ -465,10 +519,10 @@ export function LeaderboardProgressChart({
                   );
                 })}
 
-                {data.sections.map((section, index) => {
+                {snapshot.sections.map((section, index) => {
                   const x = padding.left + index * xStep;
                   const isFirstSection = index === 0;
-                  const isLastSection = index === data.sections.length - 1;
+                  const isLastSection = index === snapshot.sections.length - 1;
                   const textAnchor = isFirstSection
                     ? "start"
                     : isLastSection
@@ -495,7 +549,7 @@ export function LeaderboardProgressChart({
                         x={labelX}
                         y={chartHeight - 12}
                       >
-                        {data.kind === "WORLD_CUP" ? (
+                        {snapshot.kind === "WORLD_CUP" ? (
                           <>
                             <tspan x={labelX} dy={0}>
                               {splitWorldCupLabel(section.label).phase}
@@ -559,6 +613,13 @@ export function LeaderboardProgressChart({
           </div>
         </div>
       </div>
+
+      {hasLiveMatches && mode === "live" ? (
+        <LeaderboardLiveMatchesPanel
+          matches={data.liveMatches}
+          title="Les matchs en cours qui alimentent le graphique live."
+        />
+      ) : null}
     </section>
   );
 }

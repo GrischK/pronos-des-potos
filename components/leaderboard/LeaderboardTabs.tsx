@@ -5,6 +5,7 @@ import { ArrowDown, ArrowUp, ChartLine, ChevronDown } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { CompetitionActionCard } from "@/components/competitions/CompetitionActionCard";
+import { LeaderboardLiveMatchesPanel } from "@/components/leaderboard/LeaderboardLiveMatchesPanel";
 import { PlayerPointsBadge } from "@/components/player/PlayerPointsBadge";
 import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
 import { formatMatchScoreText } from "@/src/domain/scoring";
@@ -463,114 +464,6 @@ function LeaderboardTournamentStatsSection({
   );
 }
 
-function LiveMatchesPanel({
-  matches,
-}: {
-  matches: LeaderboardData["liveMatches"];
-}) {
-  if (matches.length === 0) {
-    return null;
-  }
-
-  return (
-    <section className="page-section">
-      <div className="section-heading">
-        <div>
-          <p className="badge badge-warning">En direct</p>
-        </div>
-        <p>Les scores live qui alimentent le classement provisoire.</p>
-      </div>
-
-      <div className="match-list">
-        {matches.map((match) => (
-          <article className="match-row" key={match.id}>
-            <div className="match-meta">
-              <span>{formatKickoffAt(match.kickoffAt)}</span>
-              <span>{getCompetitionStageLabel(match.stage)}</span>
-            </div>
-
-            <div className="match-teams">
-              <span className="match-team">
-                {getTeamFlag(match, "home") ? (
-                  <img
-                    alt=""
-                    className="team-flag"
-                    loading="lazy"
-                    src={getTeamFlag(match, "home") ?? undefined}
-                  />
-                ) : null}
-                <span>{getTeamName(match, "home")}</span>
-              </span>
-
-              <span className="match-score">
-                {formatMatchScoreText(match)}
-              </span>
-
-              <span className="match-team match-team-away">
-                <span>{getTeamName(match, "away")}</span>
-                {getTeamFlag(match, "away") ? (
-                  <img
-                    alt=""
-                    className="team-flag"
-                    loading="lazy"
-                    src={getTeamFlag(match, "away") ?? undefined}
-                  />
-                ) : null}
-              </span>
-            </div>
-
-            <span className="match-status match-live-status">
-              {renderStatus(match.status, match.liveMinute)}
-            </span>
-
-            <details className="live-match-predictions-panel">
-              <summary>
-                <span>
-                  <span className="badge badge-warning">Pronos</span>
-                  <strong>
-                    {match.predictions.length} participant
-                    {match.predictions.length > 1 ? "s" : ""}
-                  </strong>
-                </span>
-                <span
-                  aria-hidden="true"
-                  className="pending-predictions-summary-action"
-                >
-                  <ChevronDown size={18} strokeWidth={3} />
-                </span>
-              </summary>
-
-              <div className="public-predictions">
-                {match.predictions.length === 0 ? (
-                  <p>Aucun prono enregistré pour ce match.</p>
-                ) : (
-                  match.predictions.map((prediction) => (
-                    <div className="public-prediction-row" key={prediction.id}>
-                      <strong>{prediction.user.name}</strong>
-                      <div className="public-prediction-meta">
-                        {prediction.points !== null ? (
-                          <PlayerPointsBadge
-                            points={prediction.points}
-                            label="Pts"
-                            className="public-prediction-points"
-                          />
-                        ) : null}
-                        <span className="public-prediction-score">
-                          {prediction.homeScore} · {prediction.awayScore}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </details>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 export function LeaderboardTabs({
   initialMode = "official",
   leaderboard,
@@ -627,7 +520,7 @@ export function LeaderboardTabs({
         />
       </section>
 
-      {isLive ? <LiveMatchesPanel matches={leaderboard.liveMatches} /> : null}
+      {isLive ? <LeaderboardLiveMatchesPanel matches={leaderboard.liveMatches} /> : null}
 
       <div className="actions mb-4">
         <CompetitionActionCard

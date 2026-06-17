@@ -84,6 +84,12 @@ export type LeaderboardProgressData = {
   }[];
 };
 
+export type LeaderboardProgressBundle = {
+  official: LeaderboardProgressData;
+  live: LeaderboardProgressData;
+  liveMatches: LeaderboardLiveMatch[];
+};
+
 export type LeaderboardSnapshot = {
   rows: LeaderboardRow[];
   matchCount: number;
@@ -133,9 +139,21 @@ type LeaderboardMatch = {
   matchday?: number | null;
   stage?: string;
   status: string;
+  liveMinute?: number | null;
+  homePlaceholder?: string | null;
+  awayPlaceholder?: string | null;
   homeTeamId?: string | null;
   awayTeamId?: string | null;
+  homeTeam?: {
+    name: string;
+    flagUrl: string | null;
+  } | null;
+  awayTeam?: {
+    name: string;
+    flagUrl: string | null;
+  } | null;
   predictions: {
+    id?: string;
     userId: string;
     homeScore: number;
     awayScore: number;
@@ -433,7 +451,7 @@ function getDateSectionKey(match: LeaderboardMatch) {
   };
 }
 
-function buildLeaderboardProgressData(
+function buildLeaderboardProgressDataFromSnapshots(
   competition: {
     id: string;
     name: string;
@@ -442,11 +460,9 @@ function buildLeaderboardProgressData(
     emblemUrl: string | null;
     bonusEnabled: boolean;
     players: CompetitionPlayer[];
-    matches: LeaderboardMatch[];
   },
-  bonusPointsByUser: Map<string, number>,
+  snapshots: LeaderboardProgressSnapshot[],
 ): LeaderboardProgressData {
-  const snapshots = buildLeaderboardProgressSnapshots(competition, bonusPointsByUser);
   const sections = snapshots.map(({ section }) => section);
   const players = competition.players
     .map((player) => {
@@ -530,9 +546,13 @@ function buildLeaderboardProgressSnapshots(
     matches: LeaderboardMatch[];
   },
   bonusPointsByUser: Map<string, number>,
+  matches: LeaderboardMatch[],
+  includeLiveMatches: boolean,
 ): LeaderboardProgressSnapshot[] {
-  const finishedMatches = [...competition.matches]
-    .filter((match) => match.status === "FINISHED")
+  const finishedMatches = [...matches]
+    .filter((match) =>
+      includeLiveMatches ? match.status === "FINISHED" || match.status === "LIVE" : match.status === "FINISHED",
+    )
     .sort((a, b) => {
       const kickoffDiff =
         (a.kickoffAt?.getTime() ?? 0) - (b.kickoffAt?.getTime() ?? 0);
@@ -676,6 +696,115 @@ function buildLeaderboardProgressSnapshots(
   return snapshots;
 }
 
+function buildLeaderboardProgressData(
+  competition: {
+    id: string;
+    name: string;
+    slug: string;
+    kind: string;
+    emblemUrl: string | null;
+    bonusEnabled: boolean;
+    players: CompetitionPlayer[];
+    matches: LeaderboardMatch[];
+  },
+  bonusPointsByUser: Map<string, number>,
+): LeaderboardProgressData {
+  const snapshots = buildLeaderboardProgressSnapshots(
+    competition,
+    bonusPointsByUser,
+    competition.matches,
+    false,
+  );
+
+  return buildLeaderboardProgressDataFromSnapshots(competition, snapshots);
+}
+
+function buildLeaderboardProgressDataLive(
+  competition: {
+    id: string;
+    name: string;
+    slug: string;
+    kind: string;
+    emblemUrl: string | null;
+    bonusEnabled: boolean;
+    players: CompetitionPlayer[];
+    matches: LeaderboardMatch[];
+  },
+  bonusPointsByUser: Map<string, number>,
+): LeaderboardProgressData {
+  const snapshots = buildLeaderboardProgressSnapshots(
+    competition,
+    bonusPointsByUser,
+    competition.matches.filter(
+      (match) => match.status === "FINISHED" || match.status === "LIVE",
+    ),
+    true,
+  );
+
+  return buildLeaderboardProgressDataFromSnapshots(competition, snapshots);
+}
+
+function buildLeaderboardProgressLiveMatches(
+  matches: LeaderboardMatch[],
+): LeaderboardLiveMatch[] {
+  return matches
+    .filter((match) => match.status === "LIVE")
+    .map((match) => ({
+      id: match.id,
+      kickoffAt: match.kickoffAt?.toISOString() ?? new Date().toISOString(),
+      stage: match.stage ?? "",
+      status: match.status,
+      liveMinute: match.liveMinute ?? null,
+      homePlaceholder: match.homePlaceholder ?? null,
+      awayPlaceholder: match.awayPlaceholder ?? null,
+      homeScore: match.homeScore,
+      awayScore: match.awayScore,
+      regularHomeScore: match.regularHomeScore,
+      regularAwayScore: match.regularAwayScore,
+      extraTimeHomeScore: match.extraTimeHomeScore,
+      extraTimeAwayScore: match.extraTimeAwayScore,
+      penaltyHomeScore: match.penaltyHomeScore,
+      penaltyAwayScore: match.penaltyAwayScore,
+      homeTeam: match.homeTeam ?? null,
+      awayTeam: match.awayTeam ?? null,
+      predictions: match.predictions
+        .map((prediction) => {
+          let points: number | null = null;
+
+          const result = getMatchResultForPoints(match);
+
+          if (result !== null) {
+            const exactScorePredictionCount = match.predictions.filter(
+              (matchPrediction) =>
+                matchPrediction.homeScore === result.homeScore &&
+                matchPrediction.awayScore === result.awayScore,
+            ).length;
+
+            points = computePredictionPoints({
+              prediction: {
+                homeScore: prediction.homeScore,
+                awayScore: prediction.awayScore,
+              },
+              result,
+              exactScorePredictionCount,
+            });
+          }
+
+          return {
+            id: prediction.id ?? prediction.user.id,
+            homeScore: prediction.homeScore,
+            awayScore: prediction.awayScore,
+            points,
+            user: {
+              id: prediction.user.id,
+              name: getUserDisplayName(prediction.user),
+            },
+          };
+        })
+        .sort((a, b) => a.user.name.localeCompare(b.user.name, "fr")),
+    }));
+}
+
 function getOrderedFinishedMatches(matches: LeaderboardMatch[]) {
   return [...matches]
     .filter((match) => match.status === "FINISHED")
@@ -802,6 +931,8 @@ function buildLeaderboardTournamentStats(
       matches: finishedMatches,
     },
     bonusPointsByUser,
+    finishedMatches,
+    false,
   );
   const players = competition.players.map((player) => ({
     userId: player.user.id,
@@ -1466,6 +1597,18 @@ export async function getLeaderboardProgressData(
           status: true,
           homeTeamId: true,
           awayTeamId: true,
+          homeTeam: {
+            select: {
+              name: true,
+              flagUrl: true,
+            },
+          },
+          awayTeam: {
+            select: {
+              name: true,
+              flagUrl: true,
+            },
+          },
           homeScore: true,
           awayScore: true,
           regularHomeScore: true,
@@ -1519,4 +1662,124 @@ export async function getLeaderboardProgressData(
   );
 
   return buildLeaderboardProgressData(competition, bonusPointsByUser);
+}
+
+export async function getLeaderboardProgressBundle(
+  slug: string,
+): Promise<LeaderboardProgressBundle | null> {
+  const [competition, leaderboard] = await Promise.all([
+    prisma.competition.findUnique({
+      where: {
+        slug,
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        kind: true,
+        emblemUrl: true,
+        bonusEnabled: true,
+        bonusWinnerTeamId: true,
+        bonusSecondTeamId: true,
+        bonusThirdTeamId: true,
+        players: {
+          select: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                image: true,
+                name: true,
+              },
+            },
+          },
+        },
+        bonusPredictions: {
+          select: {
+            userId: true,
+            winnerTeamId: true,
+            secondTeamId: true,
+            thirdTeamId: true,
+          },
+        },
+        matches: {
+          where: {
+            status: {
+              in: ["FINISHED", "LIVE"],
+            },
+            homeScore: {
+              not: null,
+            },
+            awayScore: {
+              not: null,
+            },
+          },
+          orderBy: [{ kickoffAt: "asc" }, { createdAt: "asc" }],
+          select: {
+            id: true,
+            kickoffAt: true,
+            matchday: true,
+            stage: true,
+            status: true,
+            homeTeamId: true,
+            awayTeamId: true,
+            homeScore: true,
+            awayScore: true,
+            regularHomeScore: true,
+            regularAwayScore: true,
+            extraTimeHomeScore: true,
+            extraTimeAwayScore: true,
+            penaltyHomeScore: true,
+            penaltyAwayScore: true,
+            predictions: {
+              select: {
+                userId: true,
+                homeScore: true,
+                awayScore: true,
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    image: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
+    getLeaderboardData(slug),
+  ]);
+
+  if (!competition || !leaderboard) {
+    return null;
+  }
+
+  const bonusResult = resolveBonusResult(
+    competition.bonusEnabled,
+    competition.bonusEnabled &&
+      (competition.bonusWinnerTeamId ||
+        competition.bonusSecondTeamId ||
+        competition.bonusThirdTeamId)
+      ? {
+          winnerTeamId: competition.bonusWinnerTeamId,
+          secondTeamId: competition.bonusSecondTeamId,
+          thirdTeamId: competition.bonusThirdTeamId,
+        }
+      : null,
+    competition.matches,
+  );
+  const bonusPointsByUser = buildBonusPointsByUser(
+    competition.bonusPredictions,
+    bonusResult,
+    competition.bonusEnabled,
+  );
+
+  return {
+    official: buildLeaderboardProgressData(competition, bonusPointsByUser),
+    live: buildLeaderboardProgressDataLive(competition, bonusPointsByUser),
+    liveMatches: leaderboard.liveMatches,
+  };
 }
