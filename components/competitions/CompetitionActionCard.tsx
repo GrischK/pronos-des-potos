@@ -6,7 +6,14 @@ import { cn } from "@/src/lib/cn";
 
 import { UrgentPredictionBadge } from "./UrgentPredictionBadge";
 
-type CompetitionActionTone = "pitch" | "coral" | "navy" | "card" | "bonus";
+type CompetitionActionTone =
+  | "pitch"
+  | "coral"
+  | "navy"
+  | "card"
+  | "bonus"
+  | "graph"
+  | "stats";
 type CompetitionActionWidth = "fill" | "inline";
 
 type CompetitionActionCardProps = {
@@ -26,6 +33,8 @@ const toneClassNames: Record<CompetitionActionTone, string> = {
   navy: "competition-action--navy",
   card: "competition-action--card",
   bonus: "competition-action--bonus",
+  graph: "competition-action--graph",
+  stats: "competition-action--stats",
 };
 
 export function CompetitionActionCard({

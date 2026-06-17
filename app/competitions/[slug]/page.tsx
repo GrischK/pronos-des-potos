@@ -111,25 +111,32 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
             tone="coral"
           />
           <CompetitionActionCard
+            description="Comparer les scores"
+            href={`/competitions/${competition.slug}/tous-les-pronos`}
+            icon={<UsersRound aria-hidden="true" size={20} strokeWidth={2.8} />}
+            title="Pronos des potos"
+            tone="navy"
+          />
+          <CompetitionActionCard
+            description="Voir les matchs et horaires"
+            href={`/competitions/${competition.slug}/calendrier`}
+            icon={<CalendarDays aria-hidden="true" size={20} strokeWidth={2.8} />}
+            title="Calendrier des matchs"
+            tone="card"
+          />
+          <CompetitionActionCard
             description="Voir l'évolution du classement"
             href={`/competitions/${competition.slug}/graph`}
             icon={<ChartLine aria-hidden="true" size={20} strokeWidth={2.8} />}
             title="Graphique"
-            tone="navy"
+            tone="graph"
           />
           <CompetitionActionCard
             description="Voir toutes les stats de la compétition"
             href={`/competitions/${competition.slug}/stats`}
             icon={<BarChart3 aria-hidden="true" size={20} strokeWidth={2.8} />}
             title="Stats"
-            tone="card"
-          />
-          <CompetitionActionCard
-            description="Comparer les scores"
-            href={`/competitions/${competition.slug}/tous-les-pronos`}
-            icon={<UsersRound aria-hidden="true" size={20} strokeWidth={2.8} />}
-            title="Pronos des potos"
-            tone="navy"
+            tone="stats"
           />
           {competition.bonusEnabled ? (
             <CompetitionActionCard
@@ -140,13 +147,6 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
               tone="bonus"
             />
           ) : null}
-          <CompetitionActionCard
-            description="Voir les matchs et horaires"
-            href={`/competitions/${competition.slug}/calendrier`}
-            icon={<CalendarDays aria-hidden="true" size={20} strokeWidth={2.8} />}
-            title="Calendrier des matchs"
-            tone="card"
-          />
         </div>
       </section>
 
