@@ -768,41 +768,37 @@ export function PredictionSchedule({
   const targetMatchId = targetMatchIdProp ?? searchParams.get("match");
   const countryOptions = useMemo(() => buildCountryFilterOptions(matches), [matches]);
   const [selectedCountryId, setSelectedCountryId] = useState("");
-  const filteredMatches = useMemo(
+  const scheduleMatches = useMemo(
     () => filterMatchesByCountry(matches, selectedCountryId),
     [matches, selectedCountryId],
   );
 
   return (
     <>
-      <PendingPredictionPanel matches={filteredMatches} slug={slug} />
-
+      <PendingPredictionPanel matches={matches} slug={slug} />
       <CountryFilterPicker
         onPick={setSelectedCountryId}
         options={countryOptions}
         value={selectedCountryId}
       />
-
-      {filteredMatches.length === 0 ? (
+      {scheduleMatches.length === 0 ? (
         <p>Aucun match pour ce pays.</p>
       ) : (
-        <>
-          <PredictionScheduleBrowser
-            competitionKind={competitionKind}
-            groupHeading="Mes scores"
-            matches={filteredMatches}
-            phaseHeading="Mes scores"
-            targetMatchId={targetMatchId}
-            renderMatch={(match) => (
-              <PredictionMatchForm
-                anchorId={`match-${match.id}`}
-                key={match.id}
-                match={match}
-                slug={slug}
-              />
-            )}
-          />
-        </>
+        <PredictionScheduleBrowser
+          competitionKind={competitionKind}
+          groupHeading="Mes scores"
+          matches={scheduleMatches}
+          phaseHeading="Mes scores"
+          targetMatchId={targetMatchId}
+          renderMatch={(match) => (
+            <PredictionMatchForm
+              anchorId={`match-${match.id}`}
+              key={match.id}
+              match={match}
+              slug={slug}
+            />
+          )}
+        />
       )}
     </>
   );
