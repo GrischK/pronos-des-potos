@@ -2580,8 +2580,16 @@
   .leaderboard-radar-chart {
     @apply flex items-center justify-center rounded-lg border border-line bg-surface-alt p-3;
     background:
-      radial-gradient(circle at top, color-mix(in srgb, var(--coral) 10%, white), transparent 58%),
-      linear-gradient(145deg, color-mix(in srgb, var(--card) 8%, white), white 60%);
+      radial-gradient(
+        circle at top,
+        color-mix(in srgb, var(--coral) 12%, var(--surface)) 0,
+        transparent 58%
+      ),
+      linear-gradient(
+        145deg,
+        color-mix(in srgb, var(--card) 8%, var(--surface-alt)) 0%,
+        var(--surface) 62%
+      );
   }
 
   .leaderboard-radar-svg {
@@ -2688,27 +2696,28 @@
   }
 
   .leaderboard-radar-profile-chip--pitch {
-    background: color-mix(in srgb, var(--pitch) 10%, white);
+    background: color-mix(in srgb, var(--pitch) 14%, var(--surface));
     color: var(--pitch-strong);
   }
 
   .leaderboard-radar-profile-chip--navy {
-    background: color-mix(in srgb, var(--navy) 10%, white);
+    background: color-mix(in srgb, var(--navy) 14%, var(--surface));
     color: var(--navy);
   }
 
   .leaderboard-radar-profile-chip--coral {
-    background: color-mix(in srgb, var(--coral) 10%, white);
+    background: color-mix(in srgb, var(--coral) 14%, var(--surface));
     color: var(--coral);
   }
 
   .leaderboard-radar-profile-chip--mint {
-    background: color-mix(in srgb, var(--mint) 16%, white);
+    background: color-mix(in srgb, var(--mint) 16%, var(--surface));
     color: var(--pitch-strong);
   }
 
   .leaderboard-radar-profile-tooltip {
-    @apply grid gap-1 rounded-lg border border-line bg-white px-3 py-2;
+    @apply grid gap-1 rounded-lg border border-line bg-surface px-3 py-2;
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--foreground) 8%, transparent);
   }
 
   .leaderboard-radar-profile-tooltip strong {
@@ -2733,7 +2742,8 @@
   }
 
   .leaderboard-radar-metrics div {
-    @apply grid gap-1 rounded-lg border border-line bg-white p-3;
+    @apply grid gap-1 rounded-lg border border-line bg-surface p-3;
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--foreground) 6%, transparent);
   }
 
   .leaderboard-radar-metrics span {
@@ -2761,7 +2771,7 @@
 
   .leaderboard-radar-chip[data-selected="true"] {
     border-color: color-mix(in srgb, var(--coral) 26%, var(--line));
-    background: color-mix(in srgb, var(--coral) 10%, white);
+    background: color-mix(in srgb, var(--coral) 12%, var(--surface));
   }
 
   .leaderboard-radar-chip-avatar {

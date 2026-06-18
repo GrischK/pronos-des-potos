@@ -368,24 +368,21 @@ export function LeaderboardPotosRadar({
 
   const labelRadiusValue = isCompactLayout ? 128 : 138;
   const labelOffset = isCompactLayout ? 10 : 0;
-  const profileBadges: PlayerProfileBadge[] = [
-    styleBadge,
-    ...statProfileBadgeDefinitions
-      .map((definition) => {
-        const stat = tournamentStats.find((item) => item.key === definition.key);
+  const profileBadges: PlayerProfileBadge[] = statProfileBadgeDefinitions
+    .map((definition) => {
+      const stat = tournamentStats.find((item) => item.key === definition.key);
 
-        if (!stat) {
-          return null;
-        }
+      if (!stat) {
+        return null;
+      }
 
-        if (!stat.leaders.some((leader) => leader.userId === selectedPlayer.userId)) {
-          return null;
-        }
+      if (!stat.leaders.some((leader) => leader.userId === selectedPlayer.userId)) {
+        return null;
+      }
 
-        return definition;
-      })
-      .filter((badge): badge is PlayerProfileBadge => badge !== null),
-  ];
+      return definition;
+    })
+    .filter((badge): badge is PlayerProfileBadge => badge !== null);
   const defaultProfileKey = profileBadges[0]?.key ?? null;
 
   const selectedProfile =
