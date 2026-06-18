@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { PageHeader } from "@/components/PageHeader";
+import { LeaderboardPotosRadar } from "@/components/leaderboard/LeaderboardPotosRadar";
 import { LeaderboardTournamentStatsSection } from "@/components/leaderboard/LeaderboardTournamentStatsSection";
 import { getCompetitionKindLabel } from "@/src/domain/competition-kind";
 import { getLeaderboardData } from "@/src/server/leaderboard";
@@ -45,6 +46,20 @@ export default async function CompetitionStatsPage({
           </Link>
         </div>
       </section>
+
+      <section className="page-section">
+        <div className="section-heading">
+          <div>
+            <p className="badge badge-live">Officiel</p>
+          </div>
+          <p>Ces stats sont calculées uniquement sur les matchs terminés.</p>
+        </div>
+      </section>
+
+      <LeaderboardPotosRadar
+        players={competition.official.rows}
+        tournamentStats={competition.tournamentStats}
+      />
 
       <LeaderboardTournamentStatsSection
         slug={competition.slug}
