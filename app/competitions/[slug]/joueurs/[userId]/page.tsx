@@ -96,12 +96,17 @@ export default async function PlayerPage({ params, searchParams }: PlayerPagePro
   }
 
   const cameFromGraph = from === "graph";
+  const cameFromStats = from === "stats";
   const backHref = cameFromGraph
     ? `/competitions/${profile.competition.slug}/graph`
-    : `/competitions/${profile.competition.slug}/classement`;
+    : cameFromStats
+      ? `/competitions/${profile.competition.slug}/stats`
+      : `/competitions/${profile.competition.slug}/classement`;
   const backLabel = cameFromGraph
     ? "Retour au graphique du classement"
-    : "Retour au classement";
+    : cameFromStats
+      ? "Retour aux stats"
+      : "Retour au classement";
 
   const statCards = [
     {

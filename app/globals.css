@@ -2632,6 +2632,23 @@
     @apply flex items-center gap-3;
   }
 
+  .leaderboard-radar-player-link {
+    @apply w-fit rounded-md;
+    transition:
+      transform 160ms ease,
+      opacity 160ms ease;
+  }
+
+  .leaderboard-radar-player-link:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+  }
+
+  .leaderboard-radar-player-link:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--pitch) 40%, white);
+    outline-offset: 3px;
+  }
+
   .leaderboard-radar-player > div {
     @apply grid gap-0.5;
   }
@@ -3664,6 +3681,10 @@
 
     .leaderboard-radar-profile-tooltip {
       padding: 0.7rem 0.8rem;
+    }
+
+    .leaderboard-radar-summary-hint {
+      font-size: 10px;
     }
 
     .leaderboard-radar-picker {

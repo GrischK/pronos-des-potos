@@ -47,16 +47,8 @@ export default async function CompetitionStatsPage({
         </div>
       </section>
 
-      <section className="page-section">
-        <div className="section-heading">
-          <div>
-            <p className="badge badge-live">Officiel</p>
-          </div>
-          <p>Ces stats sont calculées uniquement sur les matchs terminés.</p>
-        </div>
-      </section>
-
       <LeaderboardPotosRadar
+        slug={competition.slug}
         players={competition.official.rows}
         tournamentStats={competition.tournamentStats}
       />

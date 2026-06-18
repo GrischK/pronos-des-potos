@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import type { LeaderboardRow, LeaderboardTournamentStat } from "@/src/server/leaderboard";
+import Link from "next/link";
 
 type RadarPlayer = Pick<
   LeaderboardRow,
@@ -30,6 +31,7 @@ type NormalizedRadarAxis = RadarAxis & {
 };
 
 type LeaderboardPotosRadarProps = {
+  slug: string;
   players: RadarPlayer[];
   tournamentStats: LeaderboardTournamentStat[];
 };
@@ -266,6 +268,7 @@ function getLabelPosition(index: number, radiusValue = labelRadius) {
 }
 
 export function LeaderboardPotosRadar({
+  slug,
   players,
   tournamentStats,
 }: LeaderboardPotosRadarProps) {
@@ -399,6 +402,7 @@ export function LeaderboardPotosRadar({
           <p className="badge badge-live">Radar des potos</p>
         </div>
         <p>Qui mise fort, qui joue safe, qui est le plus audacieux.</p>
+        <p>Ces stats calculées uniquement sur les matchs terminés.</p>
       </div>
 
       <div className="leaderboard-radar">
@@ -496,7 +500,11 @@ export function LeaderboardPotosRadar({
 
         <div className="leaderboard-radar-panel">
           <div className="leaderboard-radar-summary">
-            <div className="leaderboard-radar-player">
+            <Link
+              aria-label={`Afficher les stats de ${selectedPlayer.name}`}
+              className="leaderboard-radar-player leaderboard-radar-player-link"
+              href={`/competitions/${slug}/joueurs/${selectedPlayer.userId}?from=stats`}
+            >
               <span className="leaderboard-radar-avatar">
                 {selectedPlayer.image ? (
                   <img alt="" loading="lazy" src={selectedPlayer.image} />
@@ -508,7 +516,7 @@ export function LeaderboardPotosRadar({
                 <strong>{selectedPlayer.name}</strong>
                 <span>{styleBadge.label}</span>
               </div>
-            </div>
+            </Link>
             <p>{styleBadge.description}</p>
           </div>
 

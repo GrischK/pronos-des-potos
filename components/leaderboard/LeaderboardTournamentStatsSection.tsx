@@ -62,11 +62,11 @@ function LeaderboardStatLeaders({
   }
 
   return (
-    <span className="leaderboard-stat-meta">
+          <span className="leaderboard-stat-meta">
       {leaders.map((leader, index) => (
         <span key={leader.userId}>
           {index > 0 ? ", " : ""}
-          <Link href={`/competitions/${slug}/joueurs/${leader.userId}`}>
+          <Link href={`/competitions/${slug}/joueurs/${leader.userId}?from=stats`}>
             {leader.name}
           </Link>
         </span>
