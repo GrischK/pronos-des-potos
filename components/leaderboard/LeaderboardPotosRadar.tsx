@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { LeaderboardRow, LeaderboardTournamentStat } from "@/src/server/leaderboard";
 import Link from "next/link";
+import { useDismissibleLayer } from "@/src/lib/use-dismissible-layer";
 
 type RadarPlayer = Pick<
   LeaderboardRow,
@@ -272,6 +273,8 @@ export function LeaderboardPotosRadar({
   players,
   tournamentStats,
 }: LeaderboardPotosRadarProps) {
+  const infoButtonRef = useRef<HTMLButtonElement>(null);
+  const infoPopoverRef = useRef<HTMLDivElement>(null);
   const orderedPlayers = [...players].sort(
     (a, b) =>
       b.points - a.points ||
@@ -282,7 +285,18 @@ export function LeaderboardPotosRadar({
     orderedPlayers[0]?.userId ?? null,
   );
   const [isCompactLayout, setIsCompactLayout] = useState(false);
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
   const [selectedProfileKey, setSelectedProfileKey] = useState<string | null>(null);
+
+  useDismissibleLayer({
+    active: isInfoOpen,
+    ignoreRefs: [infoButtonRef],
+    layerRef: infoPopoverRef,
+    onDismiss: () => {
+      setIsInfoOpen(false);
+    },
+  });
+
   useEffect(() => {
     if (!selectedUserId && orderedPlayers.length > 0) {
       setSelectedUserId(orderedPlayers[0].userId);
@@ -399,7 +413,45 @@ export function LeaderboardPotosRadar({
           <p className="badge badge-live">Radar des potos</p>
         </div>
         <p>Qui mise fort, qui joue safe, qui est le plus audacieux.</p>
-        <p>Ces stats calculées uniquement sur les matchs terminés.</p>
+        <div className="leaderboard-radar-tooltip">
+          <p>Ces stats calculées uniquement sur les matchs terminés.</p>
+          <button
+            aria-expanded={isInfoOpen}
+            aria-label="Afficher le détail du calcul du radar"
+            className="leaderboard-info-button"
+            onClick={() => {
+              setIsInfoOpen((current) => !current);
+            }}
+            ref={infoButtonRef}
+            type="button"
+          >
+            ?
+          </button>
+          {isInfoOpen ? (
+            <div className="leaderboard-info-popover leaderboard-radar-popover" ref={infoPopoverRef}>
+              <strong>Comment le radar est calculé</strong>
+              <p>
+                Chaque axe est calculé sur les matchs terminés, puis normalisé par
+                rapport au meilleur joueur de la compétition sur cet axe.
+              </p>
+              <p>
+                <strong>Mise</strong> = points totaux / pronos joués.
+              </p>
+              <p>
+                <strong>Safe</strong> = bons résultats à 1 point / pronos joués.
+              </p>
+              <p>
+                <strong>Audace</strong> = scores exacts uniques à 4 points / pronos joués.
+              </p>
+              <p>
+                <strong>Précision</strong> = scores exacts totaux (3 pts + 4 pts) / pronos joués.
+              </p>
+              <p>
+                Un joueur à 100 sur un axe est simplement le meilleur du tournoi sur cette métrique.
+              </p>
+            </div>
+          ) : null}
+        </div>
       </div>
 
       <div className="leaderboard-radar">

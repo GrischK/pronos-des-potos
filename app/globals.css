@@ -2662,6 +2662,20 @@
     @apply grid gap-3;
   }
 
+  .leaderboard-radar-tooltip {
+    @apply relative flex flex-wrap items-center gap-2;
+  }
+
+  .leaderboard-radar-tooltip > p {
+    @apply m-0;
+  }
+
+  .leaderboard-radar-popover {
+    left: 0;
+    top: calc(100% + 0.5rem);
+    bottom: auto;
+  }
+
   .leaderboard-radar-summary {
     @apply grid gap-3 rounded-lg border border-line bg-surface-alt p-4;
   }
