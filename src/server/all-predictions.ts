@@ -18,6 +18,11 @@ export type PublicPredictionMatch = {
   homePlaceholder: string | null;
   awayPlaceholder: string | null;
   canRevealPredictions: boolean;
+  ownPrediction: {
+    homeScore: number;
+    awayScore: number;
+    points: number | null;
+  } | null;
   predictions: {
     id: string;
     homeScore: number;
@@ -133,39 +138,63 @@ export async function getAllPredictionsPageData(slug: string) {
     emblemUrl: competition.emblemUrl,
     bonusEnabled: competition.bonusEnabled,
     hasBonusPrediction: competition.bonusPredictions.length > 0,
-    matches: competition.matches.map((match): PublicPredictionMatch => ({
-      id: match.id,
-      kickoffAt: match.kickoffAt.toISOString(),
-      stage: match.stage,
-      matchday: match.matchday,
-      status: match.status,
-      liveMinute: match.liveMinute,
-      homeScore: match.homeScore,
-      awayScore: match.awayScore,
-      regularHomeScore: match.regularHomeScore,
-      regularAwayScore: match.regularAwayScore,
-      extraTimeHomeScore: match.extraTimeHomeScore,
-      extraTimeAwayScore: match.extraTimeAwayScore,
-      penaltyHomeScore: match.penaltyHomeScore,
-      penaltyAwayScore: match.penaltyAwayScore,
-      homePlaceholder: match.homePlaceholder,
-      awayPlaceholder: match.awayPlaceholder,
-      canRevealPredictions:
-        match.status !== "SCHEDULED" || match.kickoffAt.getTime() <= now,
-      predictions: match.predictions
-        .map((prediction) => {
-          let points: number | null = null;
+    matches: competition.matches.map((match): PublicPredictionMatch => {
+      const result =
+        match.status === "FINISHED" || match.status === "LIVE"
+          ? getMatchResultForPoints(match)
+          : null;
+      const exactScorePredictionCount =
+        result !== null
+          ? match.predictions.filter(
+              (matchPrediction) =>
+                matchPrediction.homeScore === result.homeScore &&
+                matchPrediction.awayScore === result.awayScore,
+            ).length
+          : 0;
+      const ownSourcePrediction =
+        match.predictions.find((prediction) => prediction.user.id === user.id) ?? null;
 
-          if (match.status === "FINISHED" || match.status === "LIVE") {
-            const result = getMatchResultForPoints(match);
+      return {
+        id: match.id,
+        kickoffAt: match.kickoffAt.toISOString(),
+        stage: match.stage,
+        matchday: match.matchday,
+        status: match.status,
+        liveMinute: match.liveMinute,
+        homeScore: match.homeScore,
+        awayScore: match.awayScore,
+        regularHomeScore: match.regularHomeScore,
+        regularAwayScore: match.regularAwayScore,
+        extraTimeHomeScore: match.extraTimeHomeScore,
+        extraTimeAwayScore: match.extraTimeAwayScore,
+        penaltyHomeScore: match.penaltyHomeScore,
+        penaltyAwayScore: match.penaltyAwayScore,
+        homePlaceholder: match.homePlaceholder,
+        awayPlaceholder: match.awayPlaceholder,
+        canRevealPredictions:
+          match.status !== "SCHEDULED" || match.kickoffAt.getTime() <= now,
+        ownPrediction: ownSourcePrediction
+          ? {
+              homeScore: ownSourcePrediction.homeScore,
+              awayScore: ownSourcePrediction.awayScore,
+              points:
+                result !== null
+                  ? computePredictionPoints({
+                      prediction: {
+                        homeScore: ownSourcePrediction.homeScore,
+                        awayScore: ownSourcePrediction.awayScore,
+                      },
+                      result,
+                      exactScorePredictionCount,
+                    })
+                  : null,
+            }
+          : null,
+        predictions: match.predictions
+          .map((prediction) => {
+            let points: number | null = null;
 
             if (result !== null) {
-              const exactScorePredictionCount = match.predictions.filter(
-                (matchPrediction) =>
-                  matchPrediction.homeScore === result.homeScore &&
-                  matchPrediction.awayScore === result.awayScore,
-              ).length;
-
               points = computePredictionPoints({
                 prediction: {
                   homeScore: prediction.homeScore,
@@ -175,22 +204,22 @@ export async function getAllPredictionsPageData(slug: string) {
                 exactScorePredictionCount,
               });
             }
-          }
 
-          return {
-            id: prediction.id,
-            homeScore: prediction.homeScore,
-            awayScore: prediction.awayScore,
-            points,
-            user: {
-              id: prediction.user.id,
-              name: getUserDisplayName(prediction.user),
-            },
-          };
-        })
-        .sort((a, b) => a.user.name.localeCompare(b.user.name, "fr")),
-      homeTeam: match.homeTeam,
-      awayTeam: match.awayTeam,
-    })),
+            return {
+              id: prediction.id,
+              homeScore: prediction.homeScore,
+              awayScore: prediction.awayScore,
+              points,
+              user: {
+                id: prediction.user.id,
+                name: getUserDisplayName(prediction.user),
+              },
+            };
+          })
+          .sort((a, b) => a.user.name.localeCompare(b.user.name, "fr")),
+        homeTeam: match.homeTeam,
+        awayTeam: match.awayTeam,
+      };
+    }),
   };
 }

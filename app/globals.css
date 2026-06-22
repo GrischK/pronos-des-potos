@@ -1741,6 +1741,28 @@
     @apply text-sm font-bold text-muted;
   }
 
+  .competition-card-live .competition-card-own-prediction {
+    border: 1px solid color-mix(in srgb, var(--coral) 22%, var(--line));
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--coral) 16%, white),
+        color-mix(in srgb, var(--coral) 8%, white)
+      );
+  }
+
+  .competition-card-live .competition-card-own-prediction > span {
+    color: color-mix(in srgb, var(--coral) 76%, black);
+    font-weight: var(--font-weight-black);
+  }
+
+  .competition-card-live .competition-card-own-prediction > strong,
+  .competition-card-live .competition-card-own-prediction .public-prediction-score {
+    background: color-mix(in srgb, var(--coral) 84%, #161616);
+    color: white;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, white 12%, transparent);
+  }
+
   .competition-card-stats {
     @apply grid gap-2 px-5 pb-5;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2136,7 +2158,7 @@
 
 
   .highlight-prono-line {
-    @apply flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-lg bg-surface-alt px-3 py-2;
+    @apply flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-lg bg-surface-alt px-3 py-2 mb-2;
   }
 
   .highlight-prono-line > span {
@@ -4609,6 +4631,27 @@
         color-mix(in srgb, var(--surface-alt) 82%, white),
         color-mix(in srgb, var(--surface) 94%, black)
       );
+  }
+
+  :root[data-theme="dark"] .competition-card-live .competition-card-own-prediction {
+    border-color: color-mix(in srgb, white 14%, var(--line));
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--coral) 18%, var(--surface-alt)),
+        color-mix(in srgb, var(--coral) 10%, var(--surface))
+      );
+  }
+
+  :root[data-theme="dark"] .competition-card-live .competition-card-own-prediction > span {
+    color: #ffb8a7;
+  }
+
+  :root[data-theme="dark"] .competition-card-live .competition-card-own-prediction > strong,
+  :root[data-theme="dark"] .competition-card-live .competition-card-own-prediction .public-prediction-score {
+    background: color-mix(in srgb, var(--coral) 22%, var(--surface));
+    color: #fff3ef;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, white 10%, transparent);
   }
 
   :root[data-theme="dark"] .landing-page .actions .btn-connection {

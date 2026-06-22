@@ -2,8 +2,12 @@
 
 import type { CompetitionKind } from "@prisma/client";
 import { useMemo, useState } from "react";
+import { ChevronDown } from "lucide-react";
 
-import { PlayerPointsBadge } from "@/components/player/PlayerPointsBadge";
+import {
+  getPlayerPointsToneClass,
+  PlayerPointsBadge,
+} from "@/components/player/PlayerPointsBadge";
 import {
   CountryFilterPicker,
   buildCountryFilterOptions,
@@ -70,6 +74,14 @@ function renderStatus(status: string, liveMinute: number | null) {
   );
 }
 
+function getPredictionBadgeClass(points: number | null, status: string) {
+  if (status !== "LIVE" && status !== "FINISHED") {
+    return "public-prediction-score";
+  }
+
+  return `public-prediction-score public-prediction-score--toned ${getPlayerPointsToneClass(points)}`;
+}
+
 function AllPredictionsMatchCard({ match }: { match: PublicPredictionMatch }) {
   const hasResult = match.homeScore !== null && match.awayScore !== null;
 
@@ -118,30 +130,78 @@ function AllPredictionsMatchCard({ match }: { match: PublicPredictionMatch }) {
         </span>
       </div>
 
+      <div className="highlight-prono-line">
+        <span>Ton prono</span>
+        {match.ownPrediction ? (
+          <div className="public-prediction-meta">
+            <strong
+              className={getPredictionBadgeClass(
+                match.ownPrediction.points,
+                match.status,
+              )}
+            >
+              {match.ownPrediction.homeScore} · {match.ownPrediction.awayScore}
+            </strong>
+            {match.ownPrediction.points !== null ? (
+              <PlayerPointsBadge
+                points={match.ownPrediction.points}
+                label="Pts"
+                className="public-prediction-points"
+              />
+            ) : null}
+          </div>
+        ) : (
+          <strong>Aucun prono</strong>
+        )}
+      </div>
+
       {match.canRevealPredictions ? (
-        <div className="public-predictions">
-          {match.predictions.length === 0 ? (
-            <p>Aucun prono enregistré pour ce match.</p>
-          ) : (
-            match.predictions.map((prediction) => (
-              <div className="public-prediction-row" key={prediction.id}>
-                <strong>{prediction.user.name}</strong>
-                <div className="public-prediction-meta">
-                  <span className="public-prediction-score">
-                    {prediction.homeScore} · {prediction.awayScore}
-                  </span>
-                  {prediction.points !== null ? (
-                    <PlayerPointsBadge
-                      points={prediction.points}
-                      label="Pts"
-                      className="public-prediction-points"
-                    />
-                  ) : null}
+        <details className="live-match-predictions-panel">
+          <summary>
+            <span>
+              <span className="badge badge-warning">Pronos</span>
+              <strong>
+                {match.predictions.length} participant
+                {match.predictions.length > 1 ? "s" : ""}
+              </strong>
+            </span>
+            <span
+              aria-hidden="true"
+              className="pending-predictions-summary-action"
+            >
+              <ChevronDown size={18} strokeWidth={3} />
+            </span>
+          </summary>
+
+          <div className="public-predictions">
+            {match.predictions.length === 0 ? (
+              <p>Aucun prono enregistré pour ce match.</p>
+            ) : (
+              match.predictions.map((prediction) => (
+                <div className="public-prediction-row" key={prediction.id}>
+                  <strong>{prediction.user.name}</strong>
+                  <div className="public-prediction-meta">
+                    <span
+                      className={getPredictionBadgeClass(
+                        prediction.points,
+                        match.status,
+                      )}
+                    >
+                      {prediction.homeScore} · {prediction.awayScore}
+                    </span>
+                    {prediction.points !== null ? (
+                      <PlayerPointsBadge
+                        points={prediction.points}
+                        label="Pts"
+                        className="public-prediction-points"
+                      />
+                    ) : null}
+                  </div>
                 </div>
-              </div>
-            ))
-          )}
-        </div>
+              ))
+            )}
+          </div>
+        </details>
       ) : (
         <p className="readonly-notice">
           Les pronos seront visibles après le coup d'envoi.
