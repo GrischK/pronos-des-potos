@@ -2035,6 +2035,14 @@
     @apply block text-base font-black leading-tight text-foreground;
   }
 
+  .competition-action-title-desktop {
+    display: inline;
+  }
+
+  .competition-action-title-mobile {
+    display: none;
+  }
+
   .competition-action small {
     @apply mt-1 block text-sm font-bold leading-tight text-muted;
   }
@@ -3812,22 +3820,6 @@
       word-break: break-word;
     }
 
-    .competition-action-title-mobile {
-      display: none;
-    }
-
-    .competition-action-title-desktop {
-      display: inline;
-    }
-
-    .competition-actions-grid > .competition-action:nth-child(n + 4) .competition-action-title-mobile {
-      display: inline;
-    }
-
-    .competition-actions-grid > .competition-action:nth-child(n + 4) .competition-action-title-desktop {
-      display: none;
-    }
-
     .competition-actions-grid > .competition-action:nth-child(n + 4) small {
       display: none;
     }
@@ -5142,6 +5134,14 @@
 
   .page-title-mobile {
     @apply block;
+  }
+
+  .competition-action-title-desktop {
+    display: none;
+  }
+
+  .competition-action-title-mobile {
+    display: inline;
   }
 
   .competition-card {
