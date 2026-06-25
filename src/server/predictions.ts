@@ -9,6 +9,7 @@ export type PredictionMatch = {
   stage: string;
   matchday: number | null;
   status: string;
+  liveMinute: number | null;
   homeScore: number | null;
   awayScore: number | null;
   regularHomeScore: number | null;
@@ -24,6 +25,37 @@ export type PredictionMatch = {
     homeScore: number;
     awayScore: number;
   } | null;
+  homeTeam: {
+    name: string;
+    flagUrl: string | null;
+  } | null;
+  awayTeam: {
+    name: string;
+    flagUrl: string | null;
+  } | null;
+};
+
+type PredictionMatchRow = {
+  id: string;
+  kickoffAt: Date;
+  stage: string;
+  matchday: number | null;
+  status: string;
+  liveMinute: number | null;
+  homeScore: number | null;
+  awayScore: number | null;
+  regularHomeScore: number | null;
+  regularAwayScore: number | null;
+  extraTimeHomeScore: number | null;
+  extraTimeAwayScore: number | null;
+  penaltyHomeScore: number | null;
+  penaltyAwayScore: number | null;
+  homePlaceholder: string | null;
+  awayPlaceholder: string | null;
+  predictions: {
+    homeScore: number;
+    awayScore: number;
+  }[];
   homeTeam: {
     name: string;
     flagUrl: string | null;
@@ -54,6 +86,110 @@ export type PredictionBonusData = {
   prediction: CompetitionBonusPrediction | null;
   result: CompetitionBonusPrediction | null;
 };
+
+function serializePredictionMatches(
+  competitionStatus: string,
+  matches: PredictionMatchRow[],
+  now: number,
+) {
+  return matches.map((match): PredictionMatch => ({
+    id: match.id,
+    kickoffAt: match.kickoffAt.toISOString(),
+    stage: match.stage,
+    matchday: match.matchday,
+    status: match.status,
+    liveMinute: match.liveMinute,
+    homeScore: match.homeScore,
+    awayScore: match.awayScore,
+    regularHomeScore: match.regularHomeScore,
+    regularAwayScore: match.regularAwayScore,
+    extraTimeHomeScore: match.extraTimeHomeScore,
+    extraTimeAwayScore: match.extraTimeAwayScore,
+    penaltyHomeScore: match.penaltyHomeScore,
+    penaltyAwayScore: match.penaltyAwayScore,
+    homePlaceholder: match.homePlaceholder,
+    awayPlaceholder: match.awayPlaceholder,
+    canPredict:
+      competitionStatus === "OPEN" &&
+      match.status === "SCHEDULED" &&
+      match.homeTeam !== null &&
+      match.awayTeam !== null &&
+      match.kickoffAt.getTime() > now,
+    prediction: match.predictions[0] ?? null,
+    homeTeam: match.homeTeam,
+    awayTeam: match.awayTeam,
+  }));
+}
+
+export async function getPredictionMatchesData(slug: string) {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return null;
+  }
+
+  const competition = await prisma.competition.findUnique({
+    where: {
+      slug,
+    },
+    select: {
+      status: true,
+      matches: {
+        orderBy: [{ kickoffAt: "asc" }, { createdAt: "asc" }],
+        select: {
+          id: true,
+          kickoffAt: true,
+          stage: true,
+          matchday: true,
+          status: true,
+          liveMinute: true,
+          homeScore: true,
+          awayScore: true,
+          regularHomeScore: true,
+          regularAwayScore: true,
+          extraTimeHomeScore: true,
+          extraTimeAwayScore: true,
+          penaltyHomeScore: true,
+          penaltyAwayScore: true,
+          homePlaceholder: true,
+          awayPlaceholder: true,
+          homeTeam: {
+            select: {
+              name: true,
+              flagUrl: true,
+            },
+          },
+          awayTeam: {
+            select: {
+              name: true,
+              flagUrl: true,
+            },
+          },
+          predictions: {
+            where: {
+              userId: user.id,
+            },
+            select: {
+              homeScore: true,
+              awayScore: true,
+            },
+            take: 1,
+          },
+        },
+      },
+    },
+  });
+
+  if (!competition) {
+    return null;
+  }
+
+  return serializePredictionMatches(
+    competition.status,
+    competition.matches,
+    Date.now(),
+  );
+}
 
 export async function getPredictionPageData(slug: string) {
   const user = await getCurrentUser();
@@ -97,6 +233,7 @@ export async function getPredictionPageData(slug: string) {
           stage: true,
           matchday: true,
           status: true,
+          liveMinute: true,
           homeScore: true,
           awayScore: true,
           regularHomeScore: true,
@@ -182,31 +319,6 @@ export async function getPredictionPageData(slug: string) {
           : null,
     },
     isOpen: competition.status === "OPEN",
-    matches: competition.matches.map((match): PredictionMatch => ({
-      id: match.id,
-      kickoffAt: match.kickoffAt.toISOString(),
-      stage: match.stage,
-      matchday: match.matchday,
-      status: match.status,
-      homeScore: match.homeScore,
-      awayScore: match.awayScore,
-      regularHomeScore: match.regularHomeScore,
-      regularAwayScore: match.regularAwayScore,
-      extraTimeHomeScore: match.extraTimeHomeScore,
-      extraTimeAwayScore: match.extraTimeAwayScore,
-      penaltyHomeScore: match.penaltyHomeScore,
-      penaltyAwayScore: match.penaltyAwayScore,
-      homePlaceholder: match.homePlaceholder,
-      awayPlaceholder: match.awayPlaceholder,
-      canPredict:
-        competition.status === "OPEN" &&
-        match.status === "SCHEDULED" &&
-        match.homeTeam !== null &&
-        match.awayTeam !== null &&
-        match.kickoffAt.getTime() > now,
-      prediction: match.predictions[0] ?? null,
-      homeTeam: match.homeTeam,
-      awayTeam: match.awayTeam,
-    })),
+    matches: serializePredictionMatches(competition.status, competition.matches, now),
   };
 }

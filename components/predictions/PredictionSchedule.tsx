@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { CompetitionKind } from "@prisma/client";
 import { useSearchParams } from "next/navigation";
@@ -24,6 +24,12 @@ type PredictionScheduleProps = {
   matches: PredictionMatch[];
   slug: string;
   targetMatchId?: string | null;
+};
+
+type SavedPredictionDraft = {
+  awayScore: number;
+  homeScore: number;
+  matchId: string;
 };
 
 export type ScheduleMatch = {
@@ -69,6 +75,66 @@ type ChronologicalSection<TMatch extends ScheduleMatch> = {
 
 type ScheduleView = "structure" | "chronology";
 
+function arePredictionMatchesEqual(
+  currentMatch: PredictionMatch,
+  nextMatch: PredictionMatch,
+) {
+  return (
+    currentMatch.id === nextMatch.id &&
+    currentMatch.kickoffAt === nextMatch.kickoffAt &&
+    currentMatch.stage === nextMatch.stage &&
+    currentMatch.matchday === nextMatch.matchday &&
+    currentMatch.status === nextMatch.status &&
+    currentMatch.liveMinute === nextMatch.liveMinute &&
+    currentMatch.homeScore === nextMatch.homeScore &&
+    currentMatch.awayScore === nextMatch.awayScore &&
+    currentMatch.regularHomeScore === nextMatch.regularHomeScore &&
+    currentMatch.regularAwayScore === nextMatch.regularAwayScore &&
+    currentMatch.extraTimeHomeScore === nextMatch.extraTimeHomeScore &&
+    currentMatch.extraTimeAwayScore === nextMatch.extraTimeAwayScore &&
+    currentMatch.penaltyHomeScore === nextMatch.penaltyHomeScore &&
+    currentMatch.penaltyAwayScore === nextMatch.penaltyAwayScore &&
+    currentMatch.homePlaceholder === nextMatch.homePlaceholder &&
+    currentMatch.awayPlaceholder === nextMatch.awayPlaceholder &&
+    currentMatch.canPredict === nextMatch.canPredict &&
+    currentMatch.prediction?.homeScore === nextMatch.prediction?.homeScore &&
+    currentMatch.prediction?.awayScore === nextMatch.prediction?.awayScore &&
+    currentMatch.homeTeam?.name === nextMatch.homeTeam?.name &&
+    currentMatch.homeTeam?.flagUrl === nextMatch.homeTeam?.flagUrl &&
+    currentMatch.awayTeam?.name === nextMatch.awayTeam?.name &&
+    currentMatch.awayTeam?.flagUrl === nextMatch.awayTeam?.flagUrl
+  );
+}
+
+function mergePredictionMatches(
+  currentMatches: PredictionMatch[],
+  nextMatches: PredictionMatch[],
+) {
+  const currentById = new Map(currentMatches.map((match) => [match.id, match]));
+  let hasChanged = currentMatches.length !== nextMatches.length;
+  const mergedMatches = nextMatches.map((nextMatch, index) => {
+    const currentMatch = currentById.get(nextMatch.id);
+
+    if (!currentMatch) {
+      hasChanged = true;
+      return nextMatch;
+    }
+
+    if (currentMatches[index]?.id !== nextMatch.id) {
+      hasChanged = true;
+    }
+
+    if (arePredictionMatchesEqual(currentMatch, nextMatch)) {
+      return currentMatch;
+    }
+
+    hasChanged = true;
+    return nextMatch;
+  });
+
+  return hasChanged ? mergedMatches : currentMatches;
+}
+
 const groups = [
   { name: "Groupe A", teams: ["Mexico", "South Africa", "South Korea", "Czech Republic"] },
   { name: "Groupe B", teams: ["Canada", "Qatar", "Switzerland", "Bosnia-Herzegovina"] },
@@ -104,6 +170,12 @@ const dayLabelFormatter = new Intl.DateTimeFormat("fr-FR", {
   timeZone: "Europe/Paris",
   weekday: "short",
 });
+
+const MATCHES_REFRESH_INTERVAL_MS = 30000;
+
+function isScoreInputFocused() {
+  return Boolean(document.activeElement?.closest(".prediction-inputs"));
+}
 
 function teamKey(name: string) {
   return (aliases[name] ?? name).toLowerCase().replace(/[^a-z0-9]+/g, "");
@@ -275,12 +347,15 @@ function scrollNavButtonIntoView(
 }
 
 function PendingPredictionPanel({
+  onPredictionSaved,
   matches,
   slug,
 }: {
+  onPredictionSaved: (prediction: SavedPredictionDraft) => void;
   matches: PredictionMatch[];
   slug: string;
 }) {
+  const [isOpen, setIsOpen] = useState(false);
   const pendingMatches = sortMatchesByKickoff(
     matches.filter((match) => match.canPredict && !match.prediction),
   );
@@ -296,7 +371,13 @@ function PendingPredictionPanel({
   }
 
   return (
-    <details className="pending-predictions-panel">
+    <details
+      className="pending-predictions-panel"
+      onToggle={(event) => {
+        setIsOpen(event.currentTarget.open);
+      }}
+      open={isOpen}
+    >
       <summary>
         <span>
           <span className="badge badge-warning">Pronos à poser</span>
@@ -312,11 +393,18 @@ function PendingPredictionPanel({
         </span>
       </summary>
 
-      <div className="pending-predictions-list">
-        {pendingMatches.map((match) => (
-          <PredictionMatchForm key={`pending-${match.id}`} match={match} slug={slug} />
-        ))}
-      </div>
+      {isOpen ? (
+        <div className="pending-predictions-list">
+          {pendingMatches.map((match) => (
+            <PredictionMatchForm
+              key={`pending-${match.id}`}
+              match={match}
+              onSaved={onPredictionSaved}
+              slug={slug}
+            />
+          ))}
+        </div>
+      ) : null}
     </details>
   );
 }
@@ -333,6 +421,7 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
   const groupNavRef = useRef<HTMLElement>(null);
   const dayButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const groupButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const skipNextDayNavScrollRef = useRef(false);
   const [dayNavCanScrollLeft, setDayNavCanScrollLeft] = useState(false);
   const [dayNavCanScrollRight, setDayNavCanScrollRight] = useState(false);
   const groupSections = useMemo(
@@ -409,6 +498,8 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
     groupSections[0]?.id ?? "",
   );
   const [activeDayId, setActiveDayId] = useState(defaultDayId);
+  const appliedTargetMatchIdRef = useRef<string | null>(null);
+  const [targetScrollMatchId, setTargetScrollMatchId] = useState<string | null>(null);
   const targetScrollRetryRef = useRef<number | null>(null);
   const activeStage = stages[activeStageIndex] ?? stages[0];
   const activeGroup =
@@ -416,12 +507,44 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
   const activeDay =
     chronologicalSections.find((section) => section.id === activeDayId) ??
     chronologicalSections[0];
+  const activeDayIndex = chronologicalSections.findIndex(
+    (section) => section.id === activeDay?.id,
+  );
+  const [mountedDayIds, setMountedDayIds] = useState<Set<string>>(
+    () => new Set(defaultDayId ? [defaultDayId] : []),
+  );
   const previousStage = stages[activeStageIndex - 1];
   const nextStage = stages[activeStageIndex + 1];
   const matchById = useMemo(() => new Map(matches.map((match) => [match.id, match])), [matches]);
+  const mountDaySection = useCallback((sectionId: string) => {
+    setMountedDayIds((currentMountedDayIds) => {
+      if (currentMountedDayIds.has(sectionId)) {
+        return currentMountedDayIds;
+      }
+
+      return new Set([...currentMountedDayIds, sectionId]);
+    });
+  }, []);
+  const mountedChronologicalSections = useMemo(
+    () =>
+      chronologicalSections.filter((section) =>
+        mountedDayIds.has(section.id),
+      ),
+    [chronologicalSections, mountedDayIds],
+  );
 
   useEffect(() => {
-    const targetMatch = targetMatchId ? matchById.get(targetMatchId) ?? null : null;
+    if (!targetMatchId) {
+      appliedTargetMatchIdRef.current = null;
+      setTargetScrollMatchId(null);
+      return;
+    }
+
+    if (appliedTargetMatchIdRef.current === targetMatchId) {
+      return;
+    }
+
+    const targetMatch = matchById.get(targetMatchId) ?? null;
 
     if (!targetMatch) {
       return;
@@ -432,13 +555,15 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
     );
 
     if (targetDay) {
+      appliedTargetMatchIdRef.current = targetMatchId;
       setView("chronology");
       setActiveDayId(targetDay.id);
+      setTargetScrollMatchId(targetMatchId);
     }
   }, [chronologicalSections, matchById, targetMatchId]);
 
   useEffect(() => {
-    if (view !== "chronology" || !targetMatchId) {
+    if (view !== "chronology" || !targetScrollMatchId) {
       return;
     }
 
@@ -449,7 +574,7 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
 
     let attempts = 0;
     const scrollToTarget = () => {
-      const targetElement = document.getElementById(`match-${targetMatchId}`);
+      const targetElement = document.getElementById(`match-${targetScrollMatchId}`);
 
       if (targetElement) {
         targetElement.scrollIntoView({
@@ -457,6 +582,7 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
           block: "center",
         });
         targetScrollRetryRef.current = null;
+        setTargetScrollMatchId(null);
         return;
       }
 
@@ -464,7 +590,11 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
 
       if (attempts < 10) {
         targetScrollRetryRef.current = window.setTimeout(scrollToTarget, 60);
+        return;
       }
+
+      targetScrollRetryRef.current = null;
+      setTargetScrollMatchId(null);
     };
 
     targetScrollRetryRef.current = window.setTimeout(scrollToTarget, 0);
@@ -475,7 +605,7 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
         targetScrollRetryRef.current = null;
       }
     };
-  }, [activeDayId, targetMatchId, view]);
+  }, [activeDayId, targetScrollMatchId, view]);
 
   useEffect(() => {
     if (activeDayId && chronologicalSections.some((section) => section.id === activeDayId)) {
@@ -486,6 +616,108 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
       setActiveDayId(defaultDayId);
     }
   }, [activeDayId, chronologicalSections, defaultDayId]);
+
+  useEffect(() => {
+    const sectionIds = new Set(chronologicalSections.map((section) => section.id));
+    const idsToMount = [
+      activeDay?.id,
+      chronologicalSections[activeDayIndex - 1]?.id,
+      chronologicalSections[activeDayIndex + 1]?.id,
+    ].filter((id): id is string => Boolean(id));
+
+    setMountedDayIds((currentMountedDayIds) => {
+      let hasChanged = false;
+      const nextMountedDayIds = new Set<string>();
+
+      for (const sectionId of currentMountedDayIds) {
+        if (sectionIds.has(sectionId)) {
+          nextMountedDayIds.add(sectionId);
+        } else {
+          hasChanged = true;
+        }
+      }
+
+      for (const sectionId of idsToMount) {
+        if (!nextMountedDayIds.has(sectionId)) {
+          nextMountedDayIds.add(sectionId);
+          hasChanged = true;
+        }
+      }
+
+      return hasChanged ? nextMountedDayIds : currentMountedDayIds;
+    });
+  }, [activeDay?.id, activeDayIndex, chronologicalSections]);
+
+  useEffect(() => {
+    if (view !== "chronology" || chronologicalSections.length === 0) {
+      return;
+    }
+
+    let isCancelled = false;
+    let idleCallbackId: number | null = null;
+    let timeoutId: number | null = null;
+
+    const scheduleNextMount = () => {
+      if (isCancelled) {
+        return;
+      }
+
+      if (typeof window.requestIdleCallback === "function") {
+        idleCallbackId = window.requestIdleCallback(mountNextIdleDays, {
+          timeout: 800,
+        });
+      } else {
+        timeoutId = window.setTimeout(mountNextIdleDays, 120);
+      }
+    };
+
+    const mountNextIdleDays = () => {
+      if (isCancelled) {
+        return;
+      }
+
+      let mountedMoreDays = false;
+
+      setMountedDayIds((currentMountedDayIds) => {
+        const nextMountedDayIds = new Set(currentMountedDayIds);
+        let mountedCount = 0;
+
+        for (const section of chronologicalSections) {
+          if (nextMountedDayIds.has(section.id)) {
+            continue;
+          }
+
+          nextMountedDayIds.add(section.id);
+          mountedMoreDays = true;
+          mountedCount += 1;
+
+          if (mountedCount >= 2) {
+            break;
+          }
+        }
+
+        return mountedMoreDays ? nextMountedDayIds : currentMountedDayIds;
+      });
+
+      if (mountedMoreDays) {
+        scheduleNextMount();
+      }
+    };
+
+    scheduleNextMount();
+
+    return () => {
+      isCancelled = true;
+
+      if (idleCallbackId !== null) {
+        window.cancelIdleCallback(idleCallbackId);
+      }
+
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [chronologicalSections, view]);
 
   useEffect(() => {
     if (!activeGroupId || !groupSections.some((section) => section.id === activeGroupId)) {
@@ -514,7 +746,11 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
       return;
     }
 
-    scrollNavButtonIntoView(dayNavRef.current, dayButtonRefs.current[activeDayId] ?? null);
+    if (skipNextDayNavScrollRef.current) {
+      skipNextDayNavScrollRef.current = false;
+    } else {
+      scrollNavButtonIntoView(dayNavRef.current, dayButtonRefs.current[activeDayId] ?? null);
+    }
 
     const nav = dayNavRef.current;
 
@@ -629,7 +865,13 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
                   ref={(element) => {
                     dayButtonRefs.current[section.id] = element;
                   }}
-                  onClick={() => setActiveDayId(section.id)}
+                  onClick={() => {
+                    skipNextDayNavScrollRef.current = true;
+                    mountDaySection(section.id);
+                    setActiveDayId(section.id);
+                  }}
+                  onFocus={() => mountDaySection(section.id)}
+                  onMouseEnter={() => mountDaySection(section.id)}
                   type="button"
                 >
                   <span>{section.label}</span>
@@ -648,19 +890,27 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
             </button>
           </div>
 
-          <div className="group-panel">
-            <div className="section-heading">
-              <div>
-                <p className="badge badge-live">{activeDay.title}</p>
-              </div>
-              <p className="badge badge-warning mt-2">{activeDay.matches.length} matchs</p>
-            </div>
+          <div className="day-panels">
+            {mountedChronologicalSections.map((section) => (
+              <div
+                className="group-panel"
+                hidden={section.id !== activeDay.id}
+                key={section.id}
+              >
+                <div className="section-heading">
+                  <div>
+                    <p className="badge badge-live">{section.title}</p>
+                  </div>
+                  <p className="badge badge-warning mt-2">
+                    {section.matches.length} matchs
+                  </p>
+                </div>
 
-            <div className="prediction-list">
-              {activeDay.matches.map((match) => (
-                renderMatch(match)
-              ))}
-            </div>
+                <div className="prediction-list">
+                  {section.matches.map((match) => renderMatch(match))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       ) : null}
@@ -760,22 +1010,134 @@ export function PredictionScheduleBrowser<TMatch extends ScheduleMatch>({
 
 export function PredictionSchedule({
   competitionKind,
-  matches,
+  matches: initialMatches,
   slug,
   targetMatchId: targetMatchIdProp = null,
 }: PredictionScheduleProps) {
   const searchParams = useSearchParams();
   const targetMatchId = targetMatchIdProp ?? searchParams.get("match");
+  const [matches, setMatches] = useState(initialMatches);
   const countryOptions = useMemo(() => buildCountryFilterOptions(matches), [matches]);
   const [selectedCountryId, setSelectedCountryId] = useState("");
   const scheduleMatches = useMemo(
     () => filterMatchesByCountry(matches, selectedCountryId),
     [matches, selectedCountryId],
   );
+  const handlePredictionSaved = useCallback((prediction: SavedPredictionDraft) => {
+    setMatches((currentMatches) => {
+      let hasChanged = false;
+      const nextMatches = currentMatches.map((match) => {
+        if (match.id !== prediction.matchId) {
+          return match;
+        }
+
+        if (
+          match.prediction?.homeScore === prediction.homeScore &&
+          match.prediction?.awayScore === prediction.awayScore
+        ) {
+          return match;
+        }
+
+        hasChanged = true;
+        return {
+          ...match,
+          prediction: {
+            awayScore: prediction.awayScore,
+            homeScore: prediction.homeScore,
+          },
+        };
+      });
+
+      return hasChanged ? nextMatches : currentMatches;
+    });
+  }, []);
+  const renderPredictionMatch = useCallback(
+    (match: PredictionMatch) => (
+      <PredictionMatchForm
+        anchorId={`match-${match.id}`}
+        key={match.id}
+        match={match}
+        onSaved={handlePredictionSaved}
+        slug={slug}
+      />
+    ),
+    [handlePredictionSaved, slug],
+  );
+
+  useEffect(() => {
+    setMatches((currentMatches) =>
+      mergePredictionMatches(currentMatches, initialMatches),
+    );
+  }, [initialMatches]);
+
+  useEffect(() => {
+    let isActive = true;
+    let controller: AbortController | null = null;
+
+    const refreshMatches = async () => {
+      if (document.visibilityState !== "visible" || isScoreInputFocused()) {
+        return;
+      }
+
+      controller?.abort();
+      controller = new AbortController();
+      const currentController = controller;
+
+      try {
+        const response = await fetch(
+          `/api/competitions/${encodeURIComponent(slug)}/pronos/matches`,
+          {
+            cache: "no-store",
+            signal: currentController.signal,
+          },
+        );
+
+        if (!response.ok) {
+          return;
+        }
+
+        const payload = (await response.json()) as { matches?: PredictionMatch[] };
+
+        if (isActive && Array.isArray(payload.matches) && !isScoreInputFocused()) {
+          setMatches((currentMatches) =>
+            mergePredictionMatches(currentMatches, payload.matches ?? []),
+          );
+        }
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+      } finally {
+        if (controller === currentController) {
+          controller = null;
+        }
+      }
+    };
+
+    const intervalId = window.setInterval(() => {
+      void refreshMatches();
+    }, MATCHES_REFRESH_INTERVAL_MS);
+    const refreshVisibleMatches = () => {
+      void refreshMatches();
+    };
+
+    document.addEventListener("visibilitychange", refreshVisibleMatches);
+
+    return () => {
+      isActive = false;
+      window.clearInterval(intervalId);
+      controller?.abort();
+      document.removeEventListener("visibilitychange", refreshVisibleMatches);
+    };
+  }, [slug]);
 
   return (
     <>
-      <PendingPredictionPanel matches={matches} slug={slug} />
+      <PendingPredictionPanel
+        matches={matches}
+        onPredictionSaved={handlePredictionSaved}
+        slug={slug}
+      />
       <CountryFilterPicker
         onPick={setSelectedCountryId}
         options={countryOptions}
@@ -790,14 +1152,7 @@ export function PredictionSchedule({
           matches={scheduleMatches}
           phaseHeading="Mes scores"
           targetMatchId={targetMatchId}
-          renderMatch={(match) => (
-            <PredictionMatchForm
-              anchorId={`match-${match.id}`}
-              key={match.id}
-              match={match}
-              slug={slug}
-            />
-          )}
+          renderMatch={renderPredictionMatch}
         />
       )}
     </>

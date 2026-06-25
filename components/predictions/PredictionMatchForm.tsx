@@ -1,13 +1,11 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { useActionState, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
+import type { FormEvent } from "react";
 
-import {
-  savePredictionAction,
-  type PredictionActionState,
-} from "@/src/server/prediction-actions";
 import { getCompetitionStageLabel } from "@/src/domain/competition-stage";
+import { getLiveMatchStatusLabel } from "@/src/domain/match-status";
 import { formatMatchScoreText } from "@/src/domain/scoring";
 import type { PredictionMatch } from "@/src/server/predictions";
 
@@ -15,9 +13,33 @@ type PredictionMatchFormProps = {
   match: PredictionMatch;
   slug: string;
   anchorId?: string;
+  onSaved?: (prediction: {
+    awayScore: number;
+    homeScore: number;
+    matchId: string;
+  }) => void;
 };
 
-const initialState: PredictionActionState = {};
+type PredictionSaveResponse = {
+  error?: string;
+  savedPrediction?: {
+    awayScore: number;
+    homeScore: number;
+    matchId: string;
+    savedAt: number;
+  };
+  success?: string;
+};
+
+type SubmitButtonUiState = {
+  ariaLabel: string;
+  className: string;
+  disabled: boolean;
+  editableHidden: boolean;
+  editableLabel: string;
+  pendingHidden: boolean;
+  savedHidden: boolean;
+};
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   dateStyle: "medium",
@@ -37,9 +59,17 @@ function formatKickoffAt(value: string) {
 
 function getMatchMetaBadges(match: PredictionMatch) {
   if (match.status === "LIVE") {
+    const liveStatusLabel = getLiveMatchStatusLabel(match.liveMinute);
+
     return [
       { label: "Match verrouillé", className: "badge badge-danger" },
-      { label: "En cours", className: "badge badge-warning" },
+      {
+        label:
+          liveStatusLabel === "En cours"
+            ? "En cours"
+            : `En cours ${liveStatusLabel}`,
+        className: "badge badge-warning",
+      },
     ];
   }
 
@@ -79,36 +109,169 @@ function hasCompleteScore(homeScore: string, awayScore: string) {
   return homeScore !== "" && awayScore !== "";
 }
 
-export function PredictionMatchForm({ match, slug, anchorId }: PredictionMatchFormProps) {
-  const [state, formAction, pending] = useActionState(
-    savePredictionAction,
-    initialState,
-  );
+function normalizeScoreInput(input: HTMLInputElement) {
+  const normalizedValue = input.value.replace(/\D/g, "").slice(0, 2);
+
+  if (input.value !== normalizedValue) {
+    input.value = normalizedValue;
+  }
+}
+
+function PredictionMatchFormComponent({
+  match,
+  slug,
+  anchorId,
+  onSaved,
+}: PredictionMatchFormProps) {
+  const [error, setError] = useState<string | null>(null);
   const homeInputRef = useRef<HTMLInputElement>(null);
   const awayInputRef = useRef<HTMLInputElement>(null);
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
+  const pendingLabelRef = useRef<HTMLSpanElement>(null);
+  const savedLabelRef = useRef<HTMLSpanElement>(null);
+  const editableLabelRef = useRef<HTMLSpanElement>(null);
+  const submitButtonUiStateRef = useRef<SubmitButtonUiState | null>(null);
+  const isSubmittingRef = useRef(false);
   const initialHomeScore = getPredictionValue(match.prediction?.homeScore);
   const initialAwayScore = getPredictionValue(match.prediction?.awayScore);
-  const [savedHomeScore, setSavedHomeScore] = useState(initialHomeScore);
-  const [savedAwayScore, setSavedAwayScore] = useState(initialAwayScore);
-  const [hasSavedState, setHasSavedState] = useState(
-    initialHomeScore !== "" && initialAwayScore !== "",
-  );
-  const [isDirty, setIsDirty] = useState(false);
-  const [isComplete, setIsComplete] = useState(
-    hasCompleteScore(initialHomeScore, initialAwayScore),
-  );
+  const savedHomeScoreRef = useRef(initialHomeScore);
+  const savedAwayScoreRef = useRef(initialAwayScore);
+  const hasSavedStateRef = useRef(initialHomeScore !== "" && initialAwayScore !== "");
+  const initialIsComplete = hasCompleteScore(initialHomeScore, initialAwayScore);
+  const initialShowSavedState = hasSavedStateRef.current;
 
-  const syncDraftState = () => {
+  const updateSubmitButton = (submittingOverride?: boolean) => {
+    const button = submitButtonRef.current;
+    const pendingLabel = pendingLabelRef.current;
+    const savedLabel = savedLabelRef.current;
+    const editableLabel = editableLabelRef.current;
+
+    if (!button || !pendingLabel || !savedLabel || !editableLabel) {
+      return;
+    }
+
     const nextHomeScore = homeInputRef.current?.value ?? "";
     const nextAwayScore = awayInputRef.current?.value ?? "";
     const nextIsDirty =
-      nextHomeScore !== savedHomeScore || nextAwayScore !== savedAwayScore;
+      nextHomeScore !== savedHomeScoreRef.current ||
+      nextAwayScore !== savedAwayScoreRef.current;
     const nextIsComplete = hasCompleteScore(nextHomeScore, nextAwayScore);
+    const hasExistingPrediction =
+      savedHomeScoreRef.current !== "" && savedAwayScoreRef.current !== "";
+    const showSavedState = hasSavedStateRef.current && !nextIsDirty;
+    const showPendingState = submittingOverride ?? isSubmittingRef.current;
+    const nextUiState: SubmitButtonUiState = {
+      ariaLabel: showSavedState ? "Prono enregistré" : "Enregistrer le prono",
+      className: `btn ${
+        showSavedState && !showPendingState ? "btn-saved" : "btn-primary"
+      }`,
+      disabled:
+        !match.canPredict ||
+        showPendingState ||
+        !nextIsComplete ||
+        !nextIsDirty,
+      editableHidden: showPendingState || showSavedState,
+      editableLabel: hasExistingPrediction ? "Modifier" : "Enregistrer",
+      pendingHidden: !showPendingState,
+      savedHidden: showPendingState || !showSavedState,
+    };
+    const previousUiState = submitButtonUiStateRef.current;
 
-    setIsDirty((current) => (current === nextIsDirty ? current : nextIsDirty));
-    setIsComplete((current) =>
-      current === nextIsComplete ? current : nextIsComplete,
-    );
+    if (
+      previousUiState &&
+      previousUiState.ariaLabel === nextUiState.ariaLabel &&
+      previousUiState.className === nextUiState.className &&
+      previousUiState.disabled === nextUiState.disabled &&
+      previousUiState.editableHidden === nextUiState.editableHidden &&
+      previousUiState.editableLabel === nextUiState.editableLabel &&
+      previousUiState.pendingHidden === nextUiState.pendingHidden &&
+      previousUiState.savedHidden === nextUiState.savedHidden
+    ) {
+      return;
+    }
+
+    submitButtonUiStateRef.current = nextUiState;
+
+    button.disabled = nextUiState.disabled;
+    button.className = nextUiState.className;
+    button.setAttribute("aria-label", nextUiState.ariaLabel);
+    editableLabel.textContent = nextUiState.editableLabel;
+    pendingLabel.hidden = nextUiState.pendingHidden;
+    savedLabel.hidden = nextUiState.savedHidden;
+    editableLabel.hidden = nextUiState.editableHidden;
+  };
+
+  const handleScoreInput = (event: FormEvent<HTMLInputElement>) => {
+    normalizeScoreInput(event.currentTarget);
+    updateSubmitButton();
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (isSubmittingRef.current) {
+      return;
+    }
+
+    const nextHomeScore = homeInputRef.current?.value ?? "";
+    const nextAwayScore = awayInputRef.current?.value ?? "";
+    const nextIsDirty =
+      nextHomeScore !== savedHomeScoreRef.current ||
+      nextAwayScore !== savedAwayScoreRef.current;
+
+    if (
+      !match.canPredict ||
+      !hasCompleteScore(nextHomeScore, nextAwayScore) ||
+      !nextIsDirty
+    ) {
+      updateSubmitButton();
+      return;
+    }
+
+    isSubmittingRef.current = true;
+    updateSubmitButton(true);
+
+    if (error) {
+      setError(null);
+    }
+
+    try {
+      const response = await fetch(
+        `/api/competitions/${encodeURIComponent(slug)}/pronos/predictions`,
+        {
+          body: JSON.stringify({
+            awayScore: nextAwayScore,
+            homeScore: nextHomeScore,
+            matchId: match.id,
+          }),
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+        },
+      );
+      const payload = (await response.json()) as PredictionSaveResponse;
+
+      if (!response.ok || payload.error || !payload.savedPrediction) {
+        setError(payload.error ?? "Impossible d'enregistrer le prono.");
+        return;
+      }
+
+      const savedHomeScore = String(payload.savedPrediction.homeScore);
+      const savedAwayScore = String(payload.savedPrediction.awayScore);
+
+      savedHomeScoreRef.current = savedHomeScore;
+      savedAwayScoreRef.current = savedAwayScore;
+      hasSavedStateRef.current = true;
+      onSaved?.({
+        awayScore: payload.savedPrediction.awayScore,
+        homeScore: payload.savedPrediction.homeScore,
+        matchId: payload.savedPrediction.matchId,
+      });
+    } catch {
+      setError("Impossible d'enregistrer le prono.");
+    } finally {
+      isSubmittingRef.current = false;
+      updateSubmitButton(false);
+    }
   };
 
   useEffect(() => {
@@ -120,37 +283,27 @@ export function PredictionMatchForm({ match, slug, anchorId }: PredictionMatchFo
       awayInputRef.current.value = initialAwayScore;
     }
 
-    setSavedHomeScore(initialHomeScore);
-    setSavedAwayScore(initialAwayScore);
-    setHasSavedState(initialHomeScore !== "" && initialAwayScore !== "");
-    setIsDirty(false);
-    setIsComplete(hasCompleteScore(initialHomeScore, initialAwayScore));
-  }, [initialAwayScore, initialHomeScore, match.id]);
+    savedHomeScoreRef.current = initialHomeScore;
+    savedAwayScoreRef.current = initialAwayScore;
+    hasSavedStateRef.current = initialHomeScore !== "" && initialAwayScore !== "";
+    updateSubmitButton();
+  }, [initialAwayScore, initialHomeScore, match.id, match.canPredict]);
 
   useEffect(() => {
-    if (!state.success) {
-      return;
-    }
-
-    const nextHomeScore = homeInputRef.current?.value ?? "";
-    const nextAwayScore = awayInputRef.current?.value ?? "";
-
-    setSavedHomeScore(nextHomeScore);
-    setSavedAwayScore(nextAwayScore);
-    setHasSavedState(true);
-    setIsDirty(false);
-    setIsComplete(hasCompleteScore(nextHomeScore, nextAwayScore));
-  }, [state.success]);
+    updateSubmitButton();
+  });
 
   const hasResult = match.homeScore !== null && match.awayScore !== null;
   const showReadonlyEmptyState = !match.canPredict && !match.prediction;
-  const showSavedState = hasSavedState && !isDirty;
-  const hasExistingPrediction = savedHomeScore !== "" && savedAwayScore !== "";
-  const submitLabel = hasExistingPrediction ? "Modifier" : "Enregistrer";
+  const initialSubmitLabel = initialShowSavedState ? "Modifier" : "Enregistrer";
   const matchMetaBadges = getMatchMetaBadges(match);
 
   return (
-    <form action={formAction} className="prediction-row" id={anchorId}>
+    <form
+      className="prediction-row"
+      id={anchorId}
+      onSubmit={handleSubmit}
+    >
       <input name="matchId" type="hidden" value={match.id} />
       <input name="slug" type="hidden" value={slug} />
 
@@ -170,6 +323,7 @@ export function PredictionMatchForm({ match, slug, anchorId }: PredictionMatchFo
             <img
               alt=""
               className="team-flag"
+              decoding="async"
               loading="lazy"
               src={getTeamFlag(match, "home") ?? undefined}
             />
@@ -184,30 +338,32 @@ export function PredictionMatchForm({ match, slug, anchorId }: PredictionMatchFo
             <div className="prediction-inputs">
               <input
                 aria-label={`Score ${getTeamName(match, "home")}`}
+                autoComplete="off"
                 defaultValue={initialHomeScore}
-                disabled={!match.canPredict || pending}
+                disabled={!match.canPredict}
                 inputMode="numeric"
-                max="99"
-                min="0"
+                maxLength={2}
                 name="homeScore"
-                onInput={syncDraftState}
+                onInput={handleScoreInput}
+                pattern="[0-9]*"
                 ref={homeInputRef}
                 required
-                type="number"
+                type="text"
               />
               <span>·</span>
               <input
                 aria-label={`Score ${getTeamName(match, "away")}`}
+                autoComplete="off"
                 defaultValue={initialAwayScore}
-                disabled={!match.canPredict || pending}
+                disabled={!match.canPredict}
                 inputMode="numeric"
-                max="99"
-                min="0"
+                maxLength={2}
                 name="awayScore"
-                onInput={syncDraftState}
+                onInput={handleScoreInput}
+                pattern="[0-9]*"
                 ref={awayInputRef}
                 required
-                type="number"
+                type="text"
               />
             </div>
           )}
@@ -226,6 +382,7 @@ export function PredictionMatchForm({ match, slug, anchorId }: PredictionMatchFo
             <img
               alt=""
               className="team-flag"
+              decoding="async"
               loading="lazy"
               src={getTeamFlag(match, "away") ?? undefined}
             />
@@ -236,27 +393,36 @@ export function PredictionMatchForm({ match, slug, anchorId }: PredictionMatchFo
       {showReadonlyEmptyState ? null : (
         <div className="prediction-actions">
           <button
-            aria-label={showSavedState ? "Prono enregistré" : "Enregistrer le prono"}
-            className={`btn ${showSavedState ? "btn-saved" : "btn-primary"}`}
-            disabled={!match.canPredict || pending || !isComplete || !isDirty}
+            aria-label={
+              initialShowSavedState ? "Prono enregistré" : "Enregistrer le prono"
+            }
+            className={`btn ${initialShowSavedState ? "btn-saved" : "btn-primary"}`}
+            disabled={
+              !match.canPredict ||
+              !initialIsComplete ||
+              initialShowSavedState
+            }
+            ref={submitButtonRef}
             type="submit"
           >
-            {pending ? (
-              "Enregistrement..."
-            ) : showSavedState ? (
-              <>
-                <span aria-hidden="true" className="btn-check-icon">
-                  <Check size={14} strokeWidth={3} />
-                </span>
-                Enregistré
-              </>
-            ) : (
-              submitLabel
-            )}
+            <span hidden ref={pendingLabelRef}>
+              Enregistrement...
+            </span>
+            <span hidden={!initialShowSavedState} ref={savedLabelRef}>
+              <span aria-hidden="true" className="btn-check-icon">
+                <Check size={14} strokeWidth={3} />
+              </span>
+              Enregistré
+            </span>
+            <span hidden={initialShowSavedState} ref={editableLabelRef}>
+              {initialSubmitLabel}
+            </span>
           </button>
-          {state.error ? <span className="form-error">{state.error}</span> : null}
+          {error ? <span className="form-error">{error}</span> : null}
         </div>
       )}
     </form>
   );
 }
+
+export const PredictionMatchForm = memo(PredictionMatchFormComponent);

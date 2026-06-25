@@ -1,7 +1,7 @@
 "use client";
 
 import type { CompetitionKind } from "@prisma/client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 import {
@@ -22,7 +22,10 @@ import type { PublicPredictionMatch } from "@/src/server/all-predictions";
 type AllPredictionsScheduleProps = {
   competitionKind: CompetitionKind;
   matches: PublicPredictionMatch[];
+  slug: string;
 };
+
+const MATCHES_REFRESH_INTERVAL_MS = 30000;
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   dateStyle: "medium",
@@ -213,14 +216,83 @@ function AllPredictionsMatchCard({ match }: { match: PublicPredictionMatch }) {
 
 export function AllPredictionsSchedule({
   competitionKind,
-  matches,
+  matches: initialMatches,
+  slug,
 }: AllPredictionsScheduleProps) {
+  const [matches, setMatches] = useState(initialMatches);
   const countryOptions = useMemo(() => buildCountryFilterOptions(matches), [matches]);
   const [selectedCountryId, setSelectedCountryId] = useState("");
   const filteredMatches = useMemo(
     () => filterMatchesByCountry(matches, selectedCountryId),
     [matches, selectedCountryId],
   );
+
+  useEffect(() => {
+    setMatches(initialMatches);
+  }, [initialMatches]);
+
+  useEffect(() => {
+    let isActive = true;
+    let controller: AbortController | null = null;
+
+    const refreshMatches = async () => {
+      if (document.visibilityState !== "visible") {
+        return;
+      }
+
+      controller?.abort();
+      controller = new AbortController();
+      const currentController = controller;
+
+      try {
+        const response = await fetch(
+          `/api/competitions/${encodeURIComponent(slug)}/tous-les-pronos/matches`,
+          {
+            cache: "no-store",
+            signal: currentController.signal,
+          },
+        );
+
+        if (!response.ok) {
+          return;
+        }
+
+        const payload = (await response.json()) as {
+          matches?: PublicPredictionMatch[];
+        };
+
+        if (isActive && Array.isArray(payload.matches)) {
+          setMatches(payload.matches);
+        }
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+      } finally {
+        if (controller === currentController) {
+          controller = null;
+        }
+      }
+    };
+
+    const intervalId = window.setInterval(() => {
+      void refreshMatches();
+    }, MATCHES_REFRESH_INTERVAL_MS);
+    const refreshVisibleMatches = () => {
+      void refreshMatches();
+    };
+
+    document.addEventListener("visibilitychange", refreshVisibleMatches);
+    window.addEventListener("focus", refreshVisibleMatches);
+
+    return () => {
+      isActive = false;
+      window.clearInterval(intervalId);
+      controller?.abort();
+      document.removeEventListener("visibilitychange", refreshVisibleMatches);
+      window.removeEventListener("focus", refreshVisibleMatches);
+    };
+  }, [slug]);
 
   return (
     <>

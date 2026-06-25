@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import {AutoRefresh} from "@/components/AutoRefresh";
-import {PageHeader} from "@/components/PageHeader";
-import {AllPredictionsSchedule} from "@/components/predictions/AllPredictionsSchedule";
-import {getCompetitionKindLabel} from "@/src/domain/competition-kind";
-import {getAllPredictionsPageData} from "@/src/server/all-predictions";
+import { PageHeader } from "@/components/PageHeader";
+import { AllPredictionsSchedule } from "@/components/predictions/AllPredictionsSchedule";
+import { getCompetitionKindLabel } from "@/src/domain/competition-kind";
+import { getAllPredictionsPageData } from "@/src/server/all-predictions";
 
 export const dynamic = "force-dynamic";
 
@@ -16,9 +15,9 @@ type TousLesPronosPageProps = {
 };
 
 export default async function TousLesPronosPage({
-                                                  params,
-                                                }: TousLesPronosPageProps) {
-  const {slug} = await params;
+  params,
+}: TousLesPronosPageProps) {
+  const { slug } = await params;
   const competition = await getAllPredictionsPageData(slug);
 
   if (!competition) {
@@ -27,7 +26,6 @@ export default async function TousLesPronosPage({
 
   return (
     <main className="page-shell">
-      <AutoRefresh intervalMs={30000}/>
       <PageHeader
         eyebrow={getCompetitionKindLabel(competition.kind)}
         emblemUrl={competition.emblemUrl}
@@ -52,6 +50,7 @@ export default async function TousLesPronosPage({
         <AllPredictionsSchedule
           competitionKind={competition.kind}
           matches={competition.matches}
+          slug={competition.slug}
         />
       </section>
     </main>
