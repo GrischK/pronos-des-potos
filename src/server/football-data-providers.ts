@@ -91,7 +91,7 @@ function mapFootballDataStatus(status: string): MatchStatus {
     return "FINISHED";
   }
 
-  if (["IN_PLAY", "PAUSED"].includes(status)) {
+  if (["IN_PLAY", "PAUSED", "LIVE"].includes(status)) {
     return "LIVE";
   }
 
